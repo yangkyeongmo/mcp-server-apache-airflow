@@ -1,0 +1,10 @@
+[project]
+name = "mcp-toy"
+version = "0.1.0"
+description = "A toy implementation of the Model Context Protocol"
+dependencies = [
+    "mcp[cli]>=1.2.1",
+    "mcp>=1.0.0",
+    "python-dotenv>=1.0.1",
+    "requests>=2.32.3",
+]
