@@ -1,10 +1,29 @@
 [project]
-name = "mcp-toy"
+name = "mcp-server-apache-airflow"
 version = "0.1.0"
-description = "A toy implementation of the Model Context Protocol"
-dependencies = [
-    "mcp[cli]>=1.2.1",
-    "mcp>=1.0.0",
-    "python-dotenv>=1.0.1",
-    "requests>=2.32.3",
+description = "Model Context Protocol (MCP) server for Apache Airflow"
+authors = [
+    { name = "Gyeongmo Yang", email = "me@gmyang.dev" }
 ]
+dependencies = [
+    "httpx>=0.24.1",
+    "click>=8.1.7",
+    "mcp>=0.1.0",
+]
+requires-python = ">=3.9"
+readme = "README.md"
+license = { text = "MIT" }
+
+[project.urls]
+Homepage = "https://github.com/yangkyeongmo/mcp-server-apache-airflow"
+Repository = "https://github.com/yangkyeongmo/mcp-server-apache-airflow.git"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project.scripts]
+mcp-server-apache-airflow = "server:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
