@@ -1,20 +1,20 @@
-import os
-
 import httpx
 import mcp.types as types
 
-AIRFLOW_HOST = os.getenv("AIRFLOW_HOST").rstrip("/")
-AIRFLOW_USERNAME = os.getenv("AIRFLOW_USERNAME")
-AIRFLOW_PASSWORD = os.getenv("AIRFLOW_PASSWORD")
+from src.envs import AIRFLOW_HOST, AIRFLOW_PASSWORD, AIRFLOW_USERNAME
+
 
 def get_dag_url(dag_id: str) -> str:
     return f"{AIRFLOW_HOST}/dags/{dag_id}/grid"
 
+
 def get_dag_run_url(dag_id: str, dag_run_id: str) -> str:
     return f"{AIRFLOW_HOST}/dags/{dag_id}/grid?dag_run_id={dag_run_id}"
 
+
 def get_task_instance_url(dag_id: str, dag_run_id: str, task_id: str) -> str:
     return f"{AIRFLOW_HOST}/dags/{dag_id}/grid?dag_run_id={dag_run_id}&task_id={task_id}"
+
 
 async def fetch_dags(
     limit: int | None = None,
@@ -44,19 +44,16 @@ async def fetch_dags(
 
     url = f"{AIRFLOW_HOST}{path}"
     async with httpx.AsyncClient(follow_redirects=True) as client:
-        response = await client.get(
-            url, 
-            auth=httpx.BasicAuth(AIRFLOW_USERNAME, AIRFLOW_PASSWORD),
-            params=params
-        )
+        response = await client.get(url, auth=httpx.BasicAuth(AIRFLOW_USERNAME, AIRFLOW_PASSWORD), params=params)
         response.raise_for_status()
         data = response.json()
-        
+
         # Add UI links to each DAG
         for dag in data.get("dags", []):
             dag["ui_url"] = get_dag_url(dag["dag_id"])
-            
+
         return [types.TextContent(type="text", text=response.text)]
+
 
 async def get_dag(dag_id: str) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:
     path = f"/api/v1/dags/{dag_id}"
@@ -65,47 +62,43 @@ async def get_dag(dag_id: str) -> list[types.TextContent | types.ImageContent | 
         response = await client.get(url, auth=httpx.BasicAuth(AIRFLOW_USERNAME, AIRFLOW_PASSWORD))
         response.raise_for_status()
         data = response.json()
-        
+
         # Add UI link to DAG
         data["ui_url"] = get_dag_url(dag_id)
-        
+
         return [types.TextContent(type="text", text=response.text)]
+
 
 async def pause_dag(dag_id: str) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:
     path = f"/api/v1/dags/{dag_id}"
     url = f"{AIRFLOW_HOST}{path}"
     async with httpx.AsyncClient(follow_redirects=True) as client:
         response = await client.patch(
-            url, 
-            auth=httpx.BasicAuth(AIRFLOW_USERNAME, AIRFLOW_PASSWORD),
-            json={"is_paused": True}
+            url, auth=httpx.BasicAuth(AIRFLOW_USERNAME, AIRFLOW_PASSWORD), json={"is_paused": True}
         )
         response.raise_for_status()
         return [types.TextContent(type="text", text=response.text)]
+
 
 async def unpause_dag(dag_id: str) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:
     path = f"/api/v1/dags/{dag_id}"
     url = f"{AIRFLOW_HOST}{path}"
     async with httpx.AsyncClient(follow_redirects=True) as client:
         response = await client.patch(
-            url, 
-            auth=httpx.BasicAuth(AIRFLOW_USERNAME, AIRFLOW_PASSWORD),
-            json={"is_paused": False}
+            url, auth=httpx.BasicAuth(AIRFLOW_USERNAME, AIRFLOW_PASSWORD), json={"is_paused": False}
         )
         response.raise_for_status()
         return [types.TextContent(type="text", text=response.text)]
+
 
 async def trigger_dag(dag_id: str) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:
     path = f"/api/v1/dags/{dag_id}/dagRuns"
     url = f"{AIRFLOW_HOST}{path}"
     async with httpx.AsyncClient(follow_redirects=True) as client:
-        response = await client.post(
-            url, 
-            auth=httpx.BasicAuth(AIRFLOW_USERNAME, AIRFLOW_PASSWORD),
-            json={}
-        )
+        response = await client.post(url, auth=httpx.BasicAuth(AIRFLOW_USERNAME, AIRFLOW_PASSWORD), json={})
         response.raise_for_status()
         return [types.TextContent(type="text", text=response.text)]
+
 
 async def get_dag_runs(
     dag_id: str,
@@ -151,19 +144,16 @@ async def get_dag_runs(
 
     url = f"{AIRFLOW_HOST}{path}"
     async with httpx.AsyncClient(follow_redirects=True) as client:
-        response = await client.get(
-            url, 
-            auth=httpx.BasicAuth(AIRFLOW_USERNAME, AIRFLOW_PASSWORD),
-            params=params
-        )
+        response = await client.get(url, auth=httpx.BasicAuth(AIRFLOW_USERNAME, AIRFLOW_PASSWORD), params=params)
         response.raise_for_status()
         data = response.json()
-        
+
         # Add UI links to each DAG run
         for dag_run in data.get("dag_runs", []):
             dag_run["ui_url"] = get_dag_run_url(dag_id, dag_run["dag_run_id"])
-            
+
         return [types.TextContent(type="text", text=response.text)]
+
 
 async def get_dag_tasks(dag_id: str) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:
     path = f"/api/v1/dags/{dag_id}/tasks"
@@ -173,13 +163,17 @@ async def get_dag_tasks(dag_id: str) -> list[types.TextContent | types.ImageCont
         response.raise_for_status()
         return [types.TextContent(type="text", text=response.text)]
 
-async def get_task_instance(dag_id: str, task_id: str, dag_run_id: str) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:
+
+async def get_task_instance(
+    dag_id: str, task_id: str, dag_run_id: str
+) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:
     path = f"/api/v1/dags/{dag_id}/dagRuns/{dag_run_id}/taskInstances/{task_id}"
     url = f"{AIRFLOW_HOST}{path}"
     async with httpx.AsyncClient(follow_redirects=True) as client:
         response = await client.get(url, auth=httpx.BasicAuth(AIRFLOW_USERNAME, AIRFLOW_PASSWORD))
         response.raise_for_status()
         return [types.TextContent(type="text", text=response.text)]
+
 
 async def list_task_instances(
     dag_id: str,
@@ -235,21 +229,21 @@ async def list_task_instances(
 
     url = f"{AIRFLOW_HOST}{path}"
     async with httpx.AsyncClient(follow_redirects=True) as client:
-        response = await client.get(
-            url, 
-            auth=httpx.BasicAuth(AIRFLOW_USERNAME, AIRFLOW_PASSWORD),
-            params=params
-        )
+        response = await client.get(url, auth=httpx.BasicAuth(AIRFLOW_USERNAME, AIRFLOW_PASSWORD), params=params)
         response.raise_for_status()
         return [types.TextContent(type="text", text=response.text)]
 
-async def get_import_error(import_error_id: int) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:
+
+async def get_import_error(
+    import_error_id: int,
+) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:
     path = f"/api/v1/importErrors/{import_error_id}"
     url = f"{AIRFLOW_HOST}{path}"
     async with httpx.AsyncClient(follow_redirects=True) as client:
         response = await client.get(url, auth=httpx.BasicAuth(AIRFLOW_USERNAME, AIRFLOW_PASSWORD))
         response.raise_for_status()
         return [types.TextContent(type="text", text=response.text)]
+
 
 async def list_import_errors(
     limit: int | None = None,
@@ -267,13 +261,10 @@ async def list_import_errors(
 
     url = f"{AIRFLOW_HOST}{path}"
     async with httpx.AsyncClient(follow_redirects=True) as client:
-        response = await client.get(
-            url, 
-            auth=httpx.BasicAuth(AIRFLOW_USERNAME, AIRFLOW_PASSWORD),
-            params=params
-        )
+        response = await client.get(url, auth=httpx.BasicAuth(AIRFLOW_USERNAME, AIRFLOW_PASSWORD), params=params)
         response.raise_for_status()
         return [types.TextContent(type="text", text=response.text)]
+
 
 async def get_health() -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:
     path = "/api/v1/health"
@@ -283,10 +274,11 @@ async def get_health() -> list[types.TextContent | types.ImageContent | types.Em
         response.raise_for_status()
         return [types.TextContent(type="text", text=response.text)]
 
+
 async def get_version() -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:
     path = "/api/v1/version"
     url = f"{AIRFLOW_HOST}{path}"
     async with httpx.AsyncClient(follow_redirects=True) as client:
         response = await client.get(url, auth=httpx.BasicAuth(AIRFLOW_USERNAME, AIRFLOW_PASSWORD))
         response.raise_for_status()
-        return [types.TextContent(type="text", text=response.text)] 
+        return [types.TextContent(type="text", text=response.text)]

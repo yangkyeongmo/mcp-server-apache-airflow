@@ -140,37 +140,32 @@ def main(port: int, transport: str) -> int:
                         "limit": {
                             "type": "integer",
                             "description": "The numbers of items to return (default: 100)",
-                            "minimum": 1
+                            "minimum": 1,
                         },
                         "offset": {
                             "type": "integer",
                             "description": "The number of items to skip before starting to collect the result set",
-                            "minimum": 0
+                            "minimum": 0,
                         },
                         "order_by": {
                             "type": "string",
-                            "description": "The name of the field to order the results by. Prefix with - to reverse sort order"
+                            "description": "The name of the field to order the results by. Prefix with - to reverse sort order",
                         },
                         "tags": {
                             "type": "array",
-                            "items": {
-                                "type": "string"
-                            },
-                            "description": "List of tags to filter results"
+                            "items": {"type": "string"},
+                            "description": "List of tags to filter results",
                         },
-                        "only_active": {
-                            "type": "boolean",
-                            "description": "Only filter active DAGs (default: true)"
-                        },
+                        "only_active": {"type": "boolean", "description": "Only filter active DAGs (default: true)"},
                         "paused": {
                             "type": "boolean",
-                            "description": "Only filter paused/unpaused DAGs. If absent, returns both"
+                            "description": "Only filter paused/unpaused DAGs. If absent, returns both",
                         },
                         "dag_id_pattern": {
                             "type": "string",
-                            "description": "If set, only return DAGs with dag_ids matching this pattern"
-                        }
-                    }
+                            "description": "If set, only return DAGs with dag_ids matching this pattern",
+                        },
+                    },
                 },
             ),
             types.Tool(
@@ -243,65 +238,63 @@ def main(port: int, transport: str) -> int:
                         "limit": {
                             "type": "integer",
                             "description": "The numbers of items to return (default: 100)",
-                            "minimum": 1
+                            "minimum": 1,
                         },
                         "offset": {
                             "type": "integer",
                             "description": "The number of items to skip before starting to collect the result set",
-                            "minimum": 0
+                            "minimum": 0,
                         },
                         "execution_date_gte": {
                             "type": "string",
                             "format": "date-time",
-                            "description": "Returns objects greater or equal to the specified date"
+                            "description": "Returns objects greater or equal to the specified date",
                         },
                         "execution_date_lte": {
                             "type": "string",
                             "format": "date-time",
-                            "description": "Returns objects less than or equal to the specified date"
+                            "description": "Returns objects less than or equal to the specified date",
                         },
                         "start_date_gte": {
                             "type": "string",
                             "format": "date-time",
-                            "description": "Returns objects greater or equal the specified date"
+                            "description": "Returns objects greater or equal the specified date",
                         },
                         "start_date_lte": {
                             "type": "string",
                             "format": "date-time",
-                            "description": "Returns objects less or equal the specified date"
+                            "description": "Returns objects less or equal the specified date",
                         },
                         "end_date_gte": {
                             "type": "string",
                             "format": "date-time",
-                            "description": "Returns objects greater or equal the specified date"
+                            "description": "Returns objects greater or equal the specified date",
                         },
                         "end_date_lte": {
                             "type": "string",
                             "format": "date-time",
-                            "description": "Returns objects less than or equal to the specified date"
+                            "description": "Returns objects less than or equal to the specified date",
                         },
                         "updated_at_gte": {
                             "type": "string",
                             "format": "date-time",
-                            "description": "Returns objects greater or equal the specified date"
+                            "description": "Returns objects greater or equal the specified date",
                         },
                         "updated_at_lte": {
                             "type": "string",
                             "format": "date-time",
-                            "description": "Returns objects less or equal the specified date"
+                            "description": "Returns objects less or equal the specified date",
                         },
                         "state": {
                             "type": "array",
-                            "items": {
-                                "type": "string"
-                            },
-                            "description": "The value can be repeated to retrieve multiple matching values (OR condition)"
+                            "items": {"type": "string"},
+                            "description": "The value can be repeated to retrieve multiple matching values (OR condition)",
                         },
                         "order_by": {
                             "type": "string",
-                            "description": "The name of the field to order the results by. Prefix with - to reverse sort order"
-                        }
-                    }
+                            "description": "The name of the field to order the results by. Prefix with - to reverse sort order",
+                        },
+                    },
                 },
             ),
             types.Tool(
@@ -336,7 +329,7 @@ def main(port: int, transport: str) -> int:
                         "dag_run_id": {
                             "type": "string",
                             "description": "The ID of the DAG run",
-                        }
+                        },
                     },
                 },
             ),
@@ -358,83 +351,77 @@ def main(port: int, transport: str) -> int:
                         "execution_date_gte": {
                             "type": "string",
                             "format": "date-time",
-                            "description": "Returns objects greater or equal to the specified date"
+                            "description": "Returns objects greater or equal to the specified date",
                         },
                         "execution_date_lte": {
                             "type": "string",
                             "format": "date-time",
-                            "description": "Returns objects less than or equal to the specified date"
+                            "description": "Returns objects less than or equal to the specified date",
                         },
                         "start_date_gte": {
                             "type": "string",
                             "format": "date-time",
-                            "description": "Returns objects greater or equal the specified date"
+                            "description": "Returns objects greater or equal the specified date",
                         },
                         "start_date_lte": {
                             "type": "string",
                             "format": "date-time",
-                            "description": "Returns objects less or equal the specified date"
+                            "description": "Returns objects less or equal the specified date",
                         },
                         "end_date_gte": {
                             "type": "string",
                             "format": "date-time",
-                            "description": "Returns objects greater or equal the specified date"
+                            "description": "Returns objects greater or equal the specified date",
                         },
                         "end_date_lte": {
                             "type": "string",
                             "format": "date-time",
-                            "description": "Returns objects less than or equal to the specified date"
+                            "description": "Returns objects less than or equal to the specified date",
                         },
                         "updated_at_gte": {
                             "type": "string",
                             "format": "date-time",
-                            "description": "Returns objects greater or equal the specified date"
+                            "description": "Returns objects greater or equal the specified date",
                         },
                         "updated_at_lte": {
                             "type": "string",
                             "format": "date-time",
-                            "description": "Returns objects less or equal the specified date"
+                            "description": "Returns objects less or equal the specified date",
                         },
                         "duration_gte": {
                             "type": "number",
-                            "description": "Returns objects greater than or equal to the specified values"
+                            "description": "Returns objects greater than or equal to the specified values",
                         },
                         "duration_lte": {
                             "type": "number",
-                            "description": "Returns objects less than or equal to the specified values"
+                            "description": "Returns objects less than or equal to the specified values",
                         },
                         "state": {
                             "type": "array",
-                            "items": {
-                                "type": "string"
-                            },
-                            "description": "States of the task instance. The value can be repeated to retrieve multiple matching values (OR condition)"
+                            "items": {"type": "string"},
+                            "description": "States of the task instance. The value can be repeated to retrieve multiple matching values (OR condition)",
                         },
                         "pool": {
                             "type": "array",
-                            "items": {
-                                "type": "string"
-                            },
-                            "description": "The value can be repeated to retrieve multiple matching values (OR condition)"
+                            "items": {"type": "string"},
+                            "description": "The value can be repeated to retrieve multiple matching values (OR condition)",
                         },
                         "queue": {
                             "type": "array",
-                            "items": {
-                                "type": "string"
-                            },
-                            "description": "The value can be repeated to retrieve multiple matching values (OR condition)"
+                            "items": {"type": "string"},
+                            "description": "The value can be repeated to retrieve multiple matching values (OR condition)",
                         },
                         "limit": {
                             "type": "integer",
                             "description": "The numbers of items to return (default: 100)",
-                            "minimum": 1
+                            "minimum": 1,
                         },
                         "offset": {
                             "type": "integer",
                             "description": "The number of items to skip before starting to collect the result set",
-                            "minimum": 0
-                        }
-                    }
+                            "minimum": 0,
+                        },
+                    },
                 },
             ),
             types.Tool(
@@ -460,35 +447,29 @@ def main(port: int, transport: str) -> int:
                         "limit": {
                             "type": "integer",
                             "description": "The numbers of items to return (default: 100)",
-                            "minimum": 1
+                            "minimum": 1,
                         },
                         "offset": {
                             "type": "integer",
                             "description": "The number of items to skip before starting to collect the result set",
-                            "minimum": 0
+                            "minimum": 0,
                         },
                         "order_by": {
                             "type": "string",
-                            "description": "The name of the field to order the results by. Prefix with - to reverse sort order"
-                        }
-                    }
+                            "description": "The name of the field to order the results by. Prefix with - to reverse sort order",
+                        },
+                    },
                 },
             ),
             types.Tool(
                 name="get_health",
                 description="Get the health status of the Airflow instance",
-                inputSchema={
-                    "type": "object",
-                    "properties": {}
-                },
+                inputSchema={"type": "object", "properties": {}},
             ),
             types.Tool(
                 name="get_version",
                 description="Get the version information of the Airflow instance",
-                inputSchema={
-                    "type": "object",
-                    "properties": {}
-                },
+                inputSchema={"type": "object", "properties": {}},
             ),
         ]
 
@@ -500,12 +481,8 @@ def main(port: int, transport: str) -> int:
         sse = SseServerTransport("/messages/")
 
         async def handle_sse(request):
-            async with sse.connect_sse(
-                request.scope, request.receive, request._send
-            ) as streams:
-                await app.run(
-                    streams[0], streams[1], app.create_initialization_options()
-                )
+            async with sse.connect_sse(request.scope, request.receive, request._send) as streams:
+                await app.run(streams[0], streams[1], app.create_initialization_options())
 
         starlette_app = Starlette(
             debug=True,
@@ -523,9 +500,7 @@ def main(port: int, transport: str) -> int:
 
         async def arun():
             async with stdio_server() as streams:
-                await app.run(
-                    streams[0], streams[1], app.create_initialization_options()
-                )
+                await app.run(streams[0], streams[1], app.create_initialization_options())
 
         anyio.run(arun)
 
