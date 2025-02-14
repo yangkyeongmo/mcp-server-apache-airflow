@@ -19,6 +19,7 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+.pypirc
 
 # Virtual Environment
 .env

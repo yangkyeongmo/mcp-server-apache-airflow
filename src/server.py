@@ -3,7 +3,7 @@ import click
 import mcp.types as types
 from mcp.server.lowlevel import Server
 
-import airflow
+from src import airflow
 
 COMMANDS = [
     "list_dags",
