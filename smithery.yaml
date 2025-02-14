@@ -1,0 +1,25 @@
+# Smithery configuration file: https://smithery.ai/docs/config#smitheryyaml
+
+startCommand:
+  type: stdio
+  configSchema:
+    # JSON Schema defining the configuration options for the MCP.
+    type: object
+    required:
+      - airflowHost
+      - airflowUsername
+      - airflowPassword
+    properties:
+      airflowHost:
+        type: string
+        description: The host URL for the Airflow instance.
+      airflowUsername:
+        type: string
+        description: The username for Airflow authentication.
+      airflowPassword:
+        type: string
+        description: The password for Airflow authentication.
+  commandFunction:
+    # A function that produces the CLI command to start the MCP on stdio.
+    |-
+    (config) => ({ command: 'python', args: ['src/server.py'], env: { AIRFLOW_HOST: config.airflowHost, AIRFLOW_USERNAME: config.airflowUsername, AIRFLOW_PASSWORD: config.airflowPassword } })
