@@ -1,11 +1,12 @@
+from typing import Any, Dict, List, Optional, Union
+
 import mcp.types as types
-from airflow_client.client import Configuration, ApiClient
+from airflow_client.client import ApiClient, Configuration
 from airflow_client.client.api.dag_api import DAGApi
 from airflow_client.client.api.dag_run_api import DAGRunApi
-from airflow_client.client.api.task_instance_api import TaskInstanceApi
 from airflow_client.client.api.import_error_api import ImportErrorApi
 from airflow_client.client.api.monitoring_api import MonitoringApi
-from typing import List, Optional, Dict, Any, Union
+from airflow_client.client.api.task_instance_api import TaskInstanceApi
 
 from src.envs import AIRFLOW_HOST, AIRFLOW_PASSWORD, AIRFLOW_USERNAME
 
@@ -23,6 +24,7 @@ dag_run_api = DAGRunApi(api_client)
 task_instance_api = TaskInstanceApi(api_client)
 import_error_api = ImportErrorApi(api_client)
 monitoring_api = MonitoringApi(api_client)
+
 
 def get_dag_url(dag_id: str) -> str:
     return f"{AIRFLOW_HOST}/dags/{dag_id}/grid"
@@ -64,26 +66,26 @@ async def fetch_dags(
 
     # Use the client to fetch DAGs
     response = dag_api.get_dags(**kwargs)
-    
+
     # Convert response to dictionary for easier manipulation
     response_dict = response.to_dict()
-    
+
     # Add UI links to each DAG
     for dag in response_dict.get("dags", []):
         dag["ui_url"] = get_dag_url(dag["dag_id"])
-    
+
     return [types.TextContent(type="text", text=str(response_dict))]
 
 
 async def get_dag(dag_id: str) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
     response = dag_api.get_dag(dag_id=dag_id)
-    
+
     # Convert response to dictionary for easier manipulation
     response_dict = response.to_dict()
-    
+
     # Add UI link to DAG
     response_dict["ui_url"] = get_dag_url(dag_id)
-    
+
     return [types.TextContent(type="text", text=str(response_dict))]
 
 
@@ -145,14 +147,14 @@ async def get_dag_runs(
         kwargs["order_by"] = order_by
 
     response = dag_run_api.get_dag_runs(dag_id=dag_id, **kwargs)
-    
+
     # Convert response to dictionary for easier manipulation
     response_dict = response.to_dict()
-    
+
     # Add UI links to each DAG run
     for dag_run in response_dict.get("dag_runs", []):
         dag_run["ui_url"] = get_dag_run_url(dag_id, dag_run["dag_run_id"])
-    
+
     return [types.TextContent(type="text", text=str(response_dict))]
 
 
