@@ -4,7 +4,7 @@ A Model Context Protocol (MCP) server implementation for Apache Airflow, enablin
 
 ## About
 
-This project implements a [Model Context Protocol](https://modelcontextprotocol.io/introduction) server that wraps Apache Airflow's REST API, allowing MCP clients to interact with Airflow in a standardized way.
+This project implements a [Model Context Protocol](https://modelcontextprotocol.io/introduction) server that wraps Apache Airflow's REST API, allowing MCP clients to interact with Airflow in a standardized way. It uses the official Apache Airflow client library to ensure compatibility and maintainability.
 
 ## Feature Implementation Status
 
@@ -48,6 +48,10 @@ This project implements a [Model Context Protocol](https://modelcontextprotocol.
 | Delete Connection | `/api/v1/connections/{connection_id}` | ❌ |
 
 ## Setup
+
+### Dependencies
+
+This project depends on the official Apache Airflow client library (`apache-airflow-client`). It will be automatically installed when you install this package.
 
 ### Environment Variables
 

@@ -9,6 +9,7 @@ dependencies = [
     "httpx>=0.24.1",
     "click>=8.1.7",
     "mcp>=0.1.0",
+    "apache-airflow-client>=2.7.0",
 ]
 requires-python = ">=3.10"
 readme = "README.md"
