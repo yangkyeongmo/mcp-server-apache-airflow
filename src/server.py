@@ -31,6 +31,14 @@ COMMANDS = [
     help="Transport type",
 )
 def main(port: int, transport: str) -> int:
+    # Configure logging
+    import logging
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
+    logger = logging.getLogger(__name__)
+
     app = Server("mcp-website-fetcher")
 
     @app.call_tool()
@@ -481,8 +489,23 @@ def main(port: int, transport: str) -> int:
         sse = SseServerTransport("/messages/")
 
         async def handle_sse(request):
-            async with sse.connect_sse(request.scope, request.receive, request._send) as streams:
-                await app.run(streams[0], streams[1], app.create_initialization_options())
+            try:
+                # Initialize server options before connecting SSE
+                init_options = app.create_initialization_options()
+
+                async with sse.connect_sse(request.scope, request.receive, request._send) as streams:
+                    try:
+                        await app.run(streams[0], streams[1], init_options)
+                    except Exception as e:
+                        # Log the error and ensure proper cleanup
+                        import logging
+                        logging.error(f"Error during SSE connection: {str(e)}")
+                        raise
+            except Exception as e:
+                # Handle any connection setup errors
+                import logging
+                logging.error(f"Error setting up SSE connection: {str(e)}")
+                raise
 
         starlette_app = Starlette(
             debug=True,
