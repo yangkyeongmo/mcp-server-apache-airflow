@@ -1,5 +1,5 @@
-from typing import Any, Dict, List, Optional, Union, Callable
 from datetime import datetime
+from typing import Any, Callable, Dict, List, Optional, Union
 
 import mcp.types as types
 from airflow_client.client.api.event_log_api import EventLogApi
@@ -62,7 +62,7 @@ async def get_event_logs(
         kwargs["included_events"] = included_events
     if excluded_events is not None:
         kwargs["excluded_events"] = excluded_events
-    
+
     response = event_log_api.get_event_logs(**kwargs)
     return [types.TextContent(type="text", text=str(response.to_dict()))]
 
@@ -72,4 +72,3 @@ async def get_event_log(
 ) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
     response = event_log_api.get_event_log(event_log_id=event_log_id)
     return [types.TextContent(type="text", text=str(response.to_dict()))]
-

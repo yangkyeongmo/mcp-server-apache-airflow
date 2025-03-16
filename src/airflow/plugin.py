@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Union, Callable
+from typing import Any, Callable, Dict, List, Optional, Union
 
 import mcp.types as types
 from airflow_client.client.api.plugin_api import PluginApi
@@ -20,11 +20,11 @@ async def get_plugins(
 ) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
     """
     Get a list of loaded plugins.
-    
+
     Args:
         limit: The numbers of items to return.
         offset: The number of items to skip before starting to collect the result set.
-    
+
     Returns:
         A list of loaded plugins.
     """
@@ -34,6 +34,6 @@ async def get_plugins(
         kwargs["limit"] = limit
     if offset is not None:
         kwargs["offset"] = offset
-    
+
     response = plugin_api.get_plugins(**kwargs)
     return [types.TextContent(type="text", text=str(response.to_dict()))]

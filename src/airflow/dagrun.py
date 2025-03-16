@@ -1,5 +1,5 @@
-from typing import Any, Dict, List, Optional, Union, Callable
 from datetime import datetime
+from typing import Any, Callable, Dict, List, Optional, Union
 
 import mcp.types as types
 from airflow_client.client.api.dag_run_api import DAGRunApi
@@ -26,6 +26,7 @@ def get_all_functions() -> list[tuple[Callable, str, str]]:
         (set_dag_run_note, "set_dag_run_note", "Update the DagRun note"),
         (get_upstream_dataset_events, "get_upstream_dataset_events", "Get dataset events for a DAG run"),
     ]
+
 
 def get_dag_run_url(dag_id: str, dag_run_id: str) -> str:
     return f"{AIRFLOW_HOST}/dags/{dag_id}/grid?dag_run_id={dag_run_id}"
@@ -158,14 +159,14 @@ async def get_dag_runs_batch(
         request["page_limit"] = page_limit
 
     response = dag_run_api.get_dag_runs_batch(list_dag_runs_form=request)
-    
+
     # Convert response to dictionary for easier manipulation
     response_dict = response.to_dict()
-    
+
     # Add UI links to each DAG run
     for dag_run in response_dict.get("dag_runs", []):
         dag_run["ui_url"] = get_dag_run_url(dag_run["dag_id"], dag_run["dag_run_id"])
-    
+
     return [types.TextContent(type="text", text=str(response_dict))]
 
 
@@ -173,13 +174,13 @@ async def get_dag_run(
     dag_id: str, dag_run_id: str
 ) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
     response = dag_run_api.get_dag_run(dag_id=dag_id, dag_run_id=dag_run_id)
-    
+
     # Convert response to dictionary for easier manipulation
     response_dict = response.to_dict()
-    
+
     # Add UI link to DAG run
     response_dict["ui_url"] = get_dag_run_url(dag_id, dag_run_id)
-    
+
     return [types.TextContent(type="text", text=str(response_dict))]
 
 
@@ -187,7 +188,11 @@ async def update_dag_run_state(
     dag_id: str, dag_run_id: str, state: Optional[str] = None
 ) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
     update_dag_run_state = UpdateDagRunState(state=state)
-    response = dag_run_api.update_dag_run_state(dag_id=dag_id, dag_run_id=dag_run_id, update_dag_run_state=update_dag_run_state)
+    response = dag_run_api.update_dag_run_state(
+        dag_id=dag_id,
+        dag_run_id=dag_run_id,
+        update_dag_run_state=update_dag_run_state,
+    )
     return [types.TextContent(type="text", text=str(response.to_dict()))]
 
 

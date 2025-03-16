@@ -1,4 +1,4 @@
-from typing import List, Union, Callable
+from typing import Callable, List, Union
 
 import mcp.types as types
 from airflow_client.client.api.monitoring_api import MonitoringApi

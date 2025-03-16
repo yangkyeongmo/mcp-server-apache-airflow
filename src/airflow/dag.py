@@ -1,10 +1,11 @@
-from typing import Any, Dict, List, Optional, Union, Callable
+from typing import Any, Callable, Dict, List, Optional, Union
 
 import mcp.types as types
 from airflow_client.client.api.dag_api import DAGApi
 from airflow_client.client.model.clear_task_instances import ClearTaskInstances
-from airflow_client.client.model.update_task_instances_state import UpdateTaskInstancesState
 from airflow_client.client.model.dag import DAG
+from airflow_client.client.model.update_task_instances_state import UpdateTaskInstancesState
+
 from src.airflow.airflow_client import api_client
 from src.envs import AIRFLOW_HOST
 
@@ -86,12 +87,14 @@ async def get_dag(dag_id: str) -> List[Union[types.TextContent, types.ImageConte
     return [types.TextContent(type="text", text=str(response_dict))]
 
 
-async def get_dag_details(dag_id: str, fields: Optional[List[str]] = None) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
+async def get_dag_details(
+    dag_id: str, fields: Optional[List[str]] = None
+) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
     # Build parameters dictionary
     kwargs: Dict[str, Any] = {}
     if fields is not None:
         kwargs["fields"] = fields
-    
+
     response = dag_api.get_dag_details(dag_id=dag_id, **kwargs)
     return [types.TextContent(type="text", text=str(response.to_dict()))]
 
@@ -136,11 +139,13 @@ async def patch_dag(
 
 
 async def patch_dags(
-    dag_id_pattern: Optional[str] = None, is_paused: Optional[bool] = None, tags: Optional[List[str]] = None, 
+    dag_id_pattern: Optional[str] = None,
+    is_paused: Optional[bool] = None,
+    tags: Optional[List[str]] = None,
 ) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
     update_request = {}
     update_mask = []
-    
+
     if is_paused is not None:
         update_request["is_paused"] = is_paused
         update_mask.append("is_paused")
@@ -153,7 +158,7 @@ async def patch_dags(
     kwargs = {}
     if dag_id_pattern is not None:
         kwargs["dag_id_pattern"] = dag_id_pattern
-    
+
     response = dag_api.patch_dags(dag_id_pattern=dag_id_pattern, dag=dag, update_mask=update_mask, **kwargs)
     return [types.TextContent(type="text", text=str(response.to_dict()))]
 
@@ -170,7 +175,9 @@ async def get_task(
     return [types.TextContent(type="text", text=str(response.to_dict()))]
 
 
-async def get_tasks(dag_id: str, order_by: Optional[str] = None) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
+async def get_tasks(
+    dag_id: str, order_by: Optional[str] = None
+) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
     kwargs = {}
     if order_by is not None:
         kwargs["order_by"] = order_by
@@ -218,7 +225,7 @@ async def clear_task_instances(
         clear_request["reset_dag_runs"] = reset_dag_runs
 
     clear_task_instances = ClearTaskInstances(**clear_request)
-    
+
     response = dag_api.post_clear_task_instances(dag_id=dag_id, clear_task_instances=clear_task_instances)
     return [types.TextContent(type="text", text=str(response.to_dict()))]
 
@@ -234,9 +241,7 @@ async def set_task_instances_state(
     include_past: Optional[bool] = None,
     dry_run: Optional[bool] = None,
 ) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
-    state_request = {
-        "state": state
-    }
+    state_request = {"state": state}
     if task_ids is not None:
         state_request["task_ids"] = task_ids
     if execution_date is not None:
@@ -254,12 +259,15 @@ async def set_task_instances_state(
 
     update_task_instances_state = UpdateTaskInstancesState(**state_request)
 
-    response = dag_api.post_set_task_instances_state(dag_id=dag_id, update_task_instances_state=update_task_instances_state)
+    response = dag_api.post_set_task_instances_state(
+        dag_id=dag_id,
+        update_task_instances_state=update_task_instances_state,
+    )
     return [types.TextContent(type="text", text=str(response.to_dict()))]
 
 
 async def reparse_dag_file(
-    file_token: str
+    file_token: str,
 ) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
     response = dag_api.reparse_dag_file(file_token=file_token)
     return [types.TextContent(type="text", text=str(response.to_dict()))]

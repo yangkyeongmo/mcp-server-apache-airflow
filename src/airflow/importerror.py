@@ -1,10 +1,9 @@
-from typing import Any, Dict, List, Optional, Union, Callable
+from typing import Any, Callable, Dict, List, Optional, Union
 
 import mcp.types as types
 from airflow_client.client.api.import_error_api import ImportErrorApi
 
 from src.airflow.airflow_client import api_client
-
 
 import_error_api = ImportErrorApi(api_client)
 
@@ -29,7 +28,7 @@ async def get_import_errors(
         kwargs["offset"] = offset
     if order_by is not None:
         kwargs["order_by"] = order_by
-    
+
     response = import_error_api.get_import_errors(**kwargs)
     return [types.TextContent(type="text", text=str(response.to_dict()))]
 

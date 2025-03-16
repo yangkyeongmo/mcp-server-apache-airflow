@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Union, Callable
+from typing import Any, Callable, Dict, List, Optional, Union
 
 import mcp.types as types
 from airflow_client.client.api.provider_api import ProviderApi
@@ -20,11 +20,11 @@ async def get_providers(
 ) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
     """
     Get a list of providers.
-    
+
     Args:
         limit: The numbers of items to return.
         offset: The number of items to skip before starting to collect the result set.
-    
+
     Returns:
         A list of providers with their details.
     """
@@ -34,7 +34,6 @@ async def get_providers(
         kwargs["limit"] = limit
     if offset is not None:
         kwargs["offset"] = offset
-    
+
     response = provider_api.get_providers(**kwargs)
     return [types.TextContent(type="text", text=str(response.to_dict()))]
-

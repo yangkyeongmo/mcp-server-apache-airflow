@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Union, Callable
+from typing import Any, Callable, Dict, List, Optional, Union
 
 import mcp.types as types
 from airflow_client.client.api.pool_api import PoolApi
@@ -26,12 +26,12 @@ async def get_pools(
 ) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
     """
     List pools.
-    
+
     Args:
         limit: The numbers of items to return.
         offset: The number of items to skip before starting to collect the result set.
         order_by: The name of the field to order the results by. Prefix a field name with `-` to reverse the sort order.
-    
+
     Returns:
         A list of pools.
     """
@@ -43,7 +43,7 @@ async def get_pools(
         kwargs["offset"] = offset
     if order_by is not None:
         kwargs["order_by"] = order_by
-    
+
     response = pool_api.get_pools(**kwargs)
     return [types.TextContent(type="text", text=str(response.to_dict()))]
 
@@ -53,10 +53,10 @@ async def get_pool(
 ) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
     """
     Get a pool by name.
-    
+
     Args:
         pool_name: The pool name.
-    
+
     Returns:
         The pool details.
     """
@@ -69,10 +69,10 @@ async def delete_pool(
 ) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
     """
     Delete a pool.
-    
+
     Args:
         pool_name: The pool name.
-    
+
     Returns:
         A confirmation message.
     """
@@ -88,13 +88,13 @@ async def post_pool(
 ) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
     """
     Create a pool.
-    
+
     Args:
         name: The pool name.
         slots: The number of slots.
         description: The pool description.
         include_deferred: Whether to include deferred tasks in slot calculations.
-    
+
     Returns:
         The created pool details.
     """
@@ -102,13 +102,13 @@ async def post_pool(
         name=name,
         slots=slots,
     )
-    
+
     if description is not None:
         pool.description = description
-    
+
     if include_deferred is not None:
         pool.include_deferred = include_deferred
-    
+
     response = pool_api.post_pool(pool=pool)
     return [types.TextContent(type="text", text=str(response.to_dict()))]
 
@@ -121,27 +121,26 @@ async def patch_pool(
 ) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
     """
     Update a pool.
-    
+
     Args:
         pool_name: The pool name.
         slots: The number of slots.
         description: The pool description.
         include_deferred: Whether to include deferred tasks in slot calculations.
-    
+
     Returns:
         The updated pool details.
     """
     pool = Pool()
-    
+
     if slots is not None:
         pool.slots = slots
-    
+
     if description is not None:
         pool.description = description
-    
+
     if include_deferred is not None:
         pool.include_deferred = include_deferred
-    
+
     response = pool_api.patch_pool(pool_name=pool_name, pool=pool)
     return [types.TextContent(type="text", text=str(response.to_dict()))]
-

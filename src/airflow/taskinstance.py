@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Union, Callable
+from typing import Any, Callable, Dict, List, Optional, Union
 
 import mcp.types as types
 from airflow_client.client.api.task_instance_api import TaskInstanceApi
@@ -85,12 +85,12 @@ async def update_task_instance(
     update_request = {}
     if state is not None:
         update_request["state"] = state
-    
+
     response = task_instance_api.patch_task_instance(
-        dag_id=dag_id, 
-        dag_run_id=dag_run_id, 
-        task_id=task_id, 
+        dag_id=dag_id,
+        dag_run_id=dag_run_id,
+        task_id=task_id,
         update_mask=list(update_request.keys()),
-        task_instance_request=update_request
+        task_instance_request=update_request,
     )
     return [types.TextContent(type="text", text=str(response.to_dict()))]

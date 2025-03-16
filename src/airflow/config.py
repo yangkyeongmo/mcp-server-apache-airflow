@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Union, Callable
+from typing import Any, Callable, Dict, List, Optional, Union
 
 import mcp.types as types
 from airflow_client.client.api.config_api import ConfigApi
@@ -22,7 +22,7 @@ async def get_config(
     kwargs: Dict[str, Any] = {}
     if section is not None:
         kwargs["section"] = section
-    
+
     response = config_api.get_config(**kwargs)
     return [types.TextContent(type="text", text=str(response.to_dict()))]
 

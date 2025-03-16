@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Union, Callable
+from typing import Any, Callable, Dict, List, Optional, Union
 
 import mcp.types as types
 from airflow_client.client.api.dataset_api import DatasetApi
@@ -17,7 +17,11 @@ def get_all_functions() -> list[tuple[Callable, str, str]]:
         (get_dag_dataset_queued_event, "get_dag_dataset_queued_event", "Get a queued Dataset event for a DAG"),
         (get_dag_dataset_queued_events, "get_dag_dataset_queued_events", "Get queued Dataset events for a DAG"),
         (delete_dag_dataset_queued_event, "delete_dag_dataset_queued_event", "Delete a queued Dataset event for a DAG"),
-        (delete_dag_dataset_queued_events, "delete_dag_dataset_queued_events", "Delete queued Dataset events for a DAG"),
+        (
+            delete_dag_dataset_queued_events,
+            "delete_dag_dataset_queued_events",
+            "Delete queued Dataset events for a DAG",
+        ),
         (get_dataset_queued_events, "get_dataset_queued_events", "Get queued Dataset events for a Dataset"),
         (delete_dataset_queued_events, "delete_dataset_queued_events", "Delete queued Dataset events for a Dataset"),
     ]
@@ -42,7 +46,7 @@ async def get_datasets(
         kwargs["uri_pattern"] = uri_pattern
     if dag_ids is not None:
         kwargs["dag_ids"] = dag_ids
-    
+
     response = dataset_api.get_datasets(**kwargs)
     return [types.TextContent(type="text", text=str(response.to_dict()))]
 
@@ -82,7 +86,7 @@ async def get_dataset_events(
         kwargs["source_run_id"] = source_run_id
     if source_map_index is not None:
         kwargs["source_map_index"] = source_map_index
-    
+
     response = dataset_api.get_dataset_events(**kwargs)
     return [types.TextContent(type="text", text=str(response.to_dict()))]
 
@@ -96,7 +100,7 @@ async def create_dataset_event(
     }
     if extra is not None:
         event_request["extra"] = extra
-    
+
     response = dataset_api.create_dataset_event(create_dataset_event=event_request)
     return [types.TextContent(type="text", text=str(response.to_dict()))]
 
@@ -131,7 +135,7 @@ async def delete_dag_dataset_queued_events(
     kwargs: Dict[str, Any] = {}
     if before is not None:
         kwargs["before"] = before
-    
+
     response = dataset_api.delete_dag_dataset_queued_events(dag_id=dag_id, **kwargs)
     return [types.TextContent(type="text", text=str(response.to_dict()))]
 
@@ -150,7 +154,6 @@ async def delete_dataset_queued_events(
     kwargs: Dict[str, Any] = {}
     if before is not None:
         kwargs["before"] = before
-    
+
     response = dataset_api.delete_dataset_queued_events(uri=uri, **kwargs)
     return [types.TextContent(type="text", text=str(response.to_dict()))]
-

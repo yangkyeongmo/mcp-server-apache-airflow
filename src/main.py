@@ -11,12 +11,10 @@ from src.airflow.importerror import get_all_functions as get_importerror_functio
 from src.airflow.monitoring import get_all_functions as get_monitoring_functions
 from src.airflow.plugin import get_all_functions as get_plugin_functions
 from src.airflow.pool import get_all_functions as get_pool_functions
-from src.airflow.provider import get_all_functions as get_provider_functions
 from src.airflow.taskinstance import get_all_functions as get_taskinstance_functions
 from src.airflow.variable import get_all_functions as get_variable_functions
 from src.airflow.xcom import get_all_functions as get_xcom_functions
 from src.enums import APIType
-
 
 APITYPE_TO_FUNCTIONS = {
     APIType.CONFIG: get_config_functions,
@@ -34,6 +32,7 @@ APITYPE_TO_FUNCTIONS = {
     APIType.VARIABLE: get_variable_functions,
     APIType.XCOM: get_xcom_functions,
 }
+
 
 @click.command()
 @click.option(
@@ -53,11 +52,7 @@ def main(transport: str, apis: list[str]) -> None:
     from src.server import app
 
     for api in apis:
-        try:
-            get_function = APITYPE_TO_FUNCTIONS[APIType(api)]
-        except KeyError:
-            raise ValueError(f"Invalid API type: {api}")
-
+        get_function = APITYPE_TO_FUNCTIONS[APIType(api)]
         try:
             functions = get_function()
         except NotImplementedError:

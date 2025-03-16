@@ -8,9 +8,9 @@ run:
 run-sse:
 	$(PYTHON) src --transport sse $(PARAMS)
 build:
-	$(PYTHON) -m build
+	uv build
 publish:
-	$(PYTHON) -m twine upload --config-file .pypirc dist/*
+	uv publish
 lint:
 	$(PYTHON) -m ruff check . --fix
 format:
