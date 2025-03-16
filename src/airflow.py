@@ -9,6 +9,7 @@ from airflow_client.client.api.monitoring_api import MonitoringApi
 from airflow_client.client.api.task_instance_api import TaskInstanceApi
 
 from src.envs import AIRFLOW_HOST, AIRFLOW_PASSWORD, AIRFLOW_USERNAME
+from src.server import app
 
 # Create a configuration and API client
 configuration = Configuration(
@@ -38,6 +39,7 @@ def get_task_instance_url(dag_id: str, dag_run_id: str, task_id: str) -> str:
     return f"{AIRFLOW_HOST}/dags/{dag_id}/grid?dag_run_id={dag_run_id}&task_id={task_id}"
 
 
+@app.tool(name="fetch_dags", description="Fetch all DAGs")
 async def fetch_dags(
     limit: Optional[int] = None,
     offset: Optional[int] = None,
