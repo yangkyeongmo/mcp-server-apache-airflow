@@ -150,6 +150,34 @@ Alternative configuration using `uv`:
 
 Replace `/path/to/mcp-server-apache-airflow` with the actual path where you've cloned the repository.
 
+### Selecting the API groups
+
+You can select the API groups you want to use by setting the `--apis` flag.
+
+```bash
+uv run mcp-server-apache-airflow --apis "dag,dagrun"
+```
+
+The default is to use all APIs.
+
+Allowed values are:
+
+- config
+- connections
+- dag
+- dagrun
+- dagstats
+- dataset
+- eventlog
+- importerror
+- monitoring
+- plugin
+- pool
+- provider
+- taskinstance
+- variable
+- xcom
+
 ### Manual Execution
 
 You can also run the server manually:
