@@ -11,19 +11,12 @@ import_error_api = ImportErrorApi(api_client)
 
 def get_all_functions() -> list[tuple[Callable, str, str]]:
     return [
-        (get_import_error, "get_import_error", "Get an import error by ID"),
-        (list_import_errors, "list_import_errors", "List import errors"),
+        (get_import_errors, "get_import_errors", "List import errors"),
+        (get_import_error, "get_import_error", "Get a specific import error by ID"),
     ]
 
 
-async def get_import_error(
-    import_error_id: int,
-) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
-    response = import_error_api.get_import_error(import_error_id=import_error_id)
-    return [types.TextContent(type="text", text=str(response.to_dict()))]
-
-
-async def list_import_errors(
+async def get_import_errors(
     limit: Optional[int] = None,
     offset: Optional[int] = None,
     order_by: Optional[str] = None,
@@ -36,6 +29,13 @@ async def list_import_errors(
         kwargs["offset"] = offset
     if order_by is not None:
         kwargs["order_by"] = order_by
-
+    
     response = import_error_api.get_import_errors(**kwargs)
+    return [types.TextContent(type="text", text=str(response.to_dict()))]
+
+
+async def get_import_error(
+    import_error_id: int,
+) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
+    response = import_error_api.get_import_error(import_error_id=import_error_id)
     return [types.TextContent(type="text", text=str(response.to_dict()))]

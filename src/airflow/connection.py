@@ -16,6 +16,7 @@ def get_all_functions() -> list[tuple[Callable, str, str]]:
         (get_connection, "get_connection", "Get a connection by ID"),
         (update_connection, "update_connection", "Update a connection by ID"),
         (delete_connection, "delete_connection", "Delete a connection by ID"),
+        (test_connection, "test_connection", "Test a connection"),
     ]
 
 
@@ -113,4 +114,33 @@ async def delete_connection(
     conn_id: str
 ) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
     response = connection_api.delete_connection(connection_id=conn_id)
+    return [types.TextContent(type="text", text=str(response.to_dict()))]
+
+
+async def test_connection(
+    conn_type: str,
+    host: Optional[str] = None,
+    port: Optional[int] = None,
+    login: Optional[str] = None,
+    password: Optional[str] = None,
+    schema: Optional[str] = None,
+    extra: Optional[str] = None,
+) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
+    connection_request = {
+        "conn_type": conn_type,
+    }
+    if host is not None:
+        connection_request["host"] = host
+    if port is not None:
+        connection_request["port"] = port
+    if login is not None:
+        connection_request["login"] = login
+    if password is not None:
+        connection_request["password"] = password
+    if schema is not None:
+        connection_request["schema"] = schema
+    if extra is not None:
+        connection_request["extra"] = extra
+    
+    response = connection_api.test_connection(connection_request=connection_request)
     return [types.TextContent(type="text", text=str(response.to_dict()))]
