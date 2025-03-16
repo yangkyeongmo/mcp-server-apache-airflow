@@ -111,12 +111,19 @@ Replace `/path/to/mcp-server-apache-airflow` with the actual path where you've c
 
 You can also run the server manually:
 ```bash
-python src/server.py
+make run
 ```
+
+`make run` accepts following options:
 
 Options:
 - `--port`: Port to listen on for SSE (default: 8000)
 - `--transport`: Transport type (stdio/sse, default: stdio)
+
+Or, you could run the sse server directly, which accepts same parameters:
+```bash
+make run-sse
+```
 
 ## Contributing
 
@@ -124,4 +131,4 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-[Add your license information here]
+[MIT License](LICENSE)
