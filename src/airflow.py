@@ -274,3 +274,265 @@ async def get_health() -> List[Union[types.TextContent, types.ImageContent, type
 async def get_version() -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
     response = monitoring_api.get_version()
     return [types.TextContent(type="text", text=str(response.to_dict()))]
+
+
+# DAG Management
+@app.tool(name="update_dag", description="Update a DAG by ID")
+async def update_dag(
+    dag_id: str, is_paused: Optional[bool] = None, tags: Optional[List[str]] = None
+) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
+    update_request = {}
+    if is_paused is not None:
+        update_request["is_paused"] = is_paused
+    if tags is not None:
+        update_request["tags"] = tags
+    
+    response = dag_api.patch_dag(dag_id=dag_id, dag_update_request=update_request)
+    return [types.TextContent(type="text", text=str(response.to_dict()))]
+
+
+@app.tool(name="delete_dag", description="Delete a DAG by ID")
+async def delete_dag(dag_id: str) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
+    response = dag_api.delete_dag(dag_id=dag_id)
+    return [types.TextContent(type="text", text=str(response.to_dict()))]
+
+
+# DAG Runs
+@app.tool(name="get_dag_run", description="Get a DAG run by DAG ID and DAG run ID")
+async def get_dag_run(
+    dag_id: str, dag_run_id: str
+) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
+    response = dag_run_api.get_dag_run(dag_id=dag_id, dag_run_id=dag_run_id)
+    
+    # Convert response to dictionary for easier manipulation
+    response_dict = response.to_dict()
+    
+    # Add UI link to DAG run
+    response_dict["ui_url"] = get_dag_run_url(dag_id, dag_run_id)
+    
+    return [types.TextContent(type="text", text=str(response_dict))]
+
+
+@app.tool(name="update_dag_run", description="Update a DAG run by DAG ID and DAG run ID")
+async def update_dag_run(
+    dag_id: str, dag_run_id: str, state: Optional[str] = None
+) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
+    update_request = {}
+    if state is not None:
+        update_request["state"] = state
+    
+    response = dag_run_api.patch_dag_run(dag_id=dag_id, dag_run_id=dag_run_id, update_mask=list(update_request.keys()), dag_run_request=update_request)
+    return [types.TextContent(type="text", text=str(response.to_dict()))]
+
+
+@app.tool(name="delete_dag_run", description="Delete a DAG run by DAG ID and DAG run ID")
+async def delete_dag_run(
+    dag_id: str, dag_run_id: str
+) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
+    response = dag_run_api.delete_dag_run(dag_id=dag_id, dag_run_id=dag_run_id)
+    return [types.TextContent(type="text", text=str(response.to_dict()))]
+
+
+# Tasks
+@app.tool(name="get_task", description="Get a task by DAG ID and task ID")
+async def get_task(
+    dag_id: str, task_id: str
+) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
+    response = dag_api.get_task(dag_id=dag_id, task_id=task_id)
+    return [types.TextContent(type="text", text=str(response.to_dict()))]
+
+
+@app.tool(name="update_task_instance", description="Update a task instance by DAG ID, DAG run ID, and task ID")
+async def update_task_instance(
+    dag_id: str, dag_run_id: str, task_id: str, state: Optional[str] = None
+) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
+    update_request = {}
+    if state is not None:
+        update_request["state"] = state
+    
+    response = task_instance_api.patch_task_instance(
+        dag_id=dag_id, 
+        dag_run_id=dag_run_id, 
+        task_id=task_id, 
+        update_mask=list(update_request.keys()),
+        task_instance_request=update_request
+    )
+    return [types.TextContent(type="text", text=str(response.to_dict()))]
+
+
+# Variables
+from airflow_client.client.api.variable_api import VariableApi
+variable_api = VariableApi(api_client)
+
+@app.tool(name="list_variables", description="List all variables")
+async def list_variables(
+    limit: Optional[int] = None,
+    offset: Optional[int] = None,
+    order_by: Optional[str] = None,
+) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
+    # Build parameters dictionary
+    kwargs: Dict[str, Any] = {}
+    if limit is not None:
+        kwargs["limit"] = limit
+    if offset is not None:
+        kwargs["offset"] = offset
+    if order_by is not None:
+        kwargs["order_by"] = order_by
+    
+    response = variable_api.get_variables(**kwargs)
+    return [types.TextContent(type="text", text=str(response.to_dict()))]
+
+
+@app.tool(name="create_variable", description="Create a variable")
+async def create_variable(
+    key: str, value: str, description: Optional[str] = None
+) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
+    variable_request = {
+        "key": key,
+        "value": value,
+    }
+    if description is not None:
+        variable_request["description"] = description
+    
+    response = variable_api.post_variables(variable_request=variable_request)
+    return [types.TextContent(type="text", text=str(response.to_dict()))]
+
+
+@app.tool(name="get_variable", description="Get a variable by key")
+async def get_variable(
+    key: str
+) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
+    response = variable_api.get_variable(variable_key=key)
+    return [types.TextContent(type="text", text=str(response.to_dict()))]
+
+
+@app.tool(name="update_variable", description="Update a variable by key")
+async def update_variable(
+    key: str, value: Optional[str] = None, description: Optional[str] = None
+) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
+    update_request = {}
+    if value is not None:
+        update_request["value"] = value
+    if description is not None:
+        update_request["description"] = description
+    
+    response = variable_api.patch_variable(
+        variable_key=key,
+        update_mask=list(update_request.keys()),
+        variable_request=update_request
+    )
+    return [types.TextContent(type="text", text=str(response.to_dict()))]
+
+
+@app.tool(name="delete_variable", description="Delete a variable by key")
+async def delete_variable(
+    key: str
+) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
+    response = variable_api.delete_variable(variable_key=key)
+    return [types.TextContent(type="text", text=str(response.to_dict()))]
+
+
+# Connections
+from airflow_client.client.api.connection_api import ConnectionApi
+connection_api = ConnectionApi(api_client)
+
+@app.tool(name="list_connections", description="List all connections")
+async def list_connections(
+    limit: Optional[int] = None,
+    offset: Optional[int] = None,
+    order_by: Optional[str] = None,
+) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
+    # Build parameters dictionary
+    kwargs: Dict[str, Any] = {}
+    if limit is not None:
+        kwargs["limit"] = limit
+    if offset is not None:
+        kwargs["offset"] = offset
+    if order_by is not None:
+        kwargs["order_by"] = order_by
+    
+    response = connection_api.get_connections(**kwargs)
+    return [types.TextContent(type="text", text=str(response.to_dict()))]
+
+
+@app.tool(name="create_connection", description="Create a connection")
+async def create_connection(
+    conn_id: str,
+    conn_type: str,
+    host: Optional[str] = None,
+    port: Optional[int] = None,
+    login: Optional[str] = None,
+    password: Optional[str] = None,
+    schema: Optional[str] = None,
+    extra: Optional[str] = None,
+) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
+    connection_request = {
+        "connection_id": conn_id,
+        "conn_type": conn_type,
+    }
+    if host is not None:
+        connection_request["host"] = host
+    if port is not None:
+        connection_request["port"] = port
+    if login is not None:
+        connection_request["login"] = login
+    if password is not None:
+        connection_request["password"] = password
+    if schema is not None:
+        connection_request["schema"] = schema
+    if extra is not None:
+        connection_request["extra"] = extra
+    
+    response = connection_api.post_connection(connection_request=connection_request)
+    return [types.TextContent(type="text", text=str(response.to_dict()))]
+
+
+@app.tool(name="get_connection", description="Get a connection by ID")
+async def get_connection(
+    conn_id: str
+) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
+    response = connection_api.get_connection(connection_id=conn_id)
+    return [types.TextContent(type="text", text=str(response.to_dict()))]
+
+
+@app.tool(name="update_connection", description="Update a connection by ID")
+async def update_connection(
+    conn_id: str,
+    conn_type: Optional[str] = None,
+    host: Optional[str] = None,
+    port: Optional[int] = None,
+    login: Optional[str] = None,
+    password: Optional[str] = None,
+    schema: Optional[str] = None,
+    extra: Optional[str] = None,
+) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
+    update_request = {}
+    if conn_type is not None:
+        update_request["conn_type"] = conn_type
+    if host is not None:
+        update_request["host"] = host
+    if port is not None:
+        update_request["port"] = port
+    if login is not None:
+        update_request["login"] = login
+    if password is not None:
+        update_request["password"] = password
+    if schema is not None:
+        update_request["schema"] = schema
+    if extra is not None:
+        update_request["extra"] = extra
+    
+    response = connection_api.patch_connection(
+        connection_id=conn_id,
+        update_mask=list(update_request.keys()),
+        connection_request=update_request
+    )
+    return [types.TextContent(type="text", text=str(response.to_dict()))]
+
+
+@app.tool(name="delete_connection", description="Delete a connection by ID")
+async def delete_connection(
+    conn_id: str
+) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
+    response = connection_api.delete_connection(connection_id=conn_id)
+    return [types.TextContent(type="text", text=str(response.to_dict()))]
