@@ -1,6 +1,4 @@
-import anyio
 import click
-import mcp.types as types
 from mcp.server.fastmcp import FastMCP
 
 app = FastMCP("mcp-apache-airflow")

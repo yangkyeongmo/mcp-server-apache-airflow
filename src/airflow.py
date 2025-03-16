@@ -1,3 +1,4 @@
+import asyncio
 from typing import Any, Dict, List, Optional, Union
 
 import mcp.types as types
@@ -79,6 +80,7 @@ async def fetch_dags(
     return [types.TextContent(type="text", text=str(response_dict))]
 
 
+@app.tool(name="get_dag", description="Get a DAG by ID")
 async def get_dag(dag_id: str) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
     response = dag_api.get_dag(dag_id=dag_id)
 
@@ -91,21 +93,25 @@ async def get_dag(dag_id: str) -> List[Union[types.TextContent, types.ImageConte
     return [types.TextContent(type="text", text=str(response_dict))]
 
 
+@app.tool(name="pause_dag", description="Pause a DAG by ID")
 async def pause_dag(dag_id: str) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
     response = dag_api.patch_dag(dag_id=dag_id, dag_update_request={"is_paused": True})
     return [types.TextContent(type="text", text=str(response.to_dict()))]
 
 
+@app.tool(name="unpause_dag", description="Unpause a DAG by ID")
 async def unpause_dag(dag_id: str) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
     response = dag_api.patch_dag(dag_id=dag_id, dag_update_request={"is_paused": False})
     return [types.TextContent(type="text", text=str(response.to_dict()))]
 
 
+@app.tool(name="trigger_dag", description="Trigger a DAG by ID")
 async def trigger_dag(dag_id: str) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
     response = dag_run_api.post_dag_run(dag_id=dag_id, dag_run_request={})
     return [types.TextContent(type="text", text=str(response.to_dict()))]
 
 
+@app.tool(name="get_dag_runs", description="Get DAG runs by ID")
 async def get_dag_runs(
     dag_id: str,
     limit: Optional[int] = None,
@@ -160,11 +166,13 @@ async def get_dag_runs(
     return [types.TextContent(type="text", text=str(response_dict))]
 
 
+@app.tool(name="get_dag_tasks", description="Get tasks by DAG ID")
 async def get_dag_tasks(dag_id: str) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
     response = dag_api.get_tasks(dag_id=dag_id)
     return [types.TextContent(type="text", text=str(response.to_dict()))]
 
 
+@app.tool(name="get_task_instance", description="Get a task instance by DAG ID, task ID, and DAG run ID")
 async def get_task_instance(
     dag_id: str, task_id: str, dag_run_id: str
 ) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
@@ -172,6 +180,7 @@ async def get_task_instance(
     return [types.TextContent(type="text", text=str(response.to_dict()))]
 
 
+@app.tool(name="list_task_instances", description="List task instances by DAG ID and DAG run ID")
 async def list_task_instances(
     dag_id: str,
     dag_run_id: str,
@@ -228,6 +237,7 @@ async def list_task_instances(
     return [types.TextContent(type="text", text=str(response.to_dict()))]
 
 
+@app.tool(name="get_import_error", description="Get an import error by ID")
 async def get_import_error(
     import_error_id: int,
 ) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
@@ -235,6 +245,7 @@ async def get_import_error(
     return [types.TextContent(type="text", text=str(response.to_dict()))]
 
 
+@app.tool(name="list_import_errors", description="List import errors")
 async def list_import_errors(
     limit: Optional[int] = None,
     offset: Optional[int] = None,
@@ -253,11 +264,13 @@ async def list_import_errors(
     return [types.TextContent(type="text", text=str(response.to_dict()))]
 
 
+@app.tool(name="get_health", description="Get health")
 async def get_health() -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
     response = monitoring_api.get_health()
     return [types.TextContent(type="text", text=str(response.to_dict()))]
 
 
+@app.tool(name="get_version", description="Get version")
 async def get_version() -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
     response = monitoring_api.get_version()
     return [types.TextContent(type="text", text=str(response.to_dict()))]
