@@ -1,15 +1,21 @@
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union, Callable
 
 import mcp.types as types
 from airflow_client.client.api.task_instance_api import TaskInstanceApi
 
 from src.airflow.airflow_client import api_client
-from src.server import app
 
 task_instance_api = TaskInstanceApi(api_client)
 
 
-@app.tool(name="get_task_instance", description="Get a task instance by DAG ID, task ID, and DAG run ID")
+def get_all_functions() -> list[tuple[Callable, str, str]]:
+    return [
+        (get_task_instance, "get_task_instance", "Get a task instance by DAG ID, task ID, and DAG run ID"),
+        (list_task_instances, "list_task_instances", "List task instances by DAG ID and DAG run ID"),
+        (update_task_instance, "update_task_instance", "Update a task instance by DAG ID, DAG run ID, and task ID"),
+    ]
+
+
 async def get_task_instance(
     dag_id: str, task_id: str, dag_run_id: str
 ) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
@@ -17,7 +23,6 @@ async def get_task_instance(
     return [types.TextContent(type="text", text=str(response.to_dict()))]
 
 
-@app.tool(name="list_task_instances", description="List task instances by DAG ID and DAG run ID")
 async def list_task_instances(
     dag_id: str,
     dag_run_id: str,
@@ -74,7 +79,6 @@ async def list_task_instances(
     return [types.TextContent(type="text", text=str(response.to_dict()))]
 
 
-@app.tool(name="update_task_instance", description="Update a task instance by DAG ID, DAG run ID, and task ID")
 async def update_task_instance(
     dag_id: str, dag_run_id: str, task_id: str, state: Optional[str] = None
 ) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:

@@ -1,16 +1,24 @@
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union, Callable
 
 import mcp.types as types
 
 from airflow_client.client.api.connection_api import ConnectionApi
 
 from src.airflow.airflow_client import api_client
-from src.server import app
 
 connection_api = ConnectionApi(api_client)
 
 
-@app.tool(name="list_connections", description="List all connections")
+def get_all_functions() -> list[tuple[Callable, str, str]]:
+    return [
+        (list_connections, "list_connections", "List all connections"),
+        (create_connection, "create_connection", "Create a connection"),
+        (get_connection, "get_connection", "Get a connection by ID"),
+        (update_connection, "update_connection", "Update a connection by ID"),
+        (delete_connection, "delete_connection", "Delete a connection by ID"),
+    ]
+
+
 async def list_connections(
     limit: Optional[int] = None,
     offset: Optional[int] = None,
@@ -29,7 +37,6 @@ async def list_connections(
     return [types.TextContent(type="text", text=str(response.to_dict()))]
 
 
-@app.tool(name="create_connection", description="Create a connection")
 async def create_connection(
     conn_id: str,
     conn_type: str,
@@ -61,7 +68,6 @@ async def create_connection(
     return [types.TextContent(type="text", text=str(response.to_dict()))]
 
 
-@app.tool(name="get_connection", description="Get a connection by ID")
 async def get_connection(
     conn_id: str
 ) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
@@ -69,7 +75,6 @@ async def get_connection(
     return [types.TextContent(type="text", text=str(response.to_dict()))]
 
 
-@app.tool(name="update_connection", description="Update a connection by ID")
 async def update_connection(
     conn_id: str,
     conn_type: Optional[str] = None,
@@ -104,7 +109,6 @@ async def update_connection(
     return [types.TextContent(type="text", text=str(response.to_dict()))]
 
 
-@app.tool(name="delete_connection", description="Delete a connection by ID")
 async def delete_connection(
     conn_id: str
 ) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:

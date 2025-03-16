@@ -1,16 +1,24 @@
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union, Callable
 
 import mcp.types as types
 
 from airflow_client.client.api.variable_api import VariableApi
 
 from src.airflow.airflow_client import api_client
-from src.server import app
 
 variable_api = VariableApi(api_client)
 
 
-@app.tool(name="list_variables", description="List all variables")
+def get_all_functions() -> list[tuple[Callable, str, str]]:
+    return [
+        (list_variables, "list_variables", "List all variables"),
+        (create_variable, "create_variable", "Create a variable"),
+        (get_variable, "get_variable", "Get a variable by key"),
+        (update_variable, "update_variable", "Update a variable by key"),
+        (delete_variable, "delete_variable", "Delete a variable by key"),
+    ]
+
+
 async def list_variables(
     limit: Optional[int] = None,
     offset: Optional[int] = None,
@@ -29,7 +37,6 @@ async def list_variables(
     return [types.TextContent(type="text", text=str(response.to_dict()))]
 
 
-@app.tool(name="create_variable", description="Create a variable")
 async def create_variable(
     key: str, value: str, description: Optional[str] = None
 ) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
@@ -44,7 +51,6 @@ async def create_variable(
     return [types.TextContent(type="text", text=str(response.to_dict()))]
 
 
-@app.tool(name="get_variable", description="Get a variable by key")
 async def get_variable(
     key: str
 ) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
@@ -52,7 +58,6 @@ async def get_variable(
     return [types.TextContent(type="text", text=str(response.to_dict()))]
 
 
-@app.tool(name="update_variable", description="Update a variable by key")
 async def update_variable(
     key: str, value: Optional[str] = None, description: Optional[str] = None
 ) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
@@ -70,7 +75,6 @@ async def update_variable(
     return [types.TextContent(type="text", text=str(response.to_dict()))]
 
 
-@app.tool(name="delete_variable", description="Delete a variable by key")
 async def delete_variable(
     key: str
 ) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:

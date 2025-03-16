@@ -1,26 +1,32 @@
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union, Callable
 
 import mcp.types as types
 from airflow_client.client.api.dag_run_api import DAGRunApi
 
 from src.airflow.airflow_client import api_client
 from src.envs import AIRFLOW_HOST
-from src.server import app
 
 dag_run_api = DAGRunApi(api_client)
 
+
+def get_all_functions() -> list[tuple[Callable, str, str]]:
+    return [
+        (trigger_dag, "trigger_dag", "Trigger a DAG by ID"),
+        (get_dag_runs, "get_dag_runs", "Get DAG runs by ID"),
+        (get_dag_run, "get_dag_run", "Get a DAG run by DAG ID and DAG run ID"),
+        (update_dag_run, "update_dag_run", "Update a DAG run by DAG ID and DAG run ID"),
+        (delete_dag_run, "delete_dag_run", "Delete a DAG run by DAG ID and DAG run ID"),
+    ]
 
 def get_dag_run_url(dag_id: str, dag_run_id: str) -> str:
     return f"{AIRFLOW_HOST}/dags/{dag_id}/grid?dag_run_id={dag_run_id}"
 
 
-@app.tool(name="trigger_dag", description="Trigger a DAG by ID")
 async def trigger_dag(dag_id: str) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
     response = dag_run_api.post_dag_run(dag_id=dag_id, dag_run_request={})
     return [types.TextContent(type="text", text=str(response.to_dict()))]
 
 
-@app.tool(name="get_dag_runs", description="Get DAG runs by ID")
 async def get_dag_runs(
     dag_id: str,
     limit: Optional[int] = None,
@@ -75,7 +81,6 @@ async def get_dag_runs(
     return [types.TextContent(type="text", text=str(response_dict))]
 
 
-@app.tool(name="get_dag_run", description="Get a DAG run by DAG ID and DAG run ID")
 async def get_dag_run(
     dag_id: str, dag_run_id: str
 ) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
@@ -90,7 +95,6 @@ async def get_dag_run(
     return [types.TextContent(type="text", text=str(response_dict))]
 
 
-@app.tool(name="update_dag_run", description="Update a DAG run by DAG ID and DAG run ID")
 async def update_dag_run(
     dag_id: str, dag_run_id: str, state: Optional[str] = None
 ) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
@@ -102,7 +106,6 @@ async def update_dag_run(
     return [types.TextContent(type="text", text=str(response.to_dict()))]
 
 
-@app.tool(name="delete_dag_run", description="Delete a DAG run by DAG ID and DAG run ID")
 async def delete_dag_run(
     dag_id: str, dag_run_id: str
 ) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:

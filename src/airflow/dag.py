@@ -1,20 +1,27 @@
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union, Callable
 
 import mcp.types as types
 from airflow_client.client.api.dag_api import DAGApi
 
 from src.airflow.airflow_client import api_client
 from src.envs import AIRFLOW_HOST
-from src.server import app
 
 dag_api = DAGApi(api_client)
+
+
+def get_all_functions() -> list[tuple[Callable, str, str]]:
+    return [
+        (fetch_dags, "fetch_dags", "Fetch all DAGs"),
+        (get_dag, "get_dag", "Get a DAG by ID"),
+        (pause_dag, "pause_dag", "Pause a DAG by ID"),
+        (unpause_dag, "unpause_dag", "Unpause a DAG by ID"),
+    ]
 
 
 def get_dag_url(dag_id: str) -> str:
     return f"{AIRFLOW_HOST}/dags/{dag_id}/grid"
 
 
-@app.tool(name="fetch_dags", description="Fetch all DAGs")
 async def fetch_dags(
     limit: Optional[int] = None,
     offset: Optional[int] = None,
@@ -54,7 +61,6 @@ async def fetch_dags(
     return [types.TextContent(type="text", text=str(response_dict))]
 
 
-@app.tool(name="get_dag", description="Get a DAG by ID")
 async def get_dag(dag_id: str) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
     response = dag_api.get_dag(dag_id=dag_id)
 
@@ -67,24 +73,21 @@ async def get_dag(dag_id: str) -> List[Union[types.TextContent, types.ImageConte
     return [types.TextContent(type="text", text=str(response_dict))]
 
 
-@app.tool(name="pause_dag", description="Pause a DAG by ID")
 async def pause_dag(dag_id: str) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
     response = dag_api.patch_dag(dag_id=dag_id, dag_update_request={"is_paused": True})
     return [types.TextContent(type="text", text=str(response.to_dict()))]
 
 
-@app.tool(name="unpause_dag", description="Unpause a DAG by ID")
 async def unpause_dag(dag_id: str) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
     response = dag_api.patch_dag(dag_id=dag_id, dag_update_request={"is_paused": False})
     return [types.TextContent(type="text", text=str(response.to_dict()))]
 
 
-@app.tool(name="get_dag_tasks", description="Get tasks by DAG ID")
 async def get_dag_tasks(dag_id: str) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
     response = dag_api.get_tasks(dag_id=dag_id)
     return [types.TextContent(type="text", text=str(response.to_dict()))]
 
-@app.tool(name="update_dag", description="Update a DAG by ID")
+
 async def update_dag(
     dag_id: str, is_paused: Optional[bool] = None, tags: Optional[List[str]] = None
 ) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
@@ -98,13 +101,11 @@ async def update_dag(
     return [types.TextContent(type="text", text=str(response.to_dict()))]
 
 
-@app.tool(name="delete_dag", description="Delete a DAG by ID")
 async def delete_dag(dag_id: str) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
     response = dag_api.delete_dag(dag_id=dag_id)
     return [types.TextContent(type="text", text=str(response.to_dict()))]
 
 
-@app.tool(name="get_task", description="Get a task by DAG ID and task ID")
 async def get_task(
     dag_id: str, task_id: str
 ) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
