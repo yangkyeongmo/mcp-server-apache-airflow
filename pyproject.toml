@@ -1,6 +1,6 @@
 [project]
 name = "mcp-server-apache-airflow"
-version = "0.1.3"
+version = "0.2.1"
 description = "Model Context Protocol (MCP) server for Apache Airflow"
 authors = [
     { name = "Gyeongmo Yang", email = "me@gmyang.dev" }
