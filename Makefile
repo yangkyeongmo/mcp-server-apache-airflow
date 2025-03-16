@@ -1,8 +1,17 @@
+.PHONY: run build publish lint format
+
+PYTHON=uv run --env-file .env python
+
+PARAMS=
+run:
+	$(PYTHON) src $(PARAMS)
+run-sse:
+	$(PYTHON) src --transport sse $(PARAMS)
 build:
-	uv run python -m build
+	$(PYTHON) -m build
 publish:
-	uv run python -m twine upload --config-file .pypirc dist/*
+	$(PYTHON) -m twine upload --config-file .pypirc dist/*
 lint:
-	uv run ruff check . --fix
+	$(PYTHON) -m ruff check . --fix
 format:
-	uv run ruff format .
+	$(PYTHON) -m ruff format .
