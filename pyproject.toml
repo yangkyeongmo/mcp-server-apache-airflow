@@ -1,6 +1,6 @@
 [project]
 name = "mcp-server-apache-airflow"
-version = "0.2.1"
+version = "0.2.2"
 description = "Model Context Protocol (MCP) server for Apache Airflow"
 authors = [
     { name = "Gyeongmo Yang", email = "me@gmyang.dev" }
@@ -42,7 +42,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project.scripts]
-mcp-server-apache-airflow = "server:main"
+mcp-server-apache-airflow = "src.main:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src"]
