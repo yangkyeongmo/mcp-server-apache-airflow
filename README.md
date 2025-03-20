@@ -1,4 +1,5 @@
 # mcp-server-apache-airflow
+[![smithery badge](https://smithery.ai/badge/@yangkyeongmo/mcp-server-apache-airflow)](https://smithery.ai/server/@yangkyeongmo/mcp-server-apache-airflow)
 
 A Model Context Protocol (MCP) server implementation for Apache Airflow, enabling seamless integration with MCP clients. This project provides a standardized way to interact with Apache Airflow through the Model Context Protocol.
 
@@ -198,6 +199,14 @@ Options:
 Or, you could run the sse server directly, which accepts same parameters:
 ```bash
 make run-sse
+```
+
+### Installing via Smithery
+
+To install Apache Airflow MCP Server for Claude Desktop automatically via [Smithery](https://smithery.ai/server/@yangkyeongmo/mcp-server-apache-airflow):
+
+```bash
+npx -y @smithery/cli install @yangkyeongmo/mcp-server-apache-airflow --client claude
 ```
 
 ## Contributing
