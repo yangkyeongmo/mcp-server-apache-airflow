@@ -1,0 +1,5 @@
+import os
+
+AIRFLOW_HOST = os.getenv("AIRFLOW_HOST").rstrip("/")
+AIRFLOW_USERNAME = os.getenv("AIRFLOW_USERNAME")
+AIRFLOW_PASSWORD = os.getenv("AIRFLOW_PASSWORD")
