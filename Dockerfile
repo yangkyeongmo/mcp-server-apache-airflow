@@ -9,15 +9,11 @@ WORKDIR /app
 COPY . .
 
 # Install the project dependencies
-RUN pip install --no-cache-dir httpx==0.24.1 click==8.1.7 mcp==0.1.0
-
-# Set environment variables for Airflow connection
-ENV AIRFLOW_HOST=${AIRFLOW_HOST}
-ENV AIRFLOW_USERNAME=${AIRFLOW_USERNAME}
-ENV AIRFLOW_PASSWORD=${AIRFLOW_PASSWORD}
+RUN pip install uv
+RUN uv sync
 
 # Expose the port that the server will run on
 EXPOSE 8000
 
 # Command to run the server
-CMD ["python", "src/server.py"]
+CMD ["uv", "run", "src", "--transport", "sse"]
