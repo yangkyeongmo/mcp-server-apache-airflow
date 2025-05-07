@@ -19,7 +19,10 @@ startCommand:
       airflowPassword:
         type: string
         description: The password for Airflow authentication.
+      airflowApiVersion:
+        type: string
+        description: The Airflow API version to use (defaults to v1).
   commandFunction:
     # A function that produces the CLI command to start the MCP on stdio.
     |-
-    (config) => ({ command: 'python', args: ['src/server.py'], env: { AIRFLOW_HOST: config.airflowHost, AIRFLOW_USERNAME: config.airflowUsername, AIRFLOW_PASSWORD: config.airflowPassword } })
+    (config) => ({ command: 'python', args: ['src/server.py'], env: { AIRFLOW_HOST: config.airflowHost, AIRFLOW_USERNAME: config.airflowUsername, AIRFLOW_PASSWORD: config.airflowPassword, AIRFLOW_API_VERSION: config.airflowApiVersion || 'v1' } })
