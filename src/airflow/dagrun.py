@@ -48,7 +48,6 @@ async def post_dag_run(
     # state: Optional[str] = None,  # TODO: add state
 ) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
     dag_run = DAGRun(
-        dag_id=dag_id,
         dag_run_id=dag_run_id,
         data_interval_end=data_interval_end,
         data_interval_start=data_interval_start,
