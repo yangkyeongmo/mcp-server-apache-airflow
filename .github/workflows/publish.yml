@@ -1,0 +1,64 @@
+name: Publish Python Package
+
+on:
+  push:
+    branches:
+      - main # Or your default branch
+
+jobs:
+  publish-if-version-changed:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout HEAD
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2 # Fetch enough history to compare with HEAD^
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x' # Specify your project's Python version if needed
+
+      - name: Install toml-cli and tomlkit
+        run: pip install toml-cli tomlkit
+
+      - name: Get current version
+        id: current_version
+        run: |
+          version=$(python -c "import tomlkit; print(tomlkit.load(open('pyproject.toml'))['project']['version'])")
+          echo "version=${version}" >> $GITHUB_OUTPUT
+
+      - name: Get previous version
+        id: previous_version
+        run: |
+          # Ensure pyproject.toml existed in the previous commit
+          if git show HEAD^:pyproject.toml > /dev/null 2>&1; then
+            version=$(git show HEAD^:pyproject.toml | python -c "import sys, tomlkit; print(tomlkit.load(sys.stdin)['project']['version'])")
+            echo "version=${version}" >> $GITHUB_OUTPUT
+          else
+            # If the file didn't exist in the previous commit, treat version as empty
+            # This handles the case where pyproject.toml is newly added
+            echo "version=" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Compare versions and publish
+        if: steps.current_version.outputs.version != steps.previous_version.outputs.version && steps.current_version.outputs.version != ''
+        run: |
+          echo "Version changed from ${{ steps.previous_version.outputs.version }} to ${{ steps.current_version.outputs.version }}. Publishing..."
+          # Assuming you have a Makefile with a publish target
+          make publish
+          echo "Note: Ensure your Makefile's 'publish' target is configured to use necessary tokens/credentials."
+          echo "If you need to pass secrets like a PyPI token, define them in your repository's secrets and uncomment the env block below."
+        env:
+          # Add any necessary environment variables for publishing, e.g., PyPI token
+          # PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
+          # Ensure your `make publish` command uses this token
+          DUMMY_VAR_TO_MAKE_ENV_VALID: "true" # Add a dummy var if no secrets are used yet, to keep the env block valid YAML.
+
+      - name: No version change
+        if: steps.current_version.outputs.version == steps.previous_version.outputs.version
+        run: echo "Version in pyproject.toml has not changed. No publish needed."
+
+      - name: Current version is empty (should not happen if pyproject.toml is valid)
+        if: steps.current_version.outputs.version == ''
+        run: echo "Could not determine current version from pyproject.toml."

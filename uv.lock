@@ -427,7 +427,7 @@ wheels = [
 
 [[package]]
 name = "mcp-server-apache-airflow"
-version = "0.2.2"
+version = "0.2.3"
 source = { editable = "." }
 dependencies = [
     { name = "apache-airflow-client" },
