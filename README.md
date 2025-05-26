@@ -219,6 +219,11 @@ npx -y @smithery/cli install @yangkyeongmo/mcp-server-apache-airflow --client cl
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
+The package is deployed automatically to PyPI when project.version is updated in `pyproject.toml`.
+Follow semver for versioning.
+
+Please include version update in the PR in order to apply the changes to core logic.
+
 ## License
 
 [MIT License](LICENSE)
