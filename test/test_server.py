@@ -40,8 +40,8 @@ class TestServer:
         # Verify essential methods exist
         assert hasattr(app, "add_tool")
         assert hasattr(app, "run")
-        assert callable(getattr(app, "add_tool"))
-        assert callable(getattr(app, "run"))
+        assert callable(app.add_tool)
+        assert callable(app.run)
 
     def test_app_initialization_attributes(self):
         """Test that app is properly initialized with default attributes."""
@@ -100,7 +100,7 @@ class TestServer:
         if "src.server" in sys.modules:
             reload(sys.modules["src.server"])
         else:
-            import src.server
+            pass
 
         # Verify FastMCP was called with the correct name
         mock_fastmcp.assert_called_with("mcp-apache-airflow")
