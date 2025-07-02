@@ -8,9 +8,10 @@ from src.airflow.airflow_client import api_client
 provider_api = ProviderApi(api_client)
 
 
-def get_all_functions() -> list[tuple[Callable, str, str]]:
+def get_all_functions() -> list[tuple[Callable, str, str, bool]]:
+    """Return list of (function, name, description, is_read_only) tuples for registration."""
     return [
-        (get_providers, "get_providers", "List providers"),
+        (get_providers, "get_providers", "Get a list of loaded providers", True),
     ]
 
 

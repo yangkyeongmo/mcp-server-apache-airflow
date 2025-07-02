@@ -14,17 +14,18 @@ from src.envs import AIRFLOW_HOST
 dag_run_api = DAGRunApi(api_client)
 
 
-def get_all_functions() -> list[tuple[Callable, str, str]]:
+def get_all_functions() -> list[tuple[Callable, str, str, bool]]:
+    """Return list of (function, name, description, is_read_only) tuples for registration."""
     return [
-        (post_dag_run, "post_dag_run", "Trigger a DAG by ID"),
-        (get_dag_runs, "get_dag_runs", "Get DAG runs by ID"),
-        (get_dag_runs_batch, "get_dag_runs_batch", "List DAG runs (batch)"),
-        (get_dag_run, "get_dag_run", "Get a DAG run by DAG ID and DAG run ID"),
-        (update_dag_run_state, "update_dag_run_state", "Update a DAG run state by DAG ID and DAG run ID"),
-        (delete_dag_run, "delete_dag_run", "Delete a DAG run by DAG ID and DAG run ID"),
-        (clear_dag_run, "clear_dag_run", "Clear a DAG run"),
-        (set_dag_run_note, "set_dag_run_note", "Update the DagRun note"),
-        (get_upstream_dataset_events, "get_upstream_dataset_events", "Get dataset events for a DAG run"),
+        (post_dag_run, "post_dag_run", "Trigger a DAG by ID", False),
+        (get_dag_runs, "get_dag_runs", "Get DAG runs by ID", True),
+        (get_dag_runs_batch, "get_dag_runs_batch", "List DAG runs (batch)", True),
+        (get_dag_run, "get_dag_run", "Get a DAG run by DAG ID and DAG run ID", True),
+        (update_dag_run_state, "update_dag_run_state", "Update a DAG run state by DAG ID and DAG run ID", False),
+        (delete_dag_run, "delete_dag_run", "Delete a DAG run by DAG ID and DAG run ID", False),
+        (clear_dag_run, "clear_dag_run", "Clear a DAG run", False),
+        (set_dag_run_note, "set_dag_run_note", "Update the DagRun note", False),
+        (get_upstream_dataset_events, "get_upstream_dataset_events", "Get dataset events for a DAG run", True),
     ]
 
 

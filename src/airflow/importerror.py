@@ -8,10 +8,11 @@ from src.airflow.airflow_client import api_client
 import_error_api = ImportErrorApi(api_client)
 
 
-def get_all_functions() -> list[tuple[Callable, str, str]]:
+def get_all_functions() -> list[tuple[Callable, str, str, bool]]:
+    """Return list of (function, name, description, is_read_only) tuples for registration."""
     return [
-        (get_import_errors, "get_import_errors", "List import errors"),
-        (get_import_error, "get_import_error", "Get a specific import error by ID"),
+        (get_import_errors, "get_import_errors", "List import errors", True),
+        (get_import_error, "get_import_error", "Get a specific import error by ID", True),
     ]
 
 

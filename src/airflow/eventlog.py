@@ -9,10 +9,11 @@ from src.airflow.airflow_client import api_client
 event_log_api = EventLogApi(api_client)
 
 
-def get_all_functions() -> list[tuple[Callable, str, str]]:
+def get_all_functions() -> list[tuple[Callable, str, str, bool]]:
+    """Return list of (function, name, description, is_read_only) tuples for registration."""
     return [
-        (get_event_logs, "get_event_logs", "List log entries from event log"),
-        (get_event_log, "get_event_log", "Get a specific log entry by ID"),
+        (get_event_logs, "get_event_logs", "List log entries from event log", True),
+        (get_event_log, "get_event_log", "Get a specific log entry by ID", True),
     ]
 
 
