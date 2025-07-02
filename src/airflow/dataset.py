@@ -17,7 +17,12 @@ def get_all_functions() -> list[tuple[Callable, str, str, bool]]:
         (create_dataset_event, "create_dataset_event", "Create dataset event", False),
         (get_dag_dataset_queued_event, "get_dag_dataset_queued_event", "Get a queued Dataset event for a DAG", True),
         (get_dag_dataset_queued_events, "get_dag_dataset_queued_events", "Get queued Dataset events for a DAG", True),
-        (delete_dag_dataset_queued_event, "delete_dag_dataset_queued_event", "Delete a queued Dataset event for a DAG", False),
+        (
+            delete_dag_dataset_queued_event,
+            "delete_dag_dataset_queued_event",
+            "Delete a queued Dataset event for a DAG",
+            False,
+        ),
         (
             delete_dag_dataset_queued_events,
             "delete_dag_dataset_queued_events",
@@ -25,7 +30,12 @@ def get_all_functions() -> list[tuple[Callable, str, str, bool]]:
             False,
         ),
         (get_dataset_queued_events, "get_dataset_queued_events", "Get queued Dataset events for a Dataset", True),
-        (delete_dataset_queued_events, "delete_dataset_queued_events", "Delete queued Dataset events for a Dataset", False),
+        (
+            delete_dataset_queued_events,
+            "delete_dataset_queued_events",
+            "Delete queued Dataset events for a Dataset",
+            False,
+        ),
     ]
 
 

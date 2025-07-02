@@ -171,14 +171,14 @@ class TestMain:
     def test_filter_functions_for_read_only(self):
         """Test that filter_functions_for_read_only correctly filters functions."""
         from src.main import filter_functions_for_read_only
-        
+
         # Mock function objects
         def mock_read_func():
             pass
-        
+
         def mock_write_func():
             pass
-        
+
         # Test functions with mixed read/write status
         functions = [
             (mock_read_func, "get_something", "Get something", True),
@@ -186,30 +186,30 @@ class TestMain:
             (mock_read_func, "list_something", "List something", True),
             (mock_write_func, "delete_something", "Delete something", False),
         ]
-        
+
         filtered = filter_functions_for_read_only(functions)
-        
+
         # Should only have the read-only functions
         assert len(filtered) == 2
         assert filtered[0][1] == "get_something"
         assert filtered[1][1] == "list_something"
-        
+
         # Verify all returned functions are read-only
-        for func, name, description, is_read_only in filtered:
+        for _, _, _, is_read_only in filtered:
             assert is_read_only is True
 
     def test_connection_functions_have_correct_read_only_status(self):
         """Test that connection functions are correctly marked as read-only or write."""
         from src.airflow.connection import get_all_functions
-        
+
         functions = get_all_functions()
         function_names = {name: is_read_only for _, name, _, is_read_only in functions}
-        
+
         # Verify read-only functions
         assert function_names["list_connections"] is True
         assert function_names["get_connection"] is True
         assert function_names["test_connection"] is True
-        
+
         # Verify write functions
         assert function_names["create_connection"] is False
         assert function_names["update_connection"] is False
@@ -218,10 +218,10 @@ class TestMain:
     def test_dag_functions_have_correct_read_only_status(self):
         """Test that DAG functions are correctly marked as read-only or write."""
         from src.airflow.dag import get_all_functions
-        
+
         functions = get_all_functions()
         function_names = {name: is_read_only for _, name, _, is_read_only in functions}
-        
+
         # Verify read-only functions
         assert function_names["fetch_dags"] is True
         assert function_names["get_dag"] is True
@@ -230,7 +230,7 @@ class TestMain:
         assert function_names["get_dag_tasks"] is True
         assert function_names["get_task"] is True
         assert function_names["get_tasks"] is True
-        
+
         # Verify write functions
         assert function_names["pause_dag"] is False
         assert function_names["unpause_dag"] is False
@@ -257,10 +257,10 @@ class TestMain:
         assert result.exit_code == 0
         # Should only register read-only functions (2 out of 3)
         assert mock_app.add_tool.call_count == 2
-        
+
         # Verify the correct functions were registered
         call_args_list = mock_app.add_tool.call_args_list
-        registered_names = [call.kwargs['name'] for call in call_args_list]
+        registered_names = [call.kwargs["name"] for call in call_args_list]
         assert "read_function" in registered_names
         assert "another_read_function" in registered_names
         assert "write_function" not in registered_names

@@ -39,17 +39,15 @@ APITYPE_TO_FUNCTIONS = {
 def filter_functions_for_read_only(functions: list[tuple]) -> list[tuple]:
     """
     Filter functions to only include read-only operations.
-    
+
     Args:
         functions: List of (func, name, description, is_read_only) tuples
-        
+
     Returns:
         List of (func, name, description, is_read_only) tuples with only read-only functions
     """
     return [
-        (func, name, description, is_read_only) 
-        for func, name, description, is_read_only in functions 
-        if is_read_only
+        (func, name, description, is_read_only) for func, name, description, is_read_only in functions if is_read_only
     ]
 
 
