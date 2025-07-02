@@ -217,6 +217,55 @@ To install Apache Airflow MCP Server for Claude Desktop automatically via [Smith
 npx -y @smithery/cli install @yangkyeongmo/mcp-server-apache-airflow --client claude
 ```
 
+## Development
+
+### Setting up Development Environment
+
+1. Clone the repository:
+```bash
+git clone https://github.com/yangkyeongmo/mcp-server-apache-airflow.git
+cd mcp-server-apache-airflow
+```
+
+2. Install development dependencies:
+```bash
+uv sync --dev
+```
+
+3. Create a `.env` file for environment variables (optional for development):
+```bash
+touch .env
+```
+
+### Running Tests
+
+The project uses pytest for testing with the following commands available:
+
+```bash
+# Run all tests
+make test
+```
+
+### Code Quality
+
+```bash
+# Run linting
+make lint
+
+# Run code formatting
+make format
+```
+
+### Continuous Integration
+
+The project includes a GitHub Actions workflow (`.github/workflows/test.yml`) that automatically:
+
+- Runs tests on Python 3.10, 3.11, and 3.12
+- Executes linting checks using ruff
+- Runs on every push and pull request to `main` branch
+
+The CI pipeline ensures code quality and compatibility across supported Python versions before any changes are merged.
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
