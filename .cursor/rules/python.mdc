@@ -57,3 +57,19 @@ Follow these ruff settings for consistent style:
 - Use `zip()` for parallel iteration.
 - Prefer `pathlib` over `os.path` for file operations.
 - Use context managers for resource cleanup.
+
+## Testing Guidelines
+- Create comprehensive unit tests for all modules using the `pytest` framework.
+- Place test files directly in the test directory without mirroring subdirectories (e.g., `src/main.py` → `test/test_main.py`).
+- Use descriptive test method names that clearly indicate what is being tested.
+- Include `__init__.py` files in test directories to make them proper Python packages.
+- Mock external dependencies and side effects using `unittest.mock.patch` and `MagicMock`.
+- Test both happy path and error conditions, including edge cases and exception handling.
+- Use pytest fixtures for test setup and shared test data.
+- Ensure tests are isolated and don't depend on external state or other tests.
+- Include tests for CLI interfaces using `click.testing.CliRunner` with pytest fixtures.
+- Verify function behavior, return types, and side effects in tests using assert statements.
+- Use `pytest.mark.parametrize` for testing multiple input combinations efficiently.
+- Add integration tests with `pytest.mark.integration` for complex workflows and API interactions.
+- Use `conftest.py` for shared fixtures and test configuration.
+- Organize tests in classes when testing related functionality together.
