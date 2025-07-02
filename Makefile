@@ -1,4 +1,4 @@
-.PHONY: run build publish lint format
+.PHONY: run build publish lint format test test-coverage test-fast
 
 PYTHON=uv run --env-file .env python
 
@@ -15,3 +15,9 @@ lint:
 	$(PYTHON) -m ruff check . --fix
 format:
 	$(PYTHON) -m ruff format .
+test:
+	$(PYTHON) -m pytest test/ -v
+test-coverage:
+	$(PYTHON) -m pytest test/ --cov=src --cov-report=term-missing --cov-report=html
+test-fast:
+	$(PYTHON) -m pytest test/ -x -v
