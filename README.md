@@ -109,10 +109,10 @@ This project depends on the official Apache Airflow client library (`apache-airf
 Set the following environment variables:
 
 ```
-AIRFLOW_HOST=<your-airflow-host>
+AIRFLOW_HOST=<your-airflow-host>        # Optional, defaults to http://localhost:8080
 AIRFLOW_USERNAME=<your-airflow-username>
 AIRFLOW_PASSWORD=<your-airflow-password>
-AIRFLOW_API_VERSION=v1  # Optional, defaults to v1
+AIRFLOW_API_VERSION=v1                  # Optional, defaults to v1
 ```
 
 ### Usage with Claude Desktop
@@ -236,6 +236,8 @@ uv sync --dev
 ```bash
 touch .env
 ```
+
+> **Note**: No environment variables are required for running tests. The `AIRFLOW_HOST` defaults to `http://localhost:8080` for development and testing purposes.
 
 ### Running Tests
 
