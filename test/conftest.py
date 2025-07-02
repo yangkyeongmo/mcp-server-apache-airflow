@@ -37,9 +37,10 @@ def cli_runner():
 @pytest.fixture
 def api_function_sample():
     """Sample API function for testing function registration."""
+
     def sample_api_function(param: str) -> str:
         return f"Sample response: {param}"
-    
+
     return (sample_api_function, "sample_function", "Sample function for testing")
 
 
@@ -62,8 +63,8 @@ def mock_environment_vars(monkeypatch):
         "AIRFLOW_PASSWORD": "test_password",
         "AIRFLOW_API_VERSION": "v1",
     }
-    
+
     for key, value in test_env_vars.items():
         monkeypatch.setenv(key, value)
-    
-    return test_env_vars 
+
+    return test_env_vars
