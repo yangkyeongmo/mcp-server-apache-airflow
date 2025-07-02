@@ -109,10 +109,10 @@ This project depends on the official Apache Airflow client library (`apache-airf
 Set the following environment variables:
 
 ```
-AIRFLOW_HOST=<your-airflow-host>
+AIRFLOW_HOST=<your-airflow-host>        # Optional, defaults to http://localhost:8080
 AIRFLOW_USERNAME=<your-airflow-username>
 AIRFLOW_PASSWORD=<your-airflow-password>
-AIRFLOW_API_VERSION=v1  # Optional, defaults to v1
+AIRFLOW_API_VERSION=v1                  # Optional, defaults to v1
 ```
 
 ### Usage with Claude Desktop
@@ -216,6 +216,57 @@ To install Apache Airflow MCP Server for Claude Desktop automatically via [Smith
 ```bash
 npx -y @smithery/cli install @yangkyeongmo/mcp-server-apache-airflow --client claude
 ```
+
+## Development
+
+### Setting up Development Environment
+
+1. Clone the repository:
+```bash
+git clone https://github.com/yangkyeongmo/mcp-server-apache-airflow.git
+cd mcp-server-apache-airflow
+```
+
+2. Install development dependencies:
+```bash
+uv sync --dev
+```
+
+3. Create a `.env` file for environment variables (optional for development):
+```bash
+touch .env
+```
+
+> **Note**: No environment variables are required for running tests. The `AIRFLOW_HOST` defaults to `http://localhost:8080` for development and testing purposes.
+
+### Running Tests
+
+The project uses pytest for testing with the following commands available:
+
+```bash
+# Run all tests
+make test
+```
+
+### Code Quality
+
+```bash
+# Run linting
+make lint
+
+# Run code formatting
+make format
+```
+
+### Continuous Integration
+
+The project includes a GitHub Actions workflow (`.github/workflows/test.yml`) that automatically:
+
+- Runs tests on Python 3.10, 3.11, and 3.12
+- Executes linting checks using ruff
+- Runs on every push and pull request to `main` branch
+
+The CI pipeline ensures code quality and compatibility across supported Python versions before any changes are merged.
 
 ## Contributing
 
