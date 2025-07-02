@@ -33,35 +33,6 @@ class TestDagModule:
         with patch("src.airflow.dag.dag_api") as mock_api:
             yield mock_api
 
-    @pytest.fixture
-    def sample_dag_response(self):
-        """Sample DAG response data."""
-        return MagicMock(
-            **{
-                "to_dict.return_value": {
-                    "dag_id": "test_dag",
-                    "description": "Test DAG",
-                    "is_paused": False,
-                    "schedule_interval": "@daily",
-                }
-            }
-        )
-
-    @pytest.fixture
-    def sample_dags_response(self):
-        """Sample DAGs collection response data."""
-        return MagicMock(
-            **{
-                "to_dict.return_value": {
-                    "dags": [
-                        {"dag_id": "dag1", "description": "First DAG", "is_paused": False},
-                        {"dag_id": "dag2", "description": "Second DAG", "is_paused": True},
-                    ],
-                    "total_entries": 2,
-                }
-            }
-        )
-
     def test_get_dag_url(self):
         """Test DAG URL generation."""
         test_cases = [
