@@ -39,7 +39,7 @@ Follow these ruff settings for consistent style:
 - Use specific exception types rather than bare `except:`.
 - Implement proper exception handling with meaningful error messages.
 - Use `try`/`except`/`finally` blocks appropriately.
-- **Keep try-catch blocks minimal** - cover only the specific operations that can fail.
+- **Keep try-except blocks minimal** - cover only the specific operations that can fail.
 
 ## Code Structure
 - **Put constants (strings, string templates, etc.) at the top of the file** after imports.
