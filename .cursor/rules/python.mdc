@@ -1,0 +1,59 @@
+---
+description: 
+globs: *.py
+alwaysApply: false
+---
+At the start of your every response, say "APPLIED PYTHON RULE".
+
+# Python Language Rule
+
+## Key Principles
+- Write concise, technical Python code with accurate examples.
+- Use functional programming; prefer functions over classes where possible.
+- Prefer iteration and modularization over code duplication.
+- Use descriptive variable names with auxiliary verbs (e.g., is_active, has_permission).
+- Use lowercase_with_underscores for variables, functions, and file names.
+- Follow PEP 8 style guidelines.
+
+## Python Language Guidelines
+- Use `def` for functions, `async def` for asynchronous operations.
+- Use type hints for all function signatures and variables where helpful.
+- Use f-strings for string formatting.
+- Prefer list/dict comprehensions over loops when readable.
+- Use `with` statements for resource management (files, connections).
+- Use `*args` and `**kwargs` appropriately for flexible function signatures.
+
+## Code Style (Ruff Configuration)
+Follow these ruff settings for consistent style:
+- Line length: 120 characters
+- Target Python version: 3.9+
+- Enable: pycodestyle errors/warnings (E, W), pyflakes (F), isort (I), flake8-comprehensions (C), flake8-bugbear (B)
+- Known first-party imports: ["src"]
+- Combine imports as single statements and force sort within sections
+- Allow unused imports in `__init__.py` files
+
+## Error Handling
+- Handle errors and edge cases at the start of functions (guard clauses).
+- Use early returns for error conditions; avoid deep nesting and unnecessary `else`.
+- Place the happy path last in the function.
+- Use specific exception types rather than bare `except:`.
+- Implement proper exception handling with meaningful error messages.
+- Use `try`/`except`/`finally` blocks appropriately.
+- **Keep try-catch blocks minimal** - cover only the specific operations that can fail.
+
+## Code Structure
+- **Put constants (strings, string templates, etc.) at the top of the file** after imports.
+- Import standard library modules first, then third-party, then local imports.
+- **Caller should come before callee** - define functions before they are called.
+- Use docstrings for functions and classes following PEP 257.
+- Keep functions small and focused on a single responsibility.
+- Use meaningful function and variable names that explain intent.
+- Avoid global variables; pass data through function parameters.
+
+## Python Conventions
+- Use `if __name__ == "__main__":` for script entry points.
+- Prefer `is` and `is not` for `None` comparisons.
+- Use `enumerate()` instead of manual counter variables.
+- Use `zip()` for parallel iteration.
+- Prefer `pathlib` over `os.path` for file operations.
+- Use context managers for resource cleanup.
