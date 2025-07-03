@@ -8,11 +8,17 @@ from src.airflow.airflow_client import api_client
 task_instance_api = TaskInstanceApi(api_client)
 
 
-def get_all_functions() -> list[tuple[Callable, str, str]]:
+def get_all_functions() -> list[tuple[Callable, str, str, bool]]:
+    """Return list of (function, name, description, is_read_only) tuples for registration."""
     return [
-        (get_task_instance, "get_task_instance", "Get a task instance by DAG ID, task ID, and DAG run ID"),
-        (list_task_instances, "list_task_instances", "List task instances by DAG ID and DAG run ID"),
-        (update_task_instance, "update_task_instance", "Update a task instance by DAG ID, DAG run ID, and task ID"),
+        (get_task_instance, "get_task_instance", "Get a task instance by DAG ID, task ID, and DAG run ID", True),
+        (list_task_instances, "list_task_instances", "List task instances by DAG ID and DAG run ID", True),
+        (
+            update_task_instance,
+            "update_task_instance",
+            "Update a task instance by DAG ID, DAG run ID, and task ID",
+            False,
+        ),
     ]
 
 

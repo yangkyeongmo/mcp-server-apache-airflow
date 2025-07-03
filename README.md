@@ -135,6 +135,24 @@ Add to your `claude_desktop_config.json`:
 }
 ```
 
+For read-only mode (recommended for safety):
+
+```json
+{
+  "mcpServers": {
+    "mcp-server-apache-airflow": {
+      "command": "uvx",
+      "args": ["mcp-server-apache-airflow", "--read-only"],
+      "env": {
+        "AIRFLOW_HOST": "https://your-airflow-host",
+        "AIRFLOW_USERNAME": "your-username",
+        "AIRFLOW_PASSWORD": "your-password"
+      }
+    }
+  }
+}
+```
+
 Alternative configuration using `uv`:
 
 ```json
@@ -187,6 +205,28 @@ Allowed values are:
 - taskinstance
 - variable
 - xcom
+
+### Read-Only Mode
+
+You can run the server in read-only mode by using the `--read-only` flag. This will only expose tools that perform read operations (GET requests) and exclude any tools that create, update, or delete resources.
+
+```bash
+uv run mcp-server-apache-airflow --read-only
+```
+
+In read-only mode, the server will only expose tools like:
+- Listing DAGs, DAG runs, tasks, variables, connections, etc.
+- Getting details of specific resources
+- Reading configurations and monitoring information
+- Testing connections (non-destructive)
+
+Write operations like creating, updating, deleting DAGs, variables, connections, triggering DAG runs, etc. will not be available in read-only mode.
+
+You can combine read-only mode with API group selection:
+
+```bash
+uv run mcp-server-apache-airflow --read-only --apis "dag,variable"
+```
 
 ### Manual Execution
 

@@ -1,3 +1,5 @@
+import logging
+
 import click
 
 from src.airflow.config import get_all_functions as get_config_functions
@@ -11,6 +13,7 @@ from src.airflow.importerror import get_all_functions as get_importerror_functio
 from src.airflow.monitoring import get_all_functions as get_monitoring_functions
 from src.airflow.plugin import get_all_functions as get_plugin_functions
 from src.airflow.pool import get_all_functions as get_pool_functions
+from src.airflow.provider import get_all_functions as get_provider_functions
 from src.airflow.taskinstance import get_all_functions as get_taskinstance_functions
 from src.airflow.variable import get_all_functions as get_variable_functions
 from src.airflow.xcom import get_all_functions as get_xcom_functions
@@ -28,10 +31,26 @@ APITYPE_TO_FUNCTIONS = {
     APIType.MONITORING: get_monitoring_functions,
     APIType.PLUGIN: get_plugin_functions,
     APIType.POOL: get_pool_functions,
+    APIType.PROVIDER: get_provider_functions,
     APIType.TASKINSTANCE: get_taskinstance_functions,
     APIType.VARIABLE: get_variable_functions,
     APIType.XCOM: get_xcom_functions,
 }
+
+
+def filter_functions_for_read_only(functions: list[tuple]) -> list[tuple]:
+    """
+    Filter functions to only include read-only operations.
+
+    Args:
+        functions: List of (func, name, description, is_read_only) tuples
+
+    Returns:
+        List of (func, name, description, is_read_only) tuples with only read-only functions
+    """
+    return [
+        (func, name, description, is_read_only) for func, name, description, is_read_only in functions if is_read_only
+    ]
 
 
 @click.command()
@@ -48,20 +67,32 @@ APITYPE_TO_FUNCTIONS = {
     multiple=True,
     help="APIs to run, default is all",
 )
-def main(transport: str, apis: list[str]) -> None:
+@click.option(
+    "--read-only",
+    is_flag=True,
+    help="Only expose read-only tools (GET operations, no CREATE/UPDATE/DELETE)",
+)
+def main(transport: str, apis: list[str], read_only: bool) -> None:
     from src.server import app
 
     for api in apis:
+        logging.debug(f"Adding API: {api}")
         get_function = APITYPE_TO_FUNCTIONS[APIType(api)]
         try:
             functions = get_function()
         except NotImplementedError:
             continue
 
-        for fn, name, description in functions:
-            app.add_tool(fn, name=name, description=description)
+        # Filter functions for read-only mode if requested
+        if read_only:
+            functions = filter_functions_for_read_only(functions)
+
+        for func, name, description, *_ in functions:
+            app.add_tool(func, name=name, description=description)
 
     if transport == "sse":
+        logging.debug("Starting MCP server for Apache Airflow with SSE transport")
         app.run(transport="sse")
     else:
+        logging.debug("Starting MCP server for Apache Airflow with stdio transport")
         app.run(transport="stdio")

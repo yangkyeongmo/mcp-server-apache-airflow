@@ -9,13 +9,14 @@ from src.airflow.airflow_client import api_client
 pool_api = PoolApi(api_client)
 
 
-def get_all_functions() -> list[tuple[Callable, str, str]]:
+def get_all_functions() -> list[tuple[Callable, str, str, bool]]:
+    """Return list of (function, name, description, is_read_only) tuples for registration."""
     return [
-        (get_pools, "get_pools", "List pools"),
-        (get_pool, "get_pool", "Get a pool by name"),
-        (delete_pool, "delete_pool", "Delete a pool"),
-        (post_pool, "post_pool", "Create a pool"),
-        (patch_pool, "patch_pool", "Update a pool"),
+        (get_pools, "get_pools", "List pools", True),
+        (get_pool, "get_pool", "Get a pool by name", True),
+        (delete_pool, "delete_pool", "Delete a pool", False),
+        (post_pool, "post_pool", "Create a pool", False),
+        (patch_pool, "patch_pool", "Update a pool", False),
     ]
 
 

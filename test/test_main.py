@@ -167,3 +167,123 @@ class TestMain:
 
         assert result.exit_code == 0
         assert mock_app.add_tool.call_count == 1
+
+    def test_filter_functions_for_read_only(self):
+        """Test that filter_functions_for_read_only correctly filters functions."""
+        from src.main import filter_functions_for_read_only
+
+        # Mock function objects
+        def mock_read_func():
+            pass
+
+        def mock_write_func():
+            pass
+
+        # Test functions with mixed read/write status
+        functions = [
+            (mock_read_func, "get_something", "Get something", True),
+            (mock_write_func, "create_something", "Create something", False),
+            (mock_read_func, "list_something", "List something", True),
+            (mock_write_func, "delete_something", "Delete something", False),
+        ]
+
+        filtered = filter_functions_for_read_only(functions)
+
+        # Should only have the read-only functions
+        assert len(filtered) == 2
+        assert filtered[0][1] == "get_something"
+        assert filtered[1][1] == "list_something"
+
+        # Verify all returned functions are read-only
+        for _, _, _, is_read_only in filtered:
+            assert is_read_only is True
+
+    def test_connection_functions_have_correct_read_only_status(self):
+        """Test that connection functions are correctly marked as read-only or write."""
+        from src.airflow.connection import get_all_functions
+
+        functions = get_all_functions()
+        function_names = {name: is_read_only for _, name, _, is_read_only in functions}
+
+        # Verify read-only functions
+        assert function_names["list_connections"] is True
+        assert function_names["get_connection"] is True
+        assert function_names["test_connection"] is True
+
+        # Verify write functions
+        assert function_names["create_connection"] is False
+        assert function_names["update_connection"] is False
+        assert function_names["delete_connection"] is False
+
+    def test_dag_functions_have_correct_read_only_status(self):
+        """Test that DAG functions are correctly marked as read-only or write."""
+        from src.airflow.dag import get_all_functions
+
+        functions = get_all_functions()
+        function_names = {name: is_read_only for _, name, _, is_read_only in functions}
+
+        # Verify read-only functions
+        assert function_names["fetch_dags"] is True
+        assert function_names["get_dag"] is True
+        assert function_names["get_dag_details"] is True
+        assert function_names["get_dag_source"] is True
+        assert function_names["get_dag_tasks"] is True
+        assert function_names["get_task"] is True
+        assert function_names["get_tasks"] is True
+
+        # Verify write functions
+        assert function_names["pause_dag"] is False
+        assert function_names["unpause_dag"] is False
+        assert function_names["patch_dag"] is False
+        assert function_names["patch_dags"] is False
+        assert function_names["delete_dag"] is False
+        assert function_names["clear_task_instances"] is False
+        assert function_names["set_task_instances_state"] is False
+        assert function_names["reparse_dag_file"] is False
+
+    @patch("src.server.app")
+    def test_main_read_only_mode(self, mock_app, runner):
+        """Test main function with read-only flag."""
+        # Create mock functions with mixed read/write status
+        mock_functions = [
+            (lambda: None, "read_function", "Read function", True),
+            (lambda: None, "write_function", "Write function", False),
+            (lambda: None, "another_read_function", "Another read function", True),
+        ]
+
+        with patch.dict(APITYPE_TO_FUNCTIONS, {APIType.CONFIG: lambda: mock_functions}, clear=True):
+            result = runner.invoke(main, ["--read-only", "--apis", "config"])
+
+        assert result.exit_code == 0
+        # Should only register read-only functions (2 out of 3)
+        assert mock_app.add_tool.call_count == 2
+
+        # Verify the correct functions were registered
+        call_args_list = mock_app.add_tool.call_args_list
+        registered_names = [call.kwargs["name"] for call in call_args_list]
+        assert "read_function" in registered_names
+        assert "another_read_function" in registered_names
+        assert "write_function" not in registered_names
+
+    @patch("src.server.app")
+    def test_main_read_only_mode_with_no_read_functions(self, mock_app, runner):
+        """Test main function with read-only flag when API has no read-only functions."""
+        # Create mock functions with only write operations
+        mock_functions = [
+            (lambda: None, "write_function1", "Write function 1", False),
+            (lambda: None, "write_function2", "Write function 2", False),
+        ]
+
+        with patch.dict(APITYPE_TO_FUNCTIONS, {APIType.CONFIG: lambda: mock_functions}, clear=True):
+            result = runner.invoke(main, ["--read-only", "--apis", "config"])
+
+        assert result.exit_code == 0
+        # Should not register any functions
+        assert mock_app.add_tool.call_count == 0
+
+    def test_cli_read_only_flag_in_help(self, runner):
+        """Test that read-only flag appears in help."""
+        result = runner.invoke(main, ["--help"])
+        assert result.exit_code == 0
+        assert "--read-only" in result.output
+        assert "Only expose read-only tools" in result.output

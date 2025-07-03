@@ -8,13 +8,14 @@ from src.airflow.airflow_client import api_client
 variable_api = VariableApi(api_client)
 
 
-def get_all_functions() -> list[tuple[Callable, str, str]]:
+def get_all_functions() -> list[tuple[Callable, str, str, bool]]:
+    """Return list of (function, name, description, is_read_only) tuples for registration."""
     return [
-        (list_variables, "list_variables", "List all variables"),
-        (create_variable, "create_variable", "Create a variable"),
-        (get_variable, "get_variable", "Get a variable by key"),
-        (update_variable, "update_variable", "Update a variable by key"),
-        (delete_variable, "delete_variable", "Delete a variable by key"),
+        (list_variables, "list_variables", "List all variables", True),
+        (create_variable, "create_variable", "Create a variable", False),
+        (get_variable, "get_variable", "Get a variable by key", True),
+        (update_variable, "update_variable", "Update a variable by key", False),
+        (delete_variable, "delete_variable", "Delete a variable by key", False),
     ]
 
 

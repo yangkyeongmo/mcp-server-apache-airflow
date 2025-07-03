@@ -8,10 +8,11 @@ from src.airflow.airflow_client import api_client
 xcom_api = XComApi(api_client)
 
 
-def get_all_functions() -> list[tuple[Callable, str, str]]:
+def get_all_functions() -> list[tuple[Callable, str, str, bool]]:
+    """Return list of (function, name, description, is_read_only) tuples for registration."""
     return [
-        (get_xcom_entries, "get_xcom_entries", "Get all XCom entries"),
-        (get_xcom_entry, "get_xcom_entry", "Get an XCom entry"),
+        (get_xcom_entries, "get_xcom_entries", "Get all XCom entries", True),
+        (get_xcom_entry, "get_xcom_entry", "Get an XCom entry", True),
     ]
 
 

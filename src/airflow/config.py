@@ -8,10 +8,11 @@ from src.airflow.airflow_client import api_client
 config_api = ConfigApi(api_client)
 
 
-def get_all_functions() -> list[tuple[Callable, str, str]]:
+def get_all_functions() -> list[tuple[Callable, str, str, bool]]:
+    """Return list of (function, name, description, is_read_only) tuples for registration."""
     return [
-        (get_config, "get_config", "Get current configuration"),
-        (get_value, "get_value", "Get a specific option from configuration"),
+        (get_config, "get_config", "Get current configuration", True),
+        (get_value, "get_value", "Get a specific option from configuration", True),
     ]
 
 
