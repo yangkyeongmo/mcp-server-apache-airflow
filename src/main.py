@@ -1,3 +1,5 @@
+import logging
+
 import click
 
 from src.airflow.config import get_all_functions as get_config_functions
@@ -74,6 +76,7 @@ def main(transport: str, apis: list[str], read_only: bool) -> None:
     from src.server import app
 
     for api in apis:
+        logging.debug(f"Adding API: {api}")
         get_function = APITYPE_TO_FUNCTIONS[APIType(api)]
         try:
             functions = get_function()
@@ -88,6 +91,8 @@ def main(transport: str, apis: list[str], read_only: bool) -> None:
             app.add_tool(func, name=name, description=description)
 
     if transport == "sse":
+        logging.debug("Starting MCP server for Apache Airflow with SSE transport")
         app.run(transport="sse")
     else:
+        logging.debug("Starting MCP server for Apache Airflow with stdio transport")
         app.run(transport="stdio")
