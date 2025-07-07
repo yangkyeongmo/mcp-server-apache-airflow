@@ -19,6 +19,12 @@ def get_all_functions() -> list[tuple[Callable, str, str, bool]]:
             "Update a task instance by DAG ID, DAG run ID, and task ID",
             False,
         ),
+        (
+            list_task_instance_tries,
+            "list_task_instance_tries",
+            "List task instance tries by DAG ID, DAG run ID, and task ID",
+            True,
+        ),
     ]
 
 
@@ -98,5 +104,28 @@ async def update_task_instance(
         task_id=task_id,
         update_mask=list(update_request.keys()),
         task_instance_request=update_request,
+    )
+    return [types.TextContent(type="text", text=str(response.to_dict()))]
+
+
+async def list_task_instance_tries(
+    dag_id: str,
+    dag_run_id: str,
+    task_id: str,
+    limit: Optional[int] = None,
+    offset: Optional[int] = None,
+    order_by: Optional[str] = None,
+) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
+    # Build parameters dictionary
+    kwargs: Dict[str, Any] = {}
+    if limit is not None:
+        kwargs["limit"] = limit
+    if offset is not None:
+        kwargs["offset"] = offset
+    if order_by is not None:
+        kwargs["order_by"] = order_by
+
+    response = task_instance_api.get_task_instance_tries(
+        dag_id=dag_id, dag_run_id=dag_run_id, task_id=task_id, **kwargs
     )
     return [types.TextContent(type="text", text=str(response.to_dict()))]
