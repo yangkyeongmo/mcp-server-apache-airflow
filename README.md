@@ -243,6 +243,12 @@ Options:
 - `--port`: Port to listen on for SSE (default: 8000)
 - `--transport`: Transport type (stdio/sse, default: stdio)
 
+For example
+
+```bash
+make run PARAMS="--transport sse --port 8082"
+```
+
 Or, you could run the sse server directly, which accepts same parameters:
 
 ```bash
