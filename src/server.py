@@ -1,3 +1,3 @@
-from mcp.server.fastmcp import FastMCP
+from fastmcp import FastMCP
 
 app = FastMCP("mcp-apache-airflow")

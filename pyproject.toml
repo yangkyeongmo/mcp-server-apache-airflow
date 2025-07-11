@@ -1,15 +1,16 @@
 [project]
-name = "mcp-server-apache-airflow"
+name = "airflow-mcp-server"
 version = "0.2.5"
 description = "Model Context Protocol (MCP) server for Apache Airflow"
 authors = [
-    { name = "Gyeongmo Yang", email = "me@gmyang.dev" }
+    { name = "Ruslan Galinskii", email = "galinskyifmo@gmail.com" }
 ]
 dependencies = [
     "httpx>=0.24.1",
     "click>=8.1.7",
     "mcp>=0.1.0",
     "apache-airflow-client>=2.7.0,<3",
+    "fastmcp>=2.10.4",
 ]
 requires-python = ">=3.10"
 readme = "README.md"
@@ -33,9 +34,9 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/yangkyeongmo/mcp-server-apache-airflow"
-Repository = "https://github.com/yangkyeongmo/mcp-server-apache-airflow.git"
-"Bug Tracker" = "https://github.com/yangkyeongmo/mcp-server-apache-airflow/issues"
+Homepage = "https://github.com/BoomBidiBuyBuy/airflow-mcp-server"
+Repository = "https://github.com/BoomBidiBuyBuy/airflow-mcp-server.git"
+"Bug Tracker" = "https://github.com/BoomBidiBuyBuy/airflow-mcp-server/issues"
 
 [build-system]
 requires = ["hatchling"]
