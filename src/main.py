@@ -55,6 +55,11 @@ def filter_functions_for_read_only(functions: list[tuple]) -> list[tuple]:
 
 @click.command()
 @click.option(
+    "--port",
+    default=8000,
+    help="Port"
+)
+@click.option(
     "--transport",
     type=click.Choice(["stdio", "sse"]),
     default="stdio",
@@ -72,7 +77,7 @@ def filter_functions_for_read_only(functions: list[tuple]) -> list[tuple]:
     is_flag=True,
     help="Only expose read-only tools (GET operations, no CREATE/UPDATE/DELETE)",
 )
-def main(transport: str, apis: list[str], read_only: bool) -> None:
+def main(port: int, transport: str, apis: list[str], read_only: bool) -> None:
     from src.server import app
 
     for api in apis:
@@ -89,6 +94,8 @@ def main(transport: str, apis: list[str], read_only: bool) -> None:
 
         for func, name, description, *_ in functions:
             app.add_tool(func, name=name, description=description)
+
+    app.settings.port = port
 
     if transport == "sse":
         logging.debug("Starting MCP server for Apache Airflow with SSE transport")
