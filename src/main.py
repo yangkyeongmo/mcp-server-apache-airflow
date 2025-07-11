@@ -1,5 +1,7 @@
 import logging
 
+from fastmcp.tools import Tool
+
 import click
 
 from src.airflow.config import get_all_functions as get_config_functions
@@ -93,12 +95,19 @@ def main(port: int, transport: str, apis: list[str], read_only: bool) -> None:
             functions = filter_functions_for_read_only(functions)
 
         for func, name, description, *_ in functions:
-            app.add_tool(func, name=name, description=description)
+            app.add_tool(
+                    Tool.from_function(
+                        func,
+                        name=name,
+                        description=description
+                    )
+                )
 
     app.settings.port = port
 
     if transport == "sse":
         logging.debug("Starting MCP server for Apache Airflow with SSE transport")
+        app.settings.host = "0.0.0.0"
         app.run(transport="sse")
     else:
         logging.debug("Starting MCP server for Apache Airflow with stdio transport")
