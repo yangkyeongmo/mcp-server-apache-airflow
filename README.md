@@ -105,6 +105,10 @@ AIRFLOW_HOST=<your-airflow-host>        # Optional, defaults to http://localhost
 AIRFLOW_USERNAME=<your-airflow-username>
 AIRFLOW_PASSWORD=<your-airflow-password>
 AIRFLOW_API_VERSION=v1                  # Optional, defaults to v1
+
+MCP_PORT=<port-you-want-to-run-mcp>     # Optional, default is 8000
+MCP_HOST=<host-you-want-to-run-mcp>     # Optional, default is 127.0.0.1
+MCP_TRANSPORT=<transport>               # Optional, default is stdio. Possible: stdio, sse, http
 ```
 
 ### Usage with Claude Desktop
@@ -232,19 +236,25 @@ make run
 
 Options:
 
-- `--port`: Port to listen on for SSE (default: 8000)
-- `--transport`: Transport type (stdio/sse, default: stdio)
+- `--port`: Port to listen on for SSE or HTTP (default: 8000)
+- `--transport`: Transport type (stdio/sse/http, default: stdio)
+- `--host`: Host to run (default: 127.0.0.1)
 
 For example
 
 ```bash
-make run PARAMS="--transport sse --port 8082"
+make run PARAMS="--transport sse --port 8080"
 ```
 
 Or, you could run the sse server directly, which accepts same parameters:
 
 ```bash
 make run-sse
+```
+
+Also it's possilbe to run directly using `uv`, for example
+```bash
+uv run --env-file .env src --transport http --port 8080 --host 0.0.0.0
 ```
 
 ### Installing via Smithery
@@ -261,8 +271,8 @@ npx -y @smithery/cli install @yangkyeongmo/mcp-server-apache-airflow --client cl
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yangkyeongmo/mcp-server-apache-airflow.git
-cd mcp-server-apache-airflow
+git clone https://github.com/BoomBidiBuyBuy/airflow-mcp-server.git
+cd airflow-mcp-server
 ```
 
 2. Install development dependencies:

@@ -8,6 +8,52 @@ resolution-markers = [
 ]
 
 [[package]]
+name = "airflow-mcp-server"
+version = "0.2.5"
+source = { editable = "." }
+dependencies = [
+    { name = "apache-airflow-client" },
+    { name = "click" },
+    { name = "fastmcp" },
+    { name = "httpx" },
+    { name = "mcp" },
+]
+
+[package.optional-dependencies]
+dev = [
+    { name = "build" },
+    { name = "twine" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+    { name = "pytest-cov" },
+    { name = "ruff" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "apache-airflow-client", specifier = ">=2.7.0,<3" },
+    { name = "build", marker = "extra == 'dev'", specifier = ">=1.2.2.post1" },
+    { name = "click", specifier = ">=8.1.7" },
+    { name = "fastmcp", specifier = ">=2.10.4" },
+    { name = "httpx", specifier = ">=0.24.1" },
+    { name = "mcp", specifier = ">=0.1.0" },
+    { name = "twine", marker = "extra == 'dev'", specifier = ">=6.1.0" },
+]
+provides-extras = ["dev"]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "pytest", specifier = ">=7.0.0" },
+    { name = "pytest-asyncio", specifier = ">=0.21.0" },
+    { name = "pytest-cov", specifier = ">=4.0.0" },
+    { name = "ruff", specifier = ">=0.11.0" },
+]
+
+[[package]]
 name = "annotated-types"
 version = "0.7.0"
 source = { registry = "https://pypi.org/simple" }
@@ -644,52 +690,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/3a/f5/9506eb5578d5bbe9819ee8ba3198d0ad0e2fbe3bab8b257e4131ceb7dfb6/mcp-1.11.0.tar.gz", hash = "sha256:49a213df56bb9472ff83b3132a4825f5c8f5b120a90246f08b0dac6bedac44c8", size = 406907, upload-time = "2025-07-10T16:41:09.388Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/92/9c/c9ca79f9c512e4113a5d07043013110bb3369fc7770040c61378c7fbcf70/mcp-1.11.0-py3-none-any.whl", hash = "sha256:58deac37f7483e4b338524b98bc949b7c2b7c33d978f5fafab5bde041c5e2595", size = 155880, upload-time = "2025-07-10T16:41:07.935Z" },
-]
-
-[[package]]
-name = "mcp-server-apache-airflow"
-version = "0.2.5"
-source = { editable = "." }
-dependencies = [
-    { name = "apache-airflow-client" },
-    { name = "click" },
-    { name = "fastmcp" },
-    { name = "httpx" },
-    { name = "mcp" },
-]
-
-[package.optional-dependencies]
-dev = [
-    { name = "build" },
-    { name = "twine" },
-]
-
-[package.dev-dependencies]
-dev = [
-    { name = "pytest" },
-    { name = "pytest-asyncio" },
-    { name = "pytest-cov" },
-    { name = "ruff" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "apache-airflow-client", specifier = ">=2.7.0,<3" },
-    { name = "build", marker = "extra == 'dev'", specifier = ">=1.2.2.post1" },
-    { name = "click", specifier = ">=8.1.7" },
-    { name = "fastmcp", specifier = ">=2.10.4" },
-    { name = "httpx", specifier = ">=0.24.1" },
-    { name = "mcp", specifier = ">=0.1.0" },
-    { name = "twine", marker = "extra == 'dev'", specifier = ">=6.1.0" },
-]
-provides-extras = ["dev"]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "pytest", specifier = ">=7.0.0" },
-    { name = "pytest-asyncio", specifier = ">=0.21.0" },
-    { name = "pytest-cov", specifier = ">=4.0.0" },
-    { name = "ruff", specifier = ">=0.11.0" },
 ]
 
 [[package]]
