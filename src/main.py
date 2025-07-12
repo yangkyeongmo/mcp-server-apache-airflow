@@ -98,18 +98,18 @@ DEFAULT_HOST= "127.0.0.1"
 @click.command()
 @click.option(
     "--port",
-    default=os.environ("MCP_PORT", DEFAULT_PORT),
+    default=os.environ.get("MCP_PORT", DEFAULT_PORT),
     help=f"Port. Default is {DEFAULT_PORT}"
 )
 @click.option(
     "--transport",
     type=click.Choice(["stdio", "sse", "http"]),
-    default=os.environ("MCP_TRANSPORT", "stdio"),
+    default=os.environ.get("MCP_TRANSPORT", "stdio"),
     help="Transport type",
 )
 @click.option(
     "--host",
-    default=os.environ("MCP_HOST", DEFAULT_HOST),
+    default=os.environ.get("MCP_HOST", DEFAULT_HOST),
     help=f"Sets the host for running MCP. Default is {DEFAULT_HOST}"
 )
 @click.option(
