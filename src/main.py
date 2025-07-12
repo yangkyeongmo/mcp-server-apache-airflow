@@ -1,5 +1,7 @@
+import os
 import logging
 
+from fastmcp import FastMCP
 from fastmcp.tools import Tool
 
 import click
@@ -55,33 +57,7 @@ def filter_functions_for_read_only(functions: list[tuple]) -> list[tuple]:
     ]
 
 
-@click.command()
-@click.option(
-    "--port",
-    default=8000,
-    help="Port"
-)
-@click.option(
-    "--transport",
-    type=click.Choice(["stdio", "sse"]),
-    default="stdio",
-    help="Transport type",
-)
-@click.option(
-    "--apis",
-    type=click.Choice([api.value for api in APIType]),
-    default=[api.value for api in APIType],
-    multiple=True,
-    help="APIs to run, default is all",
-)
-@click.option(
-    "--read-only",
-    is_flag=True,
-    help="Only expose read-only tools (GET operations, no CREATE/UPDATE/DELETE)",
-)
-def main(port: int, transport: str, apis: list[str], read_only: bool) -> None:
-    from src.server import app
-
+def setup_tools(app, apis, read_only):
     for api in apis:
         logging.debug(f"Adding API: {api}")
         get_function = APITYPE_TO_FUNCTIONS[APIType(api)]
@@ -103,12 +79,60 @@ def main(port: int, transport: str, apis: list[str], read_only: bool) -> None:
                     )
                 )
 
-    app.settings.port = port
 
-    if transport == "sse":
-        logging.debug("Starting MCP server for Apache Airflow with SSE transport")
-        app.settings.host = "0.0.0.0"
-        app.run(transport="sse")
-    else:
-        logging.debug("Starting MCP server for Apache Airflow with stdio transport")
-        app.run(transport="stdio")
+def configure_transport(transport):
+    if transport in {"sse", "http"}:
+        if transport == "sse":
+            logging.warning("You selected the 'sse' transposrt that is going be deprecated")
+        elif transport == "http":
+            transport = "streamable-http"
+
+    logging.debug(f"Starting MCP server for Apache Airflow with '{transport}' transport")
+    return transport
+
+
+DEFAULT_PORT = 8000
+DEFAULT_HOST= "127.0.0.1"
+
+
+@click.command()
+@click.option(
+    "--port",
+    default=os.environ.get("MCP_PORT", DEFAULT_PORT),
+    help=f"Port. Default is {DEFAULT_PORT}"
+)
+@click.option(
+    "--transport",
+    type=click.Choice(["stdio", "sse", "http"]),
+    default=os.environ.get("MCP_TRANSPORT", "stdio"),
+    help="Transport type",
+)
+@click.option(
+    "--host",
+    default=os.environ.get("MCP_HOST", DEFAULT_HOST),
+    help=f"Sets the host for running MCP. Default is {DEFAULT_HOST}"
+)
+@click.option(
+    "--apis",
+    type=click.Choice([api.value for api in APIType]),
+    default=[api.value for api in APIType],
+    multiple=True,
+    help="APIs to run, default is all",
+)
+@click.option(
+    "--read-only",
+    is_flag=True,
+    help="Only expose read-only tools (GET operations, no CREATE/UPDATE/DELETE)",
+)
+def main(port: int, transport: str, host: str, apis: list[str], read_only: bool) -> None:
+    app = FastMCP(
+        "airflow-mcp",
+        port=port,
+        host=host
+    )
+
+    setup_tools(app, apis, read_only)
+
+    app.run(
+        transport=configure_transport(transport)
+    )
