@@ -1,10 +1,10 @@
+import click
 import os
 import logging
 
-from fastmcp import FastMCP
-from fastmcp.tools import Tool
+from typing import List
 
-import click
+from src.server import MCPServer, Tool
 
 from src.airflow.config import get_all_functions as get_config_functions
 from src.airflow.connection import get_all_functions as get_connection_functions
@@ -22,6 +22,7 @@ from src.airflow.taskinstance import get_all_functions as get_taskinstance_funct
 from src.airflow.variable import get_all_functions as get_variable_functions
 from src.airflow.xcom import get_all_functions as get_xcom_functions
 from src.enums import APIType
+
 
 APITYPE_TO_FUNCTIONS = {
     APIType.CONFIG: get_config_functions,
@@ -42,22 +43,9 @@ APITYPE_TO_FUNCTIONS = {
 }
 
 
-def filter_functions_for_read_only(functions: list[tuple]) -> list[tuple]:
-    """
-    Filter functions to only include read-only operations.
+def build_tools(apis: List[str], read_only: bool) -> List[Tool]:
+    tools = []
 
-    Args:
-        functions: List of (func, name, description, is_read_only) tuples
-
-    Returns:
-        List of (func, name, description, is_read_only) tuples with only read-only functions
-    """
-    return [
-        (func, name, description, is_read_only) for func, name, description, is_read_only in functions if is_read_only
-    ]
-
-
-def setup_tools(app, apis, read_only):
     for api in apis:
         logging.debug(f"Adding API: {api}")
         get_function = APITYPE_TO_FUNCTIONS[APIType(api)]
@@ -66,21 +54,21 @@ def setup_tools(app, apis, read_only):
         except NotImplementedError:
             continue
 
-        # Filter functions for read-only mode if requested
-        if read_only:
-            functions = filter_functions_for_read_only(functions)
-
-        for func, name, description, *_ in functions:
-            app.add_tool(
-                    Tool.from_function(
-                        func,
-                        name=name,
-                        description=description
-                    )
+        tools.extend([
+                Tool.from_function(
+                    func,
+                    name=name,
+                    description=description
                 )
+                for func, name, description, is_read_only in functions
+                if ((not is_read_only) or (is_read_only == read_only))
+            ]
+        )
+
+    return tools
 
 
-def configure_transport(transport):
+def configure_transport(transport: str):
     if transport in {"sse", "http"}:
         if transport == "sse":
             logging.warning("You selected the 'sse' transposrt that is going be deprecated")
@@ -91,26 +79,22 @@ def configure_transport(transport):
     return transport
 
 
-DEFAULT_PORT = 8000
-DEFAULT_HOST= "127.0.0.1"
-
-
 @click.command()
 @click.option(
     "--port",
-    default=os.environ.get("MCP_PORT", DEFAULT_PORT),
-    help=f"Port. Default is {DEFAULT_PORT}"
+    default=os.environ.get("MCP_PORT", MCPServer.DEFAULT_PORT),
+    help=f"Port. Default is {MCPServer.DEFAULT_PORT}"
 )
 @click.option(
     "--transport",
     type=click.Choice(["stdio", "sse", "http"]),
-    default=os.environ.get("MCP_TRANSPORT", "stdio"),
+    default=os.environ.get("MCP_TRANSPORT", MCPServer.DEFAULT_TRANSPORT),
     help="Transport type",
 )
 @click.option(
     "--host",
-    default=os.environ.get("MCP_HOST", DEFAULT_HOST),
-    help=f"Sets the host for running MCP. Default is {DEFAULT_HOST}"
+    default=os.environ.get("MCP_HOST", MCPServer.DEFAULT_HOST),
+    help=f"Sets the host for running MCP. Default is {MCPServer.DEFAULT_HOST}"
 )
 @click.option(
     "--apis",
@@ -125,14 +109,12 @@ DEFAULT_HOST= "127.0.0.1"
     help="Only expose read-only tools (GET operations, no CREATE/UPDATE/DELETE)",
 )
 def main(port: int, transport: str, host: str, apis: list[str], read_only: bool) -> None:
-    app = FastMCP(
-        "airflow-mcp",
-        port=port,
-        host=host
-    )
+    mcp = MCPServer(
+            configure_transport(transport),
+            host,
+            port
+        )
 
-    setup_tools(app, apis, read_only)
+    mcp.add_tools(build_tools(apis, read_only))
 
-    app.run(
-        transport=configure_transport(transport)
-    )
+    mcp.run()

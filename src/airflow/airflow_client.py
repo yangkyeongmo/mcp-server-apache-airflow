@@ -9,10 +9,17 @@ from src.envs import (
     AIRFLOW_USERNAME,
 )
 
+params = {}
+
+if AIRFLOW_USERNAME:
+    params['username'] = AIRFLOW_USERNAME
+if AIRFLOW_PASSWORD:
+    params['password'] = AIRFLOW_PASSWORD
+
 # Create a configuration and API client
 configuration = Configuration(
     host=urljoin(AIRFLOW_HOST, f"/api/{AIRFLOW_API_VERSION}"),
-    username=AIRFLOW_USERNAME,
-    password=AIRFLOW_PASSWORD,
+    **params
 )
+configuration.debug = True
 api_client = ApiClient(configuration)
