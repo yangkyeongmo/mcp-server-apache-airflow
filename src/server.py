@@ -25,13 +25,13 @@ class UserTokenHandler(Middleware):
 
         print(f"Raw middleware processing: {context.method}")
 
-        self.set_jwt_token()
+        self.retrieve_and_apply_token()
 
         result = await call_next(context)
         print(f"Raw middleware completed: {context.method}")
         return result
 
-    def set_jwt_token(self):
+    def retrieve_and_apply_token(self):
         request : Request = get_http_request()
 
         auth_header = request.headers.get("Authorization")
@@ -68,11 +68,7 @@ class MCPServer:
         self._host = host
         self._port = port
 
-        self._mcp = FastMCP(
-                "airflow-mcp",
-                host=host,
-                port=port
-            )
+        self._mcp = FastMCP("airflow-mcp")
 
         if transport == 'http':
             self._mcp.add_middleware(UserTokenHandler())
@@ -82,4 +78,4 @@ class MCPServer:
             self._mcp.add_tool(tool)
 
     def run(self):
-        self._mcp.run(transport=self._transport)
+        self._mcp.run(transport=self._transport, host=self._host, port=self._port)
