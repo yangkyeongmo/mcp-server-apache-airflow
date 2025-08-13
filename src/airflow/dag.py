@@ -106,12 +106,14 @@ async def get_dag_source(file_token: str) -> List[Union[types.TextContent, types
 
 
 async def pause_dag(dag_id: str) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
-    response = dag_api.patch_dag(dag_id=dag_id, dag_update_request={"is_paused": True})
+    dag = DAG(is_paused=True)
+    response = dag_api.patch_dag(dag_id=dag_id, dag=dag, update_mask=["is_paused"])
     return [types.TextContent(type="text", text=str(response.to_dict()))]
 
 
 async def unpause_dag(dag_id: str) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
-    response = dag_api.patch_dag(dag_id=dag_id, dag_update_request={"is_paused": False})
+    dag = DAG(is_paused=False)
+    response = dag_api.patch_dag(dag_id=dag_id, dag=dag, update_mask=["is_paused"])
     return [types.TextContent(type="text", text=str(response.to_dict()))]
 
 
