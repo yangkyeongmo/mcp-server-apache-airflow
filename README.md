@@ -183,7 +183,7 @@ Replace `/path/to/mcp-server-apache-airflow` with the actual path where you've c
 You can select the API groups you want to use by setting the `--apis` flag.
 
 ```bash
-uv run mcp-server-apache-airflow --apis "dag,dagrun"
+uv run mcp-server-apache-airflow --apis dag --apis dagrun
 ```
 
 The default is to use all APIs.
@@ -225,7 +225,7 @@ Write operations like creating, updating, deleting DAGs, variables, connections,
 You can combine read-only mode with API group selection:
 
 ```bash
-uv run mcp-server-apache-airflow --read-only --apis "dag,variable"
+uv run mcp-server-apache-airflow --read-only --apis dag --apis variable
 ```
 
 ### Manual Execution
