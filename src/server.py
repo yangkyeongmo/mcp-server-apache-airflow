@@ -2,10 +2,8 @@ from typing import List
 
 from fastmcp import FastMCP, settings
 from fastmcp.exceptions import ToolError
-from fastmcp.server.dependencies import get_http_request
 from fastmcp.server.middleware import Middleware, MiddlewareContext
 from fastmcp.tools import Tool
-from starlette.requests import Request
 
 from src.airflow.airflow_client import api_client
 
@@ -20,14 +18,14 @@ class UserTokenHandler(Middleware):
 
         print(f"Raw middleware processing: {context.method}")
 
-        self.set_jwt_token()
+        self.retrieve_and_apply_token(context)
 
         result = await call_next(context)
         print(f"Raw middleware completed: {context.method}")
         return result
 
-    def set_jwt_token(self):
-        request: Request = get_http_request()
+    def retrieve_and_apply_token(self, context: MiddlewareContext):
+        request = context.fastmcp_context.request_context.request
 
         auth_header = request.headers.get("Authorization")
 
@@ -64,7 +62,7 @@ class MCPServer:
 
         self._mcp = FastMCP("airflow-mcp")
 
-        if transport == "http":
+        if transport == "streamable-http":
             self._mcp.add_middleware(UserTokenHandler())
 
     def add_tools(self, tools: List[Tool]):
