@@ -1,10 +1,8 @@
-import click
-import os
 import logging
-
+import os
 from typing import List
 
-from src.server import MCPServer, Tool
+import click
 
 from src.airflow.config import get_all_functions as get_config_functions
 from src.airflow.connection import get_all_functions as get_connection_functions
@@ -22,7 +20,7 @@ from src.airflow.taskinstance import get_all_functions as get_taskinstance_funct
 from src.airflow.variable import get_all_functions as get_variable_functions
 from src.airflow.xcom import get_all_functions as get_xcom_functions
 from src.enums import APIType
-
+from src.server import MCPServer, Tool
 
 APITYPE_TO_FUNCTIONS = {
     APIType.CONFIG: get_config_functions,
@@ -54,14 +52,11 @@ def build_tools(apis: List[str], read_only: bool) -> List[Tool]:
         except NotImplementedError:
             continue
 
-        tools.extend([
-                Tool.from_function(
-                    func,
-                    name=name,
-                    description=description
-                )
+        tools.extend(
+            [
+                Tool.from_function(func, name=name, description=description)
                 for func, name, description, is_read_only in functions
-                if ((not is_read_only) or (is_read_only == read_only))
+                if ((not read_only) or (is_read_only == read_only))
             ]
         )
 
@@ -83,7 +78,7 @@ def configure_transport(transport: str):
 @click.option(
     "--port",
     default=os.environ.get("MCP_PORT", MCPServer.DEFAULT_PORT),
-    help=f"Port. Default is {MCPServer.DEFAULT_PORT}"
+    help=f"Port. Default is {MCPServer.DEFAULT_PORT}",
 )
 @click.option(
     "--transport",
@@ -94,7 +89,7 @@ def configure_transport(transport: str):
 @click.option(
     "--host",
     default=os.environ.get("MCP_HOST", MCPServer.DEFAULT_HOST),
-    help=f"Sets the host for running MCP. Default is {MCPServer.DEFAULT_HOST}"
+    help=f"Sets the host for running MCP. Default is {MCPServer.DEFAULT_HOST}",
 )
 @click.option(
     "--apis",
@@ -109,11 +104,7 @@ def configure_transport(transport: str):
     help="Only expose read-only tools (GET operations, no CREATE/UPDATE/DELETE)",
 )
 def main(port: int, transport: str, host: str, apis: list[str], read_only: bool) -> None:
-    mcp = MCPServer(
-            configure_transport(transport),
-            host,
-            port
-        )
+    mcp = MCPServer(configure_transport(transport), host, port)
 
     mcp.add_tools(build_tools(apis, read_only))
 

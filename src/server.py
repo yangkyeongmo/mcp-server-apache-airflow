@@ -2,21 +2,16 @@ from typing import List
 
 from fastmcp import FastMCP, settings
 from fastmcp.exceptions import ToolError
-from fastmcp.tools import Tool
-from fastmcp.server.middleware import Middleware, MiddlewareContext
 from fastmcp.server.dependencies import get_http_request
-
+from fastmcp.server.middleware import Middleware, MiddlewareContext
+from fastmcp.tools import Tool
 from starlette.requests import Request
 
 from src.airflow.airflow_client import api_client
 
 
 class UserTokenHandler(Middleware):
-    async def on_call_tool(
-            self,
-            context: MiddlewareContext,
-            call_next
-        ):
+    async def on_call_tool(self, context: MiddlewareContext, call_next):
         """
         Executed on every tool call.
         We intercept it with goal to get secure token
@@ -32,7 +27,7 @@ class UserTokenHandler(Middleware):
         return result
 
     def set_jwt_token(self):
-        request : Request = get_http_request()
+        request: Request = get_http_request()
 
         auth_header = request.headers.get("Authorization")
 
@@ -46,7 +41,7 @@ class UserTokenHandler(Middleware):
                 print(f"Got Bearer JWT token: {token}")
 
                 api_client.configuration.access_token = token
-            if auth_header.startswith("Basic "): 
+            if auth_header.startswith("Basic "):
                 base64_str = auth_header.split(" ", 1)[1].strip()
                 if not base64_str:
                     raise ToolError(
@@ -58,7 +53,6 @@ class UserTokenHandler(Middleware):
 
 
 class MCPServer:
-
     DEFAULT_TRANSPORT = "stdio"
     DEFAULT_HOST = settings.host
     DEFAULT_PORT = settings.port
@@ -68,13 +62,9 @@ class MCPServer:
         self._host = host
         self._port = port
 
-        self._mcp = FastMCP(
-                "airflow-mcp",
-                host=host,
-                port=port
-            )
+        self._mcp = FastMCP("airflow-mcp")
 
-        if transport == 'http':
+        if transport == "http":
             self._mcp.add_middleware(UserTokenHandler())
 
     def add_tools(self, tools: List[Tool]):
@@ -82,4 +72,8 @@ class MCPServer:
             self._mcp.add_tool(tool)
 
     def run(self):
-        self._mcp.run(transport=self._transport)
+        ext_params = {}
+        if self._transport != "stdio":
+            ext_params["host"] = self._host
+            ext_params["port"] = int(self._port)
+        self._mcp.run(transport=self._transport, **ext_params)
