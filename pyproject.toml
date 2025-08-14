@@ -55,8 +55,10 @@ include = [
 ]
 
 [tool.ruff]
-select = ["E", "W", "F", "B", "I"]
 line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "B", "I"]
 
 [dependency-groups]
 dev = [

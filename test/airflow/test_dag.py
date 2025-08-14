@@ -203,12 +203,12 @@ class TestDagModule:
 
         # Verify API call and result
         mock_dag_api.patch_dag.assert_called_once_with(**test_case["expected_call_kwargs"])
-        
+
         # Verify the DAG object has correct is_paused value
         actual_call_args = mock_dag_api.patch_dag.call_args
         actual_dag = actual_call_args.kwargs["dag"]
         assert actual_dag["is_paused"] == test_case["expected_dag_is_paused"]
-        
+
         assert len(result) == 1
         assert isinstance(result[0], types.TextContent)
 
