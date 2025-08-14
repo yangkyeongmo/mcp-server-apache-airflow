@@ -54,11 +54,7 @@ def filter_functions_for_read_only(functions: list[tuple]) -> list[tuple]:
 
 
 @click.command()
-@click.option(
-    "--port",
-    default=8000,
-    help="Port"
-)
+@click.option("--port", default=8000, help="Port")
 @click.option(
     "--transport",
     type=click.Choice(["stdio", "sse"]),
