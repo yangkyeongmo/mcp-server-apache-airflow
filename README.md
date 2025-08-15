@@ -241,12 +241,18 @@ make run
 Options:
 
 - `--port`: Port to listen on for SSE (default: 8000)
-- `--transport`: Transport type (stdio/sse, default: stdio)
+- `--transport`: Transport type (stdio/sse/http, default: stdio)
 
 Or, you could run the sse server directly, which accepts same parameters:
 
 ```bash
 make run-sse
+```
+
+Also, you could start service directly using `uv` like in the following command:
+
+```bash
+uv run src --transport http --port 8080
 ```
 
 ### Installing via Smithery

@@ -1,6 +1,7 @@
 import logging
 
 import click
+from fastmcp.tools import Tool
 
 from src.airflow.config import get_all_functions as get_config_functions
 from src.airflow.connection import get_all_functions as get_connection_functions
@@ -56,10 +57,12 @@ def filter_functions_for_read_only(functions: list[tuple]) -> list[tuple]:
 @click.command()
 @click.option(
     "--transport",
-    type=click.Choice(["stdio", "sse"]),
+    type=click.Choice(["stdio", "sse", "http"]),
     default="stdio",
     help="Transport type",
 )
+@click.option("--mcp-port", default=8000, help="Port to run MCP service in case of SSE or HTTP transports.")
+@click.option("--mcp-host", default="0.0.0.0", help="Host to rum MCP srvice in case of SSE or HTTP transports.")
 @click.option(
     "--apis",
     type=click.Choice([api.value for api in APIType]),
@@ -72,7 +75,7 @@ def filter_functions_for_read_only(functions: list[tuple]) -> list[tuple]:
     is_flag=True,
     help="Only expose read-only tools (GET operations, no CREATE/UPDATE/DELETE)",
 )
-def main(transport: str, apis: list[str], read_only: bool) -> None:
+def main(transport: str, mcp_host: str, mcp_port: int, apis: list[str], read_only: bool) -> None:
     from src.server import app
 
     for api in apis:
@@ -88,11 +91,16 @@ def main(transport: str, apis: list[str], read_only: bool) -> None:
             functions = filter_functions_for_read_only(functions)
 
         for func, name, description, *_ in functions:
-            app.add_tool(func, name=name, description=description)
+            app.add_tool(Tool.from_function(func, name=name, description=description))
+
+    logging.debug(f"Starting MCP server for Apache Airflow with {transport} transport")
+    params_to_run = {}
 
     if transport == "sse":
-        logging.debug("Starting MCP server for Apache Airflow with SSE transport")
-        app.run(transport="sse")
-    else:
-        logging.debug("Starting MCP server for Apache Airflow with stdio transport")
-        app.run(transport="stdio")
+        logging.warning("NOTE: the SSE transport is going to be deprecated.")
+        app.settings.port = int(mcp_port)
+        app.settings.host = mcp_host
+    elif transport == "http":
+        params_to_run = {"port": int(mcp_port), "host": mcp_host}
+
+    app.run(transport=transport, **params_to_run)
