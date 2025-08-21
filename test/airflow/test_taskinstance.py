@@ -1,14 +1,15 @@
 """Unit tests for taskinstance module using pytest framework."""
 
-import pytest
 from unittest.mock import MagicMock, patch
 
 import mcp.types as types
+import pytest
+
 from src.airflow.taskinstance import (
     get_task_instance,
+    list_task_instance_tries,
     list_task_instances,
     update_task_instance,
-    list_task_instance_tries,
 )
 
 
@@ -59,9 +60,7 @@ class TestTaskInstanceModule:
             "src.airflow.taskinstance.task_instance_api.get_task_instance",
             return_value=mock_response,
         ) as mock_get:
-            result = await get_task_instance(
-                dag_id=dag_id, task_id=task_id, dag_run_id=dag_run_id
-            )
+            result = await get_task_instance(dag_id=dag_id, task_id=task_id, dag_run_id=dag_run_id)
 
         assert isinstance(result, list)
         assert len(result) == 1
@@ -73,9 +72,7 @@ class TestTaskInstanceModule:
         assert dag_run_id in content.text
         assert expected_state in content.text
 
-        mock_get.assert_called_once_with(
-            dag_id=dag_id, dag_run_id=dag_run_id, task_id=task_id
-        )
+        mock_get.assert_called_once_with(dag_id=dag_id, dag_run_id=dag_run_id, task_id=task_id)
 
     @pytest.mark.asyncio
     @pytest.mark.parametrize(
@@ -170,11 +167,7 @@ class TestTaskInstanceModule:
         mock_get.assert_called_once_with(
             dag_id=params["dag_id"],
             dag_run_id=params["dag_run_id"],
-            **{
-                k: v
-                for k, v in params.items()
-                if k not in {"dag_id", "dag_run_id"} and v is not None
-            }
+            **{k: v for k, v in params.items() if k not in {"dag_id", "dag_run_id"} and v is not None},
         )
 
     @pytest.mark.asyncio
@@ -204,9 +197,7 @@ class TestTaskInstanceModule:
             "src.airflow.taskinstance.task_instance_api.patch_task_instance",
             return_value=mock_response,
         ) as mock_patch:
-            result = await update_task_instance(
-                dag_id=dag_id, dag_run_id=dag_run_id, task_id=task_id, state=state
-            )
+            result = await update_task_instance(dag_id=dag_id, dag_run_id=dag_run_id, task_id=task_id, state=state)
 
         assert isinstance(result, list)
         assert len(result) == 1
@@ -253,9 +244,7 @@ class TestTaskInstanceModule:
             "order_by-empty-string",
         ],
     )
-    async def test_list_task_instance_tries(
-        self, dag_id, dag_run_id, task_id, limit, offset, order_by
-    ):
+    async def test_list_task_instance_tries(self, dag_id, dag_run_id, task_id, limit, offset, order_by):
         """
         Test `list_task_instance_tries` across various filter combinations,
         validating correct API call and response formatting.
@@ -306,5 +295,5 @@ class TestTaskInstanceModule:
                     "order_by": order_by,
                 }.items()
                 if v is not None
-            }
+            },
         )
