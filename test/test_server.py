@@ -1,11 +1,8 @@
 """Tests for the server module using pytest framework."""
 
-import sys
-from importlib import reload
-from unittest.mock import patch
-
 import pytest
-from mcp.server.fastmcp import FastMCP
+from fastmcp import FastMCP
+from fastmcp.tools import Tool
 
 
 class TestServer:
@@ -79,7 +76,7 @@ class TestServer:
 
         # This should not raise an exception
         try:
-            app.add_tool(test_tool, name="test_tool", description="Test tool")
+            app.add_tool(Tool.from_function(test_tool, name="test_tool", description="Test tool"))
         except Exception as e:
             pytest.fail(f"Tool registration failed: {e}")
 
@@ -92,15 +89,3 @@ class TestServer:
         assert app is not None
         assert hasattr(app, "name")
         assert app.name == "mcp-apache-airflow"
-
-    @patch("mcp.server.fastmcp.FastMCP")
-    def test_app_instance_creation_with_mock(self, mock_fastmcp):
-        """Test that FastMCP is called with correct parameters during module initialization."""
-        # Need to reload the module to see the mocked FastMCP constructor call
-        if "src.server" in sys.modules:
-            reload(sys.modules["src.server"])
-        else:
-            pass
-
-        # Verify FastMCP was called with the correct name
-        mock_fastmcp.assert_called_with("mcp-apache-airflow")
