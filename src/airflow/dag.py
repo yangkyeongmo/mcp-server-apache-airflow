@@ -12,23 +12,24 @@ from src.envs import AIRFLOW_HOST
 dag_api = DAGApi(api_client)
 
 
-def get_all_functions() -> list[tuple[Callable, str, str]]:
+def get_all_functions() -> list[tuple[Callable, str, str, bool]]:
+    """Return list of (function, name, description, is_read_only) tuples for registration."""
     return [
-        (get_dags, "fetch_dags", "Fetch all DAGs"),
-        (get_dag, "get_dag", "Get a DAG by ID"),
-        (get_dag_details, "get_dag_details", "Get a simplified representation of DAG"),
-        (get_dag_source, "get_dag_source", "Get a source code"),
-        (pause_dag, "pause_dag", "Pause a DAG by ID"),
-        (unpause_dag, "unpause_dag", "Unpause a DAG by ID"),
-        (get_dag_tasks, "get_dag_tasks", "Get tasks for DAG"),
-        (get_task, "get_task", "Get a task by ID"),
-        (get_tasks, "get_tasks", "Get tasks for DAG"),
-        (patch_dag, "patch_dag", "Update a DAG"),
-        (patch_dags, "patch_dags", "Update multiple DAGs"),
-        (delete_dag, "delete_dag", "Delete a DAG"),
-        (clear_task_instances, "clear_task_instances", "Clear a set of task instances"),
-        (set_task_instances_state, "set_task_instances_state", "Set a state of task instances"),
-        (reparse_dag_file, "reparse_dag_file", "Request re-parsing of a DAG file"),
+        (get_dags, "fetch_dags", "Fetch all DAGs", True),
+        (get_dag, "get_dag", "Get a DAG by ID", True),
+        (get_dag_details, "get_dag_details", "Get a simplified representation of DAG", True),
+        (get_dag_source, "get_dag_source", "Get a source code", True),
+        (pause_dag, "pause_dag", "Pause a DAG by ID", False),
+        (unpause_dag, "unpause_dag", "Unpause a DAG by ID", False),
+        (get_dag_tasks, "get_dag_tasks", "Get tasks for DAG", True),
+        (get_task, "get_task", "Get a task by ID", True),
+        (get_tasks, "get_tasks", "Get tasks for DAG", True),
+        (patch_dag, "patch_dag", "Update a DAG", False),
+        (patch_dags, "patch_dags", "Update multiple DAGs", False),
+        (delete_dag, "delete_dag", "Delete a DAG", False),
+        (clear_task_instances, "clear_task_instances", "Clear a set of task instances", False),
+        (set_task_instances_state, "set_task_instances_state", "Set a state of task instances", False),
+        (reparse_dag_file, "reparse_dag_file", "Request re-parsing of a DAG file", False),
     ]
 
 
@@ -105,12 +106,14 @@ async def get_dag_source(file_token: str) -> List[Union[types.TextContent, types
 
 
 async def pause_dag(dag_id: str) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
-    response = dag_api.patch_dag(dag_id=dag_id, dag_update_request={"is_paused": True})
+    dag = DAG(is_paused=True)
+    response = dag_api.patch_dag(dag_id=dag_id, dag=dag, update_mask=["is_paused"])
     return [types.TextContent(type="text", text=str(response.to_dict()))]
 
 
 async def unpause_dag(dag_id: str) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
-    response = dag_api.patch_dag(dag_id=dag_id, dag_update_request={"is_paused": False})
+    dag = DAG(is_paused=False)
+    response = dag_api.patch_dag(dag_id=dag_id, dag=dag, update_mask=["is_paused"])
     return [types.TextContent(type="text", text=str(response.to_dict()))]
 
 

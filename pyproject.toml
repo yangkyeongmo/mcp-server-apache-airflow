@@ -1,6 +1,6 @@
 [project]
 name = "mcp-server-apache-airflow"
-version = "0.2.4"
+version = "0.2.7"
 description = "Model Context Protocol (MCP) server for Apache Airflow"
 authors = [
     { name = "Gyeongmo Yang", email = "me@gmyang.dev" }
@@ -10,6 +10,7 @@ dependencies = [
     "click>=8.1.7",
     "mcp>=0.1.0",
     "apache-airflow-client>=2.7.0,<3",
+    "fastmcp>=2.11.3",
 ]
 requires-python = ">=3.10"
 readme = "README.md"
@@ -55,10 +56,15 @@ include = [
 ]
 
 [tool.ruff]
-select = ["E", "W", "F", "B", "I"]
 line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "B", "I"]
 
 [dependency-groups]
 dev = [
     "ruff>=0.11.0",
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "pytest-asyncio>=0.21.0",
 ]

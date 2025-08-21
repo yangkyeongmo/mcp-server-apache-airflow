@@ -14,17 +14,18 @@ from src.envs import AIRFLOW_HOST
 dag_run_api = DAGRunApi(api_client)
 
 
-def get_all_functions() -> list[tuple[Callable, str, str]]:
+def get_all_functions() -> list[tuple[Callable, str, str, bool]]:
+    """Return list of (function, name, description, is_read_only) tuples for registration."""
     return [
-        (post_dag_run, "post_dag_run", "Trigger a DAG by ID"),
-        (get_dag_runs, "get_dag_runs", "Get DAG runs by ID"),
-        (get_dag_runs_batch, "get_dag_runs_batch", "List DAG runs (batch)"),
-        (get_dag_run, "get_dag_run", "Get a DAG run by DAG ID and DAG run ID"),
-        (update_dag_run_state, "update_dag_run_state", "Update a DAG run state by DAG ID and DAG run ID"),
-        (delete_dag_run, "delete_dag_run", "Delete a DAG run by DAG ID and DAG run ID"),
-        (clear_dag_run, "clear_dag_run", "Clear a DAG run"),
-        (set_dag_run_note, "set_dag_run_note", "Update the DagRun note"),
-        (get_upstream_dataset_events, "get_upstream_dataset_events", "Get dataset events for a DAG run"),
+        (post_dag_run, "post_dag_run", "Trigger a DAG by ID", False),
+        (get_dag_runs, "get_dag_runs", "Get DAG runs by ID", True),
+        (get_dag_runs_batch, "get_dag_runs_batch", "List DAG runs (batch)", True),
+        (get_dag_run, "get_dag_run", "Get a DAG run by DAG ID and DAG run ID", True),
+        (update_dag_run_state, "update_dag_run_state", "Update a DAG run state by DAG ID and DAG run ID", False),
+        (delete_dag_run, "delete_dag_run", "Delete a DAG run by DAG ID and DAG run ID", False),
+        (clear_dag_run, "clear_dag_run", "Clear a DAG run", False),
+        (set_dag_run_note, "set_dag_run_note", "Update the DagRun note", False),
+        (get_upstream_dataset_events, "get_upstream_dataset_events", "Get dataset events for a DAG run", True),
     ]
 
 
@@ -37,31 +38,31 @@ async def post_dag_run(
     dag_run_id: Optional[str] = None,
     data_interval_end: Optional[datetime] = None,
     data_interval_start: Optional[datetime] = None,
-    end_date: Optional[datetime] = None,
     execution_date: Optional[datetime] = None,
-    external_trigger: Optional[bool] = None,
-    last_scheduling_decision: Optional[datetime] = None,
     logical_date: Optional[datetime] = None,
     note: Optional[str] = None,
-    run_type: Optional[str] = None,
-    start_date: Optional[datetime] = None,
     # state: Optional[str] = None,  # TODO: add state
 ) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
-    dag_run = DAGRun(
-        dag_id=dag_id,
-        dag_run_id=dag_run_id,
-        data_interval_end=data_interval_end,
-        data_interval_start=data_interval_start,
-        end_date=end_date,
-        execution_date=execution_date,
-        external_trigger=external_trigger,
-        last_scheduling_decision=last_scheduling_decision,
-        logical_date=logical_date,
-        note=note,
-        run_type=run_type,
-        start_date=start_date,
-        state=None,
-    )
+    # Build kwargs dictionary with only non-None values
+    kwargs = {}
+
+    # Add non-read-only fields that can be set during creation
+    if dag_run_id is not None:
+        kwargs["dag_run_id"] = dag_run_id
+    if data_interval_end is not None:
+        kwargs["data_interval_end"] = data_interval_end
+    if data_interval_start is not None:
+        kwargs["data_interval_start"] = data_interval_start
+    if execution_date is not None:
+        kwargs["execution_date"] = execution_date
+    if logical_date is not None:
+        kwargs["logical_date"] = logical_date
+    if note is not None:
+        kwargs["note"] = note
+
+    # Create DAGRun without read-only fields
+    dag_run = DAGRun(**kwargs)
+
     response = dag_run_api.post_dag_run(dag_id=dag_id, dag_run=dag_run)
     return [types.TextContent(type="text", text=str(response.to_dict()))]
 

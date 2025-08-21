@@ -13,6 +13,7 @@ class APIType(str, Enum):
     MONITORING = "monitoring"
     PLUGIN = "plugin"
     POOL = "pool"
+    PROVIDER = "provider"
     TASKINSTANCE = "taskinstance"
     VARIABLE = "variable"
     XCOM = "xcom"

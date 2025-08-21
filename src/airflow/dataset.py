@@ -8,22 +8,34 @@ from src.airflow.airflow_client import api_client
 dataset_api = DatasetApi(api_client)
 
 
-def get_all_functions() -> list[tuple[Callable, str, str]]:
+def get_all_functions() -> list[tuple[Callable, str, str, bool]]:
+    """Return list of (function, name, description, is_read_only) tuples for registration."""
     return [
-        (get_datasets, "get_datasets", "List datasets"),
-        (get_dataset, "get_dataset", "Get a dataset by URI"),
-        (get_dataset_events, "get_dataset_events", "Get dataset events"),
-        (create_dataset_event, "create_dataset_event", "Create dataset event"),
-        (get_dag_dataset_queued_event, "get_dag_dataset_queued_event", "Get a queued Dataset event for a DAG"),
-        (get_dag_dataset_queued_events, "get_dag_dataset_queued_events", "Get queued Dataset events for a DAG"),
-        (delete_dag_dataset_queued_event, "delete_dag_dataset_queued_event", "Delete a queued Dataset event for a DAG"),
+        (get_datasets, "get_datasets", "List datasets", True),
+        (get_dataset, "get_dataset", "Get a dataset by URI", True),
+        (get_dataset_events, "get_dataset_events", "Get dataset events", True),
+        (create_dataset_event, "create_dataset_event", "Create dataset event", False),
+        (get_dag_dataset_queued_event, "get_dag_dataset_queued_event", "Get a queued Dataset event for a DAG", True),
+        (get_dag_dataset_queued_events, "get_dag_dataset_queued_events", "Get queued Dataset events for a DAG", True),
+        (
+            delete_dag_dataset_queued_event,
+            "delete_dag_dataset_queued_event",
+            "Delete a queued Dataset event for a DAG",
+            False,
+        ),
         (
             delete_dag_dataset_queued_events,
             "delete_dag_dataset_queued_events",
             "Delete queued Dataset events for a DAG",
+            False,
         ),
-        (get_dataset_queued_events, "get_dataset_queued_events", "Get queued Dataset events for a Dataset"),
-        (delete_dataset_queued_events, "delete_dataset_queued_events", "Delete queued Dataset events for a Dataset"),
+        (get_dataset_queued_events, "get_dataset_queued_events", "Get queued Dataset events for a Dataset", True),
+        (
+            delete_dataset_queued_events,
+            "delete_dataset_queued_events",
+            "Delete queued Dataset events for a Dataset",
+            False,
+        ),
     ]
 
 

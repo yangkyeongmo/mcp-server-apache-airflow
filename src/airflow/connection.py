@@ -8,14 +8,15 @@ from src.airflow.airflow_client import api_client
 connection_api = ConnectionApi(api_client)
 
 
-def get_all_functions() -> list[tuple[Callable, str, str]]:
+def get_all_functions() -> list[tuple[Callable, str, str, bool]]:
+    """Return list of (function, name, description, is_read_only) tuples for registration."""
     return [
-        (list_connections, "list_connections", "List all connections"),
-        (create_connection, "create_connection", "Create a connection"),
-        (get_connection, "get_connection", "Get a connection by ID"),
-        (update_connection, "update_connection", "Update a connection by ID"),
-        (delete_connection, "delete_connection", "Delete a connection by ID"),
-        (test_connection, "test_connection", "Test a connection"),
+        (list_connections, "list_connections", "List all connections", True),
+        (create_connection, "create_connection", "Create a connection", False),
+        (get_connection, "get_connection", "Get a connection by ID", True),
+        (update_connection, "update_connection", "Update a connection by ID", False),
+        (delete_connection, "delete_connection", "Delete a connection by ID", False),
+        (test_connection, "test_connection", "Test a connection", True),
     ]
 
 

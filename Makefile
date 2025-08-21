@@ -1,4 +1,4 @@
-.PHONY: run build publish lint format
+.PHONY: run build publish lint format test
 
 PYTHON=uv run --env-file .env python
 
@@ -15,3 +15,5 @@ lint:
 	$(PYTHON) -m ruff check . --fix
 format:
 	$(PYTHON) -m ruff format .
+test:
+	$(PYTHON) -m pytest test/ -v

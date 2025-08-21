@@ -110,10 +110,10 @@ This project depends on the official Apache Airflow client library (`apache-airf
 Set the following environment variables:
 
 ```
-AIRFLOW_HOST=<your-airflow-host>
+AIRFLOW_HOST=<your-airflow-host>        # Optional, defaults to http://localhost:8080
 AIRFLOW_USERNAME=<your-airflow-username>
 AIRFLOW_PASSWORD=<your-airflow-password>
-AIRFLOW_API_VERSION=v1  # Optional, defaults to v1
+AIRFLOW_API_VERSION=v1                  # Optional, defaults to v1
 ```
 
 ### Usage with Claude Desktop
@@ -126,6 +126,24 @@ Add to your `claude_desktop_config.json`:
     "mcp-server-apache-airflow": {
       "command": "uvx",
       "args": ["mcp-server-apache-airflow"],
+      "env": {
+        "AIRFLOW_HOST": "https://your-airflow-host",
+        "AIRFLOW_USERNAME": "your-username",
+        "AIRFLOW_PASSWORD": "your-password"
+      }
+    }
+  }
+}
+```
+
+For read-only mode (recommended for safety):
+
+```json
+{
+  "mcpServers": {
+    "mcp-server-apache-airflow": {
+      "command": "uvx",
+      "args": ["mcp-server-apache-airflow", "--read-only"],
       "env": {
         "AIRFLOW_HOST": "https://your-airflow-host",
         "AIRFLOW_USERNAME": "your-username",
@@ -166,7 +184,7 @@ Replace `/path/to/mcp-server-apache-airflow` with the actual path where you've c
 You can select the API groups you want to use by setting the `--apis` flag.
 
 ```bash
-uv run mcp-server-apache-airflow --apis "dag,dagrun"
+uv run mcp-server-apache-airflow --apis dag --apis dagrun
 ```
 
 The default is to use all APIs.
@@ -189,6 +207,28 @@ Allowed values are:
 - variable
 - xcom
 
+### Read-Only Mode
+
+You can run the server in read-only mode by using the `--read-only` flag. This will only expose tools that perform read operations (GET requests) and exclude any tools that create, update, or delete resources.
+
+```bash
+uv run mcp-server-apache-airflow --read-only
+```
+
+In read-only mode, the server will only expose tools like:
+- Listing DAGs, DAG runs, tasks, variables, connections, etc.
+- Getting details of specific resources
+- Reading configurations and monitoring information
+- Testing connections (non-destructive)
+
+Write operations like creating, updating, deleting DAGs, variables, connections, triggering DAG runs, etc. will not be available in read-only mode.
+
+You can combine read-only mode with API group selection:
+
+```bash
+uv run mcp-server-apache-airflow --read-only --apis dag --apis variable
+```
+
 ### Manual Execution
 
 You can also run the server manually:
@@ -202,12 +242,18 @@ make run
 Options:
 
 - `--port`: Port to listen on for SSE (default: 8000)
-- `--transport`: Transport type (stdio/sse, default: stdio)
+- `--transport`: Transport type (stdio/sse/http, default: stdio)
 
 Or, you could run the sse server directly, which accepts same parameters:
 
 ```bash
 make run-sse
+```
+
+Also, you could start service directly using `uv` like in the following command:
+
+```bash
+uv run src --transport http --port 8080
 ```
 
 ### Installing via Smithery
@@ -217,6 +263,57 @@ To install Apache Airflow MCP Server for Claude Desktop automatically via [Smith
 ```bash
 npx -y @smithery/cli install @yangkyeongmo/mcp-server-apache-airflow --client claude
 ```
+
+## Development
+
+### Setting up Development Environment
+
+1. Clone the repository:
+```bash
+git clone https://github.com/yangkyeongmo/mcp-server-apache-airflow.git
+cd mcp-server-apache-airflow
+```
+
+2. Install development dependencies:
+```bash
+uv sync --dev
+```
+
+3. Create a `.env` file for environment variables (optional for development):
+```bash
+touch .env
+```
+
+> **Note**: No environment variables are required for running tests. The `AIRFLOW_HOST` defaults to `http://localhost:8080` for development and testing purposes.
+
+### Running Tests
+
+The project uses pytest for testing with the following commands available:
+
+```bash
+# Run all tests
+make test
+```
+
+### Code Quality
+
+```bash
+# Run linting
+make lint
+
+# Run code formatting
+make format
+```
+
+### Continuous Integration
+
+The project includes a GitHub Actions workflow (`.github/workflows/test.yml`) that automatically:
+
+- Runs tests on Python 3.10, 3.11, and 3.12
+- Executes linting checks using ruff
+- Runs on every push and pull request to `main` branch
+
+The CI pipeline ensures code quality and compatibility across supported Python versions before any changes are merged.
 
 ## Contributing
 

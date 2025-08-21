@@ -8,9 +8,10 @@ from src.airflow.airflow_client import api_client
 plugin_api = PluginApi(api_client)
 
 
-def get_all_functions() -> list[tuple[Callable, str, str]]:
+def get_all_functions() -> list[tuple[Callable, str, str, bool]]:
+    """Return list of (function, name, description, is_read_only) tuples for registration."""
     return [
-        (get_plugins, "get_plugins", "Get a list of loaded plugins"),
+        (get_plugins, "get_plugins", "Get a list of loaded plugins", True),
     ]
 
 
