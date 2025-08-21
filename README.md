@@ -184,7 +184,7 @@ Replace `/path/to/mcp-server-apache-airflow` with the actual path where you've c
 You can select the API groups you want to use by setting the `--apis` flag.
 
 ```bash
-uv run mcp-server-apache-airflow --apis "dag,dagrun"
+uv run mcp-server-apache-airflow --apis dag --apis dagrun
 ```
 
 The default is to use all APIs.
@@ -226,7 +226,7 @@ Write operations like creating, updating, deleting DAGs, variables, connections,
 You can combine read-only mode with API group selection:
 
 ```bash
-uv run mcp-server-apache-airflow --read-only --apis "dag,variable"
+uv run mcp-server-apache-airflow --read-only --apis dag --apis variable
 ```
 
 ### Manual Execution
@@ -242,12 +242,18 @@ make run
 Options:
 
 - `--port`: Port to listen on for SSE (default: 8000)
-- `--transport`: Transport type (stdio/sse, default: stdio)
+- `--transport`: Transport type (stdio/sse/http, default: stdio)
 
 Or, you could run the sse server directly, which accepts same parameters:
 
 ```bash
 make run-sse
+```
+
+Also, you could start service directly using `uv` like in the following command:
+
+```bash
+uv run src --transport http --port 8080
 ```
 
 ### Installing via Smithery

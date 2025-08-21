@@ -1,12 +1,12 @@
 """Tests for the main module using pytest framework."""
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 from click.testing import CliRunner
 
 from src.enums import APIType
-from src.main import APITYPE_TO_FUNCTIONS, main
+from src.main import APITYPE_TO_FUNCTIONS, Tool, main
 
 
 class TestMain:
@@ -56,7 +56,7 @@ class TestMain:
             result = runner.invoke(main, ["--transport", "sse"])
 
         assert result.exit_code == 0
-        mock_app.run.assert_called_once_with(transport="sse")
+        mock_app.run.assert_called_once_with(transport="sse", port=8000, host="0.0.0.0")
 
     @patch("src.server.app")
     def test_main_specific_apis(self, mock_app, runner):
@@ -112,14 +112,21 @@ class TestMain:
     @patch("src.server.app")
     def test_function_registration_flow(self, mock_app, runner):
         """Test the complete function registration flow."""
-        mock_function = MagicMock()
+
+        def mock_function():
+            # .add_tools in FastMCP does not allow adding functions with *args
+            # it limits to use Mock and MagicMock
+            pass
+
         mock_functions = [(mock_function, "test_name", "test_description")]
 
         with patch.dict(APITYPE_TO_FUNCTIONS, {APIType.CONFIG: lambda: mock_functions}, clear=True):
             result = runner.invoke(main, ["--apis", "config"])
 
         assert result.exit_code == 0
-        mock_app.add_tool.assert_called_once_with(mock_function, name="test_name", description="test_description")
+        mock_app.add_tool.assert_called_once_with(
+            Tool.from_function(mock_function, name="test_name", description="test_description")
+        )
 
     @patch("src.server.app")
     def test_multiple_functions_per_api(self, mock_app, runner):
@@ -144,7 +151,7 @@ class TestMain:
         assert "Transport type" in result.output
         assert "APIs to run" in result.output
 
-    @pytest.mark.parametrize("transport", ["stdio", "sse"])
+    @pytest.mark.parametrize("transport", ["stdio", "sse", "http"])
     @patch("src.server.app")
     def test_main_transport_options(self, mock_app, transport, runner):
         """Test main function with different transport options."""
@@ -154,7 +161,31 @@ class TestMain:
             result = runner.invoke(main, ["--transport", transport, "--apis", "config"])
 
         assert result.exit_code == 0
-        mock_app.run.assert_called_once_with(transport=transport)
+        if transport == "stdio":
+            mock_app.run.assert_called_once_with(transport=transport)
+        else:
+            mock_app.run.assert_called_once_with(transport=transport, port=8000, host="0.0.0.0")
+
+    @pytest.mark.parametrize("transport", ["sse", "http"])
+    @pytest.mark.parametrize("port", [None, "12345"])
+    @pytest.mark.parametrize("host", [None, "127.0.0.1"])
+    @patch("src.server.app")
+    def test_port_and_host_options(self, mock_app, transport, port, host, runner):
+        """Test that port and host are set for SSE and HTTP transports"""
+        mock_functions = [(lambda: None, "test_function", "Test description")]
+
+        with patch.dict(APITYPE_TO_FUNCTIONS, {APIType.CONFIG: lambda: mock_functions}, clear=True):
+            ext_params = []
+            if port:
+                ext_params += ["--mcp-port", port]
+            if host:
+                ext_params += ["--mcp-host", host]
+            runner.invoke(main, ["--transport", transport, "--apis", "config"] + ext_params)
+
+        expected_params = {}
+        expected_params["port"] = int(port) if port else 8000
+        expected_params["host"] = host if host else "0.0.0.0"
+        mock_app.run.assert_called_once_with(transport=transport, **expected_params)
 
     @pytest.mark.parametrize("api_name", [api.value for api in APIType])
     @patch("src.server.app")
@@ -260,7 +291,8 @@ class TestMain:
 
         # Verify the correct functions were registered
         call_args_list = mock_app.add_tool.call_args_list
-        registered_names = [call.kwargs["name"] for call in call_args_list]
+
+        registered_names = [call.args[0].name for call in call_args_list]
         assert "read_function" in registered_names
         assert "another_read_function" in registered_names
         assert "write_function" not in registered_names

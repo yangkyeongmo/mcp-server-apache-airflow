@@ -1,6 +1,6 @@
 """Table-driven tests for the dag module using pytest framework."""
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import ANY, MagicMock, patch
 
 import mcp.types as types
 import pytest
@@ -178,14 +178,16 @@ class TestDagModule:
                 "function": pause_dag,
                 "input": {"dag_id": "test_dag"},
                 "mock_response": {"dag_id": "test_dag", "is_paused": True},
-                "expected_call_kwargs": {"dag_id": "test_dag", "dag_update_request": {"is_paused": True}},
+                "expected_call_kwargs": {"dag_id": "test_dag", "dag": ANY, "update_mask": ["is_paused"]},
+                "expected_dag_is_paused": True,
             },
             {
                 "name": "unpause_dag",
                 "function": unpause_dag,
                 "input": {"dag_id": "test_dag"},
                 "mock_response": {"dag_id": "test_dag", "is_paused": False},
-                "expected_call_kwargs": {"dag_id": "test_dag", "dag_update_request": {"is_paused": False}},
+                "expected_call_kwargs": {"dag_id": "test_dag", "dag": ANY, "update_mask": ["is_paused"]},
+                "expected_dag_is_paused": False,
             },
         ],
     )
@@ -201,6 +203,12 @@ class TestDagModule:
 
         # Verify API call and result
         mock_dag_api.patch_dag.assert_called_once_with(**test_case["expected_call_kwargs"])
+
+        # Verify the DAG object has correct is_paused value
+        actual_call_args = mock_dag_api.patch_dag.call_args
+        actual_dag = actual_call_args.kwargs["dag"]
+        assert actual_dag["is_paused"] == test_case["expected_dag_is_paused"]
+
         assert len(result) == 1
         assert isinstance(result[0], types.TextContent)
 
