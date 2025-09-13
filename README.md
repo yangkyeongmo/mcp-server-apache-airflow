@@ -84,6 +84,8 @@ This project implements a [Model Context Protocol](https://modelcontextprotocol.
 | Get Health                       | `/api/v1/health`                                                                            | ✅     |
 | **DAG Stats**              |                                                                                               |        |
 | Get DAG Stats                    | `/api/v1/dags/statistics`                                                                   | ✅     |
+| **DAG Warnings**           |                                                                                               |        |
+| Get DAG Warnings                 | `/api/v1/dagWarnings`                                                                       | ✅     |
 | **Config**                 |                                                                                               |        |
 | Get Config                       | `/api/v1/config`                                                                            | ✅     |
 | **Plugins**                |                                                                                               |        |
