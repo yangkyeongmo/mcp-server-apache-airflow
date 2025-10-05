@@ -111,15 +111,31 @@ Set the following environment variables:
 
 ```
 AIRFLOW_HOST=<your-airflow-host>        # Optional, defaults to http://localhost:8080
-AIRFLOW_USERNAME=<your-airflow-username>
-AIRFLOW_PASSWORD=<your-airflow-password>
 AIRFLOW_API_VERSION=v1                  # Optional, defaults to v1
 ```
+
+#### Authentication
+
+Choose one of the following authentication methods:
+
+**Basic Authentication (default):**
+```
+AIRFLOW_USERNAME=<your-airflow-username>
+AIRFLOW_PASSWORD=<your-airflow-password>
+```
+
+**JWT Token Authentication:**
+```
+AIRFLOW_JWT_TOKEN=<your-jwt-token>
+```
+
+> **Note**: If both JWT token and basic authentication credentials are provided, JWT token takes precedence.
 
 ### Usage with Claude Desktop
 
 Add to your `claude_desktop_config.json`:
 
+**Basic Authentication:**
 ```json
 {
   "mcpServers": {
@@ -136,8 +152,25 @@ Add to your `claude_desktop_config.json`:
 }
 ```
 
+**JWT Token Authentication:**
+```json
+{
+  "mcpServers": {
+    "mcp-server-apache-airflow": {
+      "command": "uvx",
+      "args": ["mcp-server-apache-airflow"],
+      "env": {
+        "AIRFLOW_HOST": "https://your-airflow-host",
+        "AIRFLOW_JWT_TOKEN": "your-jwt-token"
+      }
+    }
+  }
+}
+```
+
 For read-only mode (recommended for safety):
 
+**Basic Authentication:**
 ```json
 {
   "mcpServers": {
@@ -154,8 +187,25 @@ For read-only mode (recommended for safety):
 }
 ```
 
+**JWT Token Authentication:**
+```json
+{
+  "mcpServers": {
+    "mcp-server-apache-airflow": {
+      "command": "uvx",
+      "args": ["mcp-server-apache-airflow", "--read-only"],
+      "env": {
+        "AIRFLOW_HOST": "https://your-airflow-host",
+        "AIRFLOW_JWT_TOKEN": "your-jwt-token"
+      }
+    }
+  }
+}
+```
+
 Alternative configuration using `uv`:
 
+**Basic Authentication:**
 ```json
 {
   "mcpServers": {
@@ -171,6 +221,27 @@ Alternative configuration using `uv`:
         "AIRFLOW_HOST": "https://your-airflow-host",
         "AIRFLOW_USERNAME": "your-username",
         "AIRFLOW_PASSWORD": "your-password"
+      }
+    }
+  }
+}
+```
+
+**JWT Token Authentication:**
+```json
+{
+  "mcpServers": {
+    "mcp-server-apache-airflow": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/path/to/mcp-server-apache-airflow",
+        "run",
+        "mcp-server-apache-airflow"
+      ],
+      "env": {
+        "AIRFLOW_HOST": "https://your-airflow-host",
+        "AIRFLOW_JWT_TOKEN": "your-jwt-token"
       }
     }
   }
