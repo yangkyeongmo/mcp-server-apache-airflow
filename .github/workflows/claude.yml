@@ -1,0 +1,41 @@
+name: Claude Mention Response
+
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  respond-to-claude-mention:
+    if: contains(github.event.comment.body, '@claude')
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v3
+      with:
+        version: "latest"
+
+    - name: Install dependencies
+      run: |
+        uv sync --dev
+
+    - name: Run Claude response
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        COMMENT_BODY: ${{ github.event.comment.body }}
+        ISSUE_NUMBER: ${{ github.event.issue.number }}
+        REPO_NAME: ${{ github.repository }}
+        COMMENT_ID: ${{ github.event.comment.id }}
+      run: |
+        echo "Claude was mentioned in comment: $COMMENT_BODY"
+        echo "Processing Claude mention for issue #$ISSUE_NUMBER in $REPO_NAME"
+        # Add your Claude response logic here
+        # This could involve calling Claude API or running specific commands
