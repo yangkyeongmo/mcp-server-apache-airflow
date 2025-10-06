@@ -129,6 +129,16 @@ AIRFLOW_PASSWORD=<your-airflow-password>
 AIRFLOW_JWT_TOKEN=<your-jwt-token>
 ```
 
+To obtain a JWT token, you can use Airflow's authentication endpoint:
+
+```bash
+ENDPOINT_URL="http://localhost:8080"  # Replace with your Airflow endpoint
+curl -X 'POST' \
+  "${ENDPOINT_URL}/auth/token" \
+  -H 'Content-Type: application/json' \
+  -d '{ "username": "<your-username>", "password": "<your-password>" }'
+```
+
 > **Note**: If both JWT token and basic authentication credentials are provided, JWT token takes precedence.
 
 ### Usage with Claude Desktop
