@@ -47,6 +47,7 @@ This project implements a [Model Context Protocol](https://modelcontextprotocol.
 | Get Task Instance Log            | `/api/v1/dags/{dag_id}/dagRuns/{dag_run_id}/taskInstances/{task_id}/logs/{task_try_number}` | ✅     |
 | Clear Task Instances             | `/api/v1/dags/{dag_id}/clearTaskInstances`                                                  | ✅     |
 | Set Task Instances State         | `/api/v1/dags/{dag_id}/updateTaskInstancesState`                                            | ✅     |
+| List Task Instance Tries         | `/api/v1/dags/{dag_id}/dagRuns/{dag_run_id}/taskInstances/{task_id}/tries`                  | ✅     |
 | **Variables**              |                                                                                               |        |
 | List Variables                   | `/api/v1/variables`                                                                         | ✅     |
 | Create Variable                  | `/api/v1/variables`                                                                         | ✅     |

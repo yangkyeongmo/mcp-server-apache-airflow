@@ -25,6 +25,12 @@ def get_all_functions() -> list[tuple[Callable, str, str, bool]]:
             "Get the log from a task instance by DAG ID, task ID, DAG run ID and task try number",
             True,
         ),
+        (
+            list_task_instance_tries,
+            "list_task_instance_tries",
+            "List task instance tries by DAG ID, DAG run ID, and task ID",
+            True,
+        ),
     ]
 
 
@@ -107,8 +113,32 @@ async def update_task_instance(
     )
     return [types.TextContent(type="text", text=str(response.to_dict()))]
 
+
 async def get_log(
     dag_id: str, task_id: str, dag_run_id: str, task_try_number: int
 ) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
     response = task_instance_api.get_log(dag_id=dag_id, dag_run_id=dag_run_id, task_id=task_id, task_try_number=task_try_number)
+    return [types.TextContent(type="text", text=str(response.to_dict()))]
+
+
+async def list_task_instance_tries(
+    dag_id: str,
+    dag_run_id: str,
+    task_id: str,
+    limit: Optional[int] = None,
+    offset: Optional[int] = None,
+    order_by: Optional[str] = None,
+) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
+    # Build parameters dictionary
+    kwargs: Dict[str, Any] = {}
+    if limit is not None:
+        kwargs["limit"] = limit
+    if offset is not None:
+        kwargs["offset"] = offset
+    if order_by is not None:
+        kwargs["order_by"] = order_by
+
+    response = task_instance_api.get_task_instance_tries(
+        dag_id=dag_id, dag_run_id=dag_run_id, task_id=task_id, **kwargs
+    )
     return [types.TextContent(type="text", text=str(response.to_dict()))]
