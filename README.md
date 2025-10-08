@@ -3,6 +3,7 @@
 # mcp-server-apache-airflow
 
 [![smithery badge](https://smithery.ai/badge/@yangkyeongmo/mcp-server-apache-airflow)](https://smithery.ai/server/@yangkyeongmo/mcp-server-apache-airflow)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/mcp-server-apache-airflow)
 
 A Model Context Protocol (MCP) server implementation for Apache Airflow, enabling seamless integration with MCP clients. This project provides a standardized way to interact with Apache Airflow through the Model Context Protocol.
 
