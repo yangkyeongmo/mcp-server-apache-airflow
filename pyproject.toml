@@ -3,7 +3,7 @@ name = "mcp-server-apache-airflow"
 version = "0.2.8"
 description = "Model Context Protocol (MCP) server for Apache Airflow"
 authors = [
-    { name = "Gyeongmo Yang", email = "me@gmyang.dev" }
+    { name = "Gyeongmo Yang", email = "me@yanggyeongmo.com" }
 ]
 dependencies = [
     "httpx>=0.24.1",
