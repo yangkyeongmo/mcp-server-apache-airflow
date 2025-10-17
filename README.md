@@ -115,6 +115,7 @@ AIRFLOW_HOST=<your-airflow-host>        # Optional, defaults to http://localhost
 AIRFLOW_USERNAME=<your-airflow-username>
 AIRFLOW_PASSWORD=<your-airflow-password>
 AIRFLOW_API_VERSION=v1                  # Optional, defaults to v1
+READ_ONLY=true                          # Optional, enables read-only mode (true/false, defaults to false)
 ```
 
 ### Usage with Claude Desktop
@@ -144,11 +145,12 @@ For read-only mode (recommended for safety):
   "mcpServers": {
     "mcp-server-apache-airflow": {
       "command": "uvx",
-      "args": ["mcp-server-apache-airflow", "--read-only"],
+      "args": ["mcp-server-apache-airflow"],
       "env": {
         "AIRFLOW_HOST": "https://your-airflow-host",
         "AIRFLOW_USERNAME": "your-username",
-        "AIRFLOW_PASSWORD": "your-password"
+        "AIRFLOW_PASSWORD": "your-password",
+        "READ_ONLY": "true"
       }
     }
   }
@@ -210,10 +212,16 @@ Allowed values are:
 
 ### Read-Only Mode
 
-You can run the server in read-only mode by using the `--read-only` flag. This will only expose tools that perform read operations (GET requests) and exclude any tools that create, update, or delete resources.
+You can run the server in read-only mode by using the `--read-only` flag or by setting the `READ_ONLY=true` environment variable. This will only expose tools that perform read operations (GET requests) and exclude any tools that create, update, or delete resources.
 
+Using the command-line flag:
 ```bash
 uv run mcp-server-apache-airflow --read-only
+```
+
+Using the environment variable:
+```bash
+READ_ONLY=true uv run mcp-server-apache-airflow
 ```
 
 In read-only mode, the server will only expose tools like:
