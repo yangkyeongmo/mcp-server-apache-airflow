@@ -20,6 +20,12 @@ def get_all_functions() -> list[tuple[Callable, str, str, bool]]:
             False,
         ),
         (
+            get_log,
+            "get_log",
+            "Get the log from a task instance by DAG ID, task ID, DAG run ID and task try number",
+            True,
+        ),
+        (
             list_task_instance_tries,
             "list_task_instance_tries",
             "List task instance tries by DAG ID, DAG run ID, and task ID",
@@ -104,6 +110,18 @@ async def update_task_instance(
         task_id=task_id,
         update_mask=list(update_request.keys()),
         task_instance_request=update_request,
+    )
+    return [types.TextContent(type="text", text=str(response.to_dict()))]
+
+
+async def get_log(
+    dag_id: str, task_id: str, dag_run_id: str, task_try_number: int
+) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
+    response = task_instance_api.get_log(
+        dag_id=dag_id,
+        dag_run_id=dag_run_id,
+        task_id=task_id,
+        task_try_number=task_try_number,
     )
     return [types.TextContent(type="text", text=str(response.to_dict()))]
 
