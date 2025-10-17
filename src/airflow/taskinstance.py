@@ -118,7 +118,10 @@ async def get_log(
     dag_id: str, task_id: str, dag_run_id: str, task_try_number: int
 ) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
     response = task_instance_api.get_log(
-        dag_id=dag_id, dag_run_id=dag_run_id, task_id=task_id, task_try_number=task_try_number,
+        dag_id=dag_id,
+        dag_run_id=dag_run_id,
+        task_id=task_id,
+        task_try_number=task_try_number,
     )
     return [types.TextContent(type="text", text=str(response.to_dict()))]
 
