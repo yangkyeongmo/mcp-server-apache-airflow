@@ -19,6 +19,7 @@ from src.airflow.taskinstance import get_all_functions as get_taskinstance_funct
 from src.airflow.variable import get_all_functions as get_variable_functions
 from src.airflow.xcom import get_all_functions as get_xcom_functions
 from src.enums import APIType
+from src.envs import READ_ONLY
 
 APITYPE_TO_FUNCTIONS = {
     APIType.CONFIG: get_config_functions,
@@ -73,6 +74,7 @@ def filter_functions_for_read_only(functions: list[tuple]) -> list[tuple]:
 @click.option(
     "--read-only",
     is_flag=True,
+    default=READ_ONLY,
     help="Only expose read-only tools (GET operations, no CREATE/UPDATE/DELETE)",
 )
 def main(transport: str, mcp_host: str, mcp_port: int, apis: list[str], read_only: bool) -> None:
