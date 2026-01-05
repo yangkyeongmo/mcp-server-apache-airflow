@@ -120,7 +120,7 @@ class TestAirflowClientAuthentication:
         with patch.dict(
             os.environ,
             {
-                "AIRFLOW_HOST": "https://airflow.example.com:8080/custom",
+                "AIRFLOW_HOST": "https://airflow.example.com:8080",
                 "AIRFLOW_JWT_TOKEN": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
                 "AIRFLOW_API_VERSION": "v2",
             },
@@ -145,3 +145,28 @@ class TestAirflowClientAuthentication:
             assert configuration.host == "https://airflow.example.com:8080/api/v2"
             assert configuration.api_key == {"Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."}
             assert configuration.api_key_prefix == {"Authorization": ""}
+
+    def test_environment_variable_parsing_with_custom_path(self):
+        """Test that custom paths in AIRFLOW_HOST are preserved."""
+        with patch.dict(
+            os.environ,
+            {
+                "AIRFLOW_HOST": "https://airflow.example.com:8080/custom",
+                "AIRFLOW_JWT_TOKEN": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
+                "AIRFLOW_API_VERSION": "v2",
+            },
+            clear=True,
+        ):
+            # Clear any cached modules
+            modules_to_clear = ["src.envs", "src.airflow.airflow_client"]
+            for module in modules_to_clear:
+                if module in sys.modules:
+                    del sys.modules[module]
+
+            # Re-import after setting environment
+            from src.airflow.airflow_client import configuration
+            from src.envs import AIRFLOW_HOST
+
+            # Path should be preserved, not stripped
+            assert AIRFLOW_HOST == "https://airflow.example.com:8080/custom"
+            assert configuration.host == "https://airflow.example.com:8080/custom/api/v2"

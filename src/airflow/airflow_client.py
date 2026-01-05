@@ -1,5 +1,3 @@
-from urllib.parse import urljoin
-
 from airflow_client.client import ApiClient, Configuration
 
 from src.envs import (
@@ -12,7 +10,7 @@ from src.envs import (
 
 # Create a configuration and API client
 configuration = Configuration(
-    host=urljoin(AIRFLOW_HOST, f"/api/{AIRFLOW_API_VERSION}"),
+    host=f"{AIRFLOW_HOST}/api/{AIRFLOW_API_VERSION}",
 )
 
 # Set up authentication - prefer JWT token if available, fallback to basic auth
