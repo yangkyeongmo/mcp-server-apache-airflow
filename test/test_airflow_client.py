@@ -59,8 +59,7 @@ class TestAirflowClientAuthentication:
 
             # Verify configuration
             assert configuration.host == "http://localhost:8080/api/v1"
-            assert configuration.api_key == {"Authorization": "Bearer test.jwt.token"}
-            assert configuration.api_key_prefix == {"Authorization": ""}
+            assert api_client.default_headers["Authorization"] == "Bearer test.jwt.token"
             assert isinstance(api_client, ApiClient)
 
     def test_jwt_token_takes_precedence_over_basic_auth(self):
@@ -87,8 +86,7 @@ class TestAirflowClientAuthentication:
 
             # Verify JWT token is used (not basic auth)
             assert configuration.host == "http://localhost:8080/api/v1"
-            assert configuration.api_key == {"Authorization": "Bearer test.jwt.token"}
-            assert configuration.api_key_prefix == {"Authorization": ""}
+            assert api_client.default_headers["Authorization"] == "Bearer test.jwt.token"
             # Basic auth should not be set when JWT is present
             assert not hasattr(configuration, "username") or configuration.username is None
             assert not hasattr(configuration, "password") or configuration.password is None
@@ -133,7 +131,7 @@ class TestAirflowClientAuthentication:
                     del sys.modules[module]
 
             # Re-import after setting environment
-            from src.airflow.airflow_client import configuration
+            from src.airflow.airflow_client import api_client, configuration
             from src.envs import AIRFLOW_API_VERSION, AIRFLOW_HOST, AIRFLOW_JWT_TOKEN
 
             # Verify environment variables are parsed correctly
@@ -143,5 +141,4 @@ class TestAirflowClientAuthentication:
 
             # Verify configuration uses parsed values
             assert configuration.host == "https://airflow.example.com:8080/api/v2"
-            assert configuration.api_key == {"Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."}
-            assert configuration.api_key_prefix == {"Authorization": ""}
+            assert api_client.default_headers["Authorization"] == "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."

@@ -15,12 +15,14 @@ configuration = Configuration(
     host=urljoin(AIRFLOW_HOST, f"/api/{AIRFLOW_API_VERSION}"),
 )
 
-# Set up authentication - prefer JWT token if available, fallback to basic auth
-if AIRFLOW_JWT_TOKEN:
-    configuration.api_key = {"Authorization": f"Bearer {AIRFLOW_JWT_TOKEN}"}
-    configuration.api_key_prefix = {"Authorization": ""}
-elif AIRFLOW_USERNAME and AIRFLOW_PASSWORD:
+# Set up basic auth if provided (and no JWT token)
+if not AIRFLOW_JWT_TOKEN and AIRFLOW_USERNAME and AIRFLOW_PASSWORD:
     configuration.username = AIRFLOW_USERNAME
     configuration.password = AIRFLOW_PASSWORD
 
 api_client = ApiClient(configuration)
+
+# Set JWT token via default headers - this is required because
+# configuration.api_key doesn't work properly with apache-airflow-client
+if AIRFLOW_JWT_TOKEN:
+    api_client.default_headers["Authorization"] = f"Bearer {AIRFLOW_JWT_TOKEN}"
