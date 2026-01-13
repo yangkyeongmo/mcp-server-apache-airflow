@@ -59,6 +59,8 @@ class TestAirflowClientAuthentication:
 
             # Verify configuration
             assert configuration.host == "http://localhost:8080/api/v1"
+            assert configuration.api_key == {"Authorization": "Bearer test.jwt.token"}
+            assert configuration.api_key_prefix == {"Authorization": ""}
             assert api_client.default_headers["Authorization"] == "Bearer test.jwt.token"
             assert isinstance(api_client, ApiClient)
 
@@ -86,6 +88,8 @@ class TestAirflowClientAuthentication:
 
             # Verify JWT token is used (not basic auth)
             assert configuration.host == "http://localhost:8080/api/v1"
+            assert configuration.api_key == {"Authorization": "Bearer test.jwt.token"}
+            assert configuration.api_key_prefix == {"Authorization": ""}
             assert api_client.default_headers["Authorization"] == "Bearer test.jwt.token"
             # Basic auth should not be set when JWT is present
             assert not hasattr(configuration, "username") or configuration.username is None
@@ -141,4 +145,6 @@ class TestAirflowClientAuthentication:
 
             # Verify configuration uses parsed values
             assert configuration.host == "https://airflow.example.com:8080/api/v2"
+            assert configuration.api_key == {"Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."}
+            assert configuration.api_key_prefix == {"Authorization": ""}
             assert api_client.default_headers["Authorization"] == "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
