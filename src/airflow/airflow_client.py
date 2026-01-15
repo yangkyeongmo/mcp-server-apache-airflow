@@ -1,4 +1,3 @@
-from base64 import b64encode
 from urllib.parse import urljoin
 
 from airflow_client.client import ApiClient, Configuration
@@ -16,22 +15,20 @@ configuration = Configuration(
     host=urljoin(AIRFLOW_HOST, f"/api/{AIRFLOW_API_VERSION}"),
 )
 
-# Set up authentication - prefer JWT token if available, fallback to basic auth
+# Set up authentication - JWT token is preferred over basic auth
 if AIRFLOW_JWT_TOKEN:
-    configuration.api_key = {"Authorization": f"Bearer {AIRFLOW_JWT_TOKEN}"}
-    configuration.api_key_prefix = {"Authorization": ""}
+    configuration.api_key = {"Authorization": f"{AIRFLOW_JWT_TOKEN}"}
+    configuration.api_key_prefix = {"Authorization": "Bearer"}
 elif AIRFLOW_USERNAME and AIRFLOW_PASSWORD:
     configuration.username = AIRFLOW_USERNAME
     configuration.password = AIRFLOW_PASSWORD
 
 api_client = ApiClient(configuration)
 
-# Fallback: If configuration doesn't produce auth_settings, set headers directly.
-# This is needed for some versions of apache-airflow-client which don't apply
-# api_key or basic auth to requests properly.
-if not configuration.auth_settings():
-    if AIRFLOW_JWT_TOKEN:
-        api_client.default_headers["Authorization"] = f"Bearer {AIRFLOW_JWT_TOKEN}"
-    elif AIRFLOW_USERNAME and AIRFLOW_PASSWORD:
-        credentials = b64encode(f"{AIRFLOW_USERNAME}:{AIRFLOW_PASSWORD}".encode()).decode()
-        api_client.default_headers["Authorization"] = f"Basic {credentials}"
+# JWT/Bearer auth requires manual header setup because auth_settings() in
+# apache-airflow-client 2.x only supports Basic authentication.
+# If ever updated to apache-airflow-client 3.x it's the other way around,
+# JWT/Bearer is natively supported through "access_token", and Basic auth
+# requires manual header.
+if AIRFLOW_JWT_TOKEN:
+    api_client.default_headers["Authorization"] = configuration.get_api_key_with_prefix("Authorization")
