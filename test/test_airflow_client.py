@@ -50,7 +50,6 @@ class TestAirflowClientAuthentication:
             decoded_credentials = base64.b64decode(auth_value.split(" ")[1]).decode()
             assert decoded_credentials == "testuser:testpass"
 
-
     def test_jwt_token_auth_configuration(self):
         """Test that JWT token authentication is configured correctly."""
         with patch.dict(
@@ -81,7 +80,6 @@ class TestAirflowClientAuthentication:
             assert configuration.auth_settings() == {}
             # JWT auth requires manual header in v2.x (api_key/auth_settings doesn't support Bearer)
             assert api_client.default_headers["Authorization"] == "Bearer test.jwt.token"
-
 
     def test_jwt_token_takes_precedence_over_basic_auth(self):
         """Test that JWT token takes precedence when both auth methods are provided."""
