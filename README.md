@@ -295,34 +295,6 @@ rm -rf $AIRFLOW_STATE_DIR
 
 ---
 
-## CI/CD Integration
-
-For headless environments (CI pipelines, servers):
-
-### Option 1: Pre-Authenticated Cookies
-
-1. Run locally with `AIRFLOW_HEADLESS=false` to capture cookies
-2. Copy `cookies.enc` and `key` to CI environment
-3. Set `AIRFLOW_STATE_DIR` to point to copied files
-
-### Option 2: Use JWT or Basic Auth
-
-```bash
-# CI environment - skip SSO, use service account
-export AIRFLOW_SSO_AUTH=false
-export AIRFLOW_USERNAME=ci-service-account
-export AIRFLOW_PASSWORD=$CI_AIRFLOW_PASSWORD
-```
-
-### Option 3: Headless SSO (If IdP Supports)
-
-Some IdPs allow programmatic auth. Set:
-```bash
-AIRFLOW_HEADLESS=true
-```
-Note: This only works if your IdP doesn't require interactive CAPTCHA/MFA.
-
----
 
 ## Security Considerations
 
@@ -388,10 +360,3 @@ payload = store.load()
 ```
 
 ---
-
-## Changelog
-
-| Version | Changes |
-|---------|---------|
-| 0.2.9 | Added SSO cookie authentication support |
-| 0.2.8 | Upstream baseline (JWT + Basic Auth only) |
