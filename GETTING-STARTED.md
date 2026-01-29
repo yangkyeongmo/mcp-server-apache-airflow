@@ -99,5 +99,6 @@ See [examples/](examples/) for detailed MCP interactions:
 ## Links
 
 - [README](README.md) - Full documentation, troubleshooting, architecture
+- [Airflow MCP Servers](AIRFLOW-MCP-SERVERS.md) - Alternative servers comparison, Airflow v3 migration
 - [setup-mcp.sh](setup-mcp.sh) - Setup and toggle MCP configs
 - [update-hosts.sh](update-hosts.sh) - VPN DNS fix

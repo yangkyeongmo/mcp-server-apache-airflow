@@ -13,6 +13,16 @@ This document describes a fork of the public Apache Airflow MCP server with an e
 
 ---
 
+## Why This Fork?
+
+We forked [yangkyeongmo/mcp-server-apache-airflow](https://github.com/yangkyeongmo/mcp-server-apache-airflow) for its stability, clean API abstraction, and extensible architecture — allowing us to add SSO cookie-based auth without rewriting core logic.
+
+⚠️ **Airflow 2.x EOL: April 2026** — This MCP server primarily supports Airflow 2.x (`/api/v1`). Airflow 3.0 requires JWT auth which may not be compatible with our SSO approach.
+
+📖 **See [Airflow MCP Servers](AIRFLOW-MCP-SERVERS.md)** for alternative servers comparison and v3 migration options.
+
+---
+
 ## Architecture
 
 ```
