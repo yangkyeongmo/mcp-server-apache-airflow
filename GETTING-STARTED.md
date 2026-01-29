@@ -40,7 +40,8 @@ Restart VSCode → uses saved SSO cookies.
 Restart VSCode/AmpCode → uses saved SSO cookies.
 
 > **Note:** Amp VSCode Extension reads from global VSCode settings, not project files.
-> The script adds `airflow-sso` to `~/Library/Application Support/Code/User/settings.json`.
+> The script adds `airflow-sso` to `~/Library/Application Support/Code/User/settings.json`,
+> then toggles `"disabled": true/false` for enable/disable (config is preserved).
 > See [ampcode.com/manual](https://ampcode.com/manual#configuration) for details.
 
 ### 5. Disable When Not on VPN
@@ -57,7 +58,7 @@ Restart VSCode/AmpCode → uses saved SSO cookies.
 |------|---------|--------|
 | Claude Code | Renames `.mcp.json` → `.mcp.json.disabled` | Restores file |
 | VSCode Copilot | Renames `.vscode/mcp.json` → `.disabled` | Restores file |
-| AmpCode | Removes `airflow-sso` from VSCode settings.json | Re-adds entry |
+| AmpCode | Sets `"disabled": true` in VSCode settings | Removes `disabled` property |
 
 ---
 

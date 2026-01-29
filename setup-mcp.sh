@@ -12,7 +12,7 @@
 #
 # AMPCODE NOTE:
 #   Amp VSCode Extension reads from global VSCode settings, not .amp/settings.json.
-#   This script can add/remove airflow-sso from VSCode settings safely.
+#   This script adds airflow-sso on first setup, then toggles "disabled": true/false.
 #   See: https://ampcode.com/manual#configuration
 #
 # HOW IT WORKS:
@@ -91,13 +91,25 @@ show_help() {
 # ============================================================================
 # AMPCODE HELPERS (VSCode Settings Manipulation)
 # ============================================================================
-# Uses Python to safely add/remove airflow-sso from VSCode settings.json
-# Handles JSONC format (JSON with comments) by using regex-based approach.
+# Uses Python to safely modify airflow-sso in VSCode settings.json.
+# - ampcode_add: Adds airflow-sso config if not exists
+# - ampcode_enable: Sets "disabled": false (or removes the property)
+# - ampcode_disable: Sets "disabled": true
 # ============================================================================
 
 ampcode_exists() {
     if [ -f "$AMPCODE_SETTINGS" ]; then
         grep -q '"airflow-sso"' "$AMPCODE_SETTINGS" 2>/dev/null
+        return $?
+    fi
+    return 1
+}
+
+ampcode_is_disabled() {
+    if [ -f "$AMPCODE_SETTINGS" ] && ampcode_exists; then
+        # Check if airflow-sso has "disabled": true
+        # Use simple grep - if "disabled": true appears near "airflow-sso"
+        grep -A 5 '"airflow-sso"' "$AMPCODE_SETTINGS" 2>/dev/null | grep -q '"disabled"\s*:\s*true'
         return $?
     fi
     return 1
@@ -110,8 +122,9 @@ ampcode_add() {
     fi
 
     if ampcode_exists; then
-        log_warn "AmpCode airflow-sso already exists, skipping"
-        return 0
+        # Already exists, just enable it
+        ampcode_enable
+        return $?
     fi
 
     # Use Python to safely add the entry
@@ -147,16 +160,13 @@ try:
         content = f.read()
 
     # Find amp.mcpServers section
-    # Look for "amp.mcpServers": { ... }
     pattern = r'("amp\.mcpServers"\s*:\s*\{)'
     match = re.search(pattern, content)
 
     if match:
         # Insert after the opening brace
         insert_pos = match.end()
-        # Format the new entry
         entry_json = json.dumps(airflow_config, indent=4)
-        # Indent each line properly (8 spaces for nested content)
         indented = '\n'.join('        ' + line if i > 0 else line
                             for i, line in enumerate(entry_json.split('\n')))
         new_entry = f'\n        "airflow-sso": {indented},'
@@ -167,8 +177,6 @@ try:
             f.write(new_content)
         print("added")
     else:
-        # amp.mcpServers doesn't exist, need to add it
-        # Find a good place to insert (before the closing brace)
         print("no_section")
         sys.exit(1)
 
@@ -188,7 +196,7 @@ EOF
     fi
 }
 
-ampcode_remove() {
+ampcode_disable() {
     if ! [ -f "$AMPCODE_SETTINGS" ]; then
         return 0
     fi
@@ -197,7 +205,11 @@ ampcode_remove() {
         return 0
     fi
 
-    # Use Python to safely remove the entry
+    if ampcode_is_disabled; then
+        return 0  # Already disabled
+    fi
+
+    # Use Python to set "disabled": true
     python3 << EOF
 import re
 import sys
@@ -208,48 +220,32 @@ try:
     with open(settings_path, 'r') as f:
         content = f.read()
 
-    # Remove "airflow-sso": { ... }, pattern
-    # This regex matches the key and its nested object value
-    # It handles nested braces by counting them
+    # Find airflow-sso block and add/update "disabled": true
+    # Strategy: Find the opening of airflow-sso object and insert "disabled": true after it
 
-    # Find the start of "airflow-sso"
-    start_pattern = r',?\s*"airflow-sso"\s*:\s*\{'
-    match = re.search(start_pattern, content)
-
-    if not match:
-        # Try without leading comma
-        start_pattern = r'"airflow-sso"\s*:\s*\{'
-        match = re.search(start_pattern, content)
+    pattern = r'("airflow-sso"\s*:\s*\{)'
+    match = re.search(pattern, content)
 
     if match:
-        start = match.start()
-        # Find matching closing brace
-        pos = match.end()
-        depth = 1
-        while pos < len(content) and depth > 0:
-            if content[pos] == '{':
-                depth += 1
-            elif content[pos] == '}':
-                depth -= 1
-            pos += 1
-
-        # Check for trailing comma
-        end = pos
-        while end < len(content) and content[end] in ' \t\n':
-            end += 1
-        if end < len(content) and content[end] == ',':
-            end += 1
-
-        # Remove the entry
-        new_content = content[:start] + content[end:]
-
-        # Clean up any double commas or leading commas in objects
-        new_content = re.sub(r',(\s*[}\]])', r'\1', new_content)
-        new_content = re.sub(r'\{\s*,', '{', new_content)
+        insert_pos = match.end()
+        # Check if disabled already exists (just not true)
+        disabled_pattern = r'("airflow-sso"\s*:\s*\{[^}]*)"disabled"\s*:\s*\w+'
+        if re.search(disabled_pattern, content, re.DOTALL):
+            # Replace existing disabled value
+            content = re.sub(
+                r'("airflow-sso"\s*:\s*\{[^}]*"disabled"\s*:\s*)\w+',
+                r'\1true',
+                content,
+                flags=re.DOTALL
+            )
+        else:
+            # Insert "disabled": true after opening brace
+            new_content = content[:insert_pos] + '\n            "disabled": true,' + content[insert_pos:]
+            content = new_content
 
         with open(settings_path, 'w') as f:
-            f.write(new_content)
-        print("removed")
+            f.write(content)
+        print("disabled")
     else:
         print("not_found")
 
@@ -260,7 +256,60 @@ EOF
 
     result=$?
     if [ $result -eq 0 ]; then
-        log_info "Removed airflow-sso from AmpCode"
+        log_info "Disabled airflow-sso in AmpCode"
+        return 0
+    fi
+    return 1
+}
+
+ampcode_enable() {
+    if ! [ -f "$AMPCODE_SETTINGS" ]; then
+        return 1
+    fi
+
+    if ! ampcode_exists; then
+        # Doesn't exist, need to add it
+        ampcode_add
+        return $?
+    fi
+
+    if ! ampcode_is_disabled; then
+        log_warn "AmpCode airflow-sso already enabled"
+        return 0  # Already enabled
+    fi
+
+    # Use Python to remove "disabled": true (or set to false)
+    python3 << EOF
+import re
+import sys
+
+settings_path = "$AMPCODE_SETTINGS"
+
+try:
+    with open(settings_path, 'r') as f:
+        content = f.read()
+
+    # Remove the "disabled": true line from airflow-sso block
+    # Match "disabled": true with optional trailing comma and whitespace
+    pattern = r'("airflow-sso"\s*:\s*\{[^}]*)\s*"disabled"\s*:\s*true,?\s*'
+
+    new_content = re.sub(pattern, r'\1', content, flags=re.DOTALL)
+
+    # Clean up any double commas
+    new_content = re.sub(r',(\s*[,}])', r'\1', new_content)
+
+    with open(settings_path, 'w') as f:
+        f.write(new_content)
+    print("enabled")
+
+except Exception as e:
+    print(f"error: {e}", file=sys.stderr)
+    sys.exit(1)
+EOF
+
+    result=$?
+    if [ $result -eq 0 ]; then
+        log_info "Enabled airflow-sso in AmpCode"
         return 0
     fi
     return 1
@@ -291,7 +340,11 @@ show_status() {
 
     # AmpCode
     if ampcode_exists; then
-        echo -e "  AmpCode      (VSCode settings.json)  ${GREEN}enabled${NC}"
+        if ampcode_is_disabled; then
+            echo -e "  AmpCode      (VSCode settings.json)  ${RED}disabled${NC}"
+        else
+            echo -e "  AmpCode      (VSCode settings.json)  ${GREEN}enabled${NC}"
+        fi
     else
         echo -e "  AmpCode      (VSCode settings.json)  ${YELLOW}not setup${NC}"
     fi
@@ -417,8 +470,8 @@ disable_all() {
         disabled=$((disabled + 1))
     fi
 
-    if ampcode_exists; then
-        ampcode_remove
+    if ampcode_exists && ! ampcode_is_disabled; then
+        ampcode_disable
         disabled=$((disabled + 1))
     fi
 
@@ -451,8 +504,13 @@ enable_all() {
         enabled=$((enabled + 1))
     fi
 
-    # Re-add AmpCode if it was removed
-    if ! ampcode_exists; then
+    # Enable AmpCode if it exists and is disabled, or add if missing
+    if ampcode_exists; then
+        if ampcode_is_disabled; then
+            ampcode_enable
+            enabled=$((enabled + 1))
+        fi
+    else
         ampcode_add
         enabled=$((enabled + 1))
     fi
