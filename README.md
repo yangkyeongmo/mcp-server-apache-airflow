@@ -293,6 +293,24 @@ rm -f $AIRFLOW_STATE_DIR/cookies.enc
 | `No 'session' cookie captured` warning | Airflow uses different cookie name | Usually safe to ignore; auth may still work |
 | Cookies expire too quickly | IdP session shorter than 24h | Lower `AIRFLOW_MAX_COOKIE_AGE_HOURS` |
 | `Cookie file corrupted` warning | Disk issue or interrupted write | Automatic recovery; re-auth triggered |
+| `ENOTFOUND` or DNS resolution fails | VPN DNS not propagating to all apps | Run `sudo ./update-hosts.sh` (see below) |
+
+### VPN DNS Issues
+
+Some apps (curl, Python, MCP servers) may fail to resolve internal hostnames like `pidgey.ready-internal.net` even when connected to VPN. This happens when the app bypasses VPN DNS.
+
+**Fix:** Use [`update-hosts.sh`](update-hosts.sh) to write the resolved IP directly to `/etc/hosts`:
+
+```bash
+# One-time fix (requires sudo)
+sudo ./update-hosts.sh
+
+# Automate via cron (every 30 minutes)
+sudo crontab -e
+# Add: */30 * * * * /path/to/update-hosts.sh >> /var/log/hosts-update.log 2>&1
+```
+
+The script resolves the hostname via VPN DNS (`nslookup`) and updates `/etc/hosts` so all apps can reach the internal server.
 
 ### Reset All State
 
