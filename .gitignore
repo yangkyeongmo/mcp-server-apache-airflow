@@ -47,5 +47,3 @@ Thumbs.db
 # Personal MCP configs (gitignored - run ./setup-mcp.sh to create from examples)
 .mcp.json
 .mcp.json.disabled
-.amp/*
-!.amp/settings.example.json

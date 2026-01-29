@@ -195,10 +195,11 @@ uv sync --extra sso
 uv run playwright install chromium
 
 ./setup-mcp.sh claude   # Setup Claude Code → Restart → SSO login
-./setup-mcp.sh rest     # Setup AmpCode + VSCode (reuses cookies)
+./setup-mcp.sh vscode   # Setup VSCode Copilot (reuses cookies)
+./setup-mcp.sh ampcode  # Setup AmpCode (reuses cookies)
 ```
 
-📖 **See [Getting Started](GETTING-STARTED.md)** for detailed setup steps, AmpCode manual UI setup, and example prompts.
+📖 **See [Getting Started](GETTING-STARTED.md)** for detailed setup and example prompts.
 
 ---
 

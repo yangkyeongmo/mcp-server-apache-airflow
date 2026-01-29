@@ -5,25 +5,37 @@
 # Creates personal MCP configs from committed example templates.
 # Each team member runs this script - personal configs are gitignored.
 #
+# SUPPORTED TOOLS:
+#   - Claude Code: Project-level .mcp.json (handled by this script)
+#   - VSCode Copilot: Project-level .vscode/mcp.json (handled by this script)
+#   - AmpCode: Global VSCode settings (handled by this script)
+#
+# AMPCODE NOTE:
+#   Amp VSCode Extension reads from global VSCode settings, not .amp/settings.json.
+#   This script can add/remove airflow-sso from VSCode settings safely.
+#   See: https://ampcode.com/manual#configuration
+#
 # HOW IT WORKS:
 #   - Example files (.example.json) are committed to git as templates
 #   - This script copies them to active configs, replacing $PROJECT_DIR with actual path
-#   - Personal configs (.mcp.json, .amp/settings.json, .vscode/mcp.json) are gitignored
+#   - Personal configs are gitignored
 #   - All tools share the same SSO cookies in .airflow_state/
 #
 # RECOMMENDED SETUP ORDER:
 #   1. ./setup-mcp.sh claude   → Restart Claude Code → Complete SSO login
 #   2. Test in Claude Code: "List all Airflow DAGs"
-#   3. ./setup-mcp.sh rest     → Restart AmpCode + VSCode (cookies already saved)
+#   3. ./setup-mcp.sh vscode   → Restart VSCode (cookies already saved)
+#   4. ./setup-mcp.sh ampcode  → Adds to VSCode settings → Restart AmpCode
 #
 # WHEN NOT ON VPN:
 #   ./setup-mcp.sh disable     → Avoid login prompts on tool startup
 #   ./setup-mcp.sh enable      → Re-enable when back on VPN
 #
 # Usage:
-#   ./setup-mcp.sh claude   # Step 1: Setup Claude Code, then SSO login & test
-#   ./setup-mcp.sh rest     # Step 2: Setup AmpCode + VSCode (reuses SSO cookies)
-#   ./setup-mcp.sh all      # Setup all at once
+#   ./setup-mcp.sh claude   # Setup Claude Code (triggers SSO login)
+#   ./setup-mcp.sh vscode   # Setup VSCode Copilot (reuses SSO cookies)
+#   ./setup-mcp.sh ampcode  # Setup AmpCode (adds to VSCode settings)
+#   ./setup-mcp.sh all      # Setup all three tools
 #   ./setup-mcp.sh disable  # Disable all MCP configs (no login prompts)
 #   ./setup-mcp.sh enable   # Re-enable all MCP configs
 #   ./setup-mcp.sh status   # Show current status
@@ -35,18 +47,15 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # ============================================================================
 # CONFIG FILE PATHS
 # ============================================================================
-# Example files (committed to git - templates for team)
-# Personal files (gitignored - created by this script)
-# ============================================================================
 
 CLAUDE_EXAMPLE="$SCRIPT_DIR/.mcp.example.json"
 CLAUDE_CONFIG="$SCRIPT_DIR/.mcp.json"
 
-AMP_EXAMPLE="$SCRIPT_DIR/.amp/settings.example.json"
-AMP_CONFIG="$SCRIPT_DIR/.amp/settings.json"
-
 VSCODE_EXAMPLE="$SCRIPT_DIR/.vscode/mcp.example.json"
 VSCODE_CONFIG="$SCRIPT_DIR/.vscode/mcp.json"
+
+# AmpCode uses global VSCode settings
+AMPCODE_SETTINGS="$HOME/Library/Application Support/Code/User/settings.json"
 
 # ============================================================================
 # OUTPUT HELPERS
@@ -60,21 +69,201 @@ NC='\033[0m'
 
 log_info() { echo -e "${GREEN}✓${NC} $1"; }
 log_warn() { echo -e "${YELLOW}⚠${NC} $1"; }
+log_error() { echo -e "${RED}✗${NC} $1"; }
 
 show_help() {
     echo ""
     echo -e "${BLUE}Airflow MCP Setup${NC}"
     echo ""
     echo "Setup commands:"
-    echo "  claude   Setup Claude Code only"
-    echo "  rest     Setup AmpCode + VSCode (after SSO login)"
-    echo "  all      Setup all tools at once"
+    echo "  claude   Setup Claude Code (triggers SSO login)"
+    echo "  vscode   Setup VSCode Copilot"
+    echo "  ampcode  Setup AmpCode (modifies VSCode settings)"
+    echo "  all      Setup all three tools"
     echo ""
     echo "Toggle commands:"
-    echo "  disable  Disable MCP (avoid login prompts when not on VPN)"
-    echo "  enable   Re-enable MCP configs"
+    echo "  disable  Disable all MCP configs (no login prompts when off VPN)"
+    echo "  enable   Re-enable all MCP configs"
     echo "  status   Show current config status"
     echo ""
+}
+
+# ============================================================================
+# AMPCODE HELPERS (VSCode Settings Manipulation)
+# ============================================================================
+# Uses Python to safely add/remove airflow-sso from VSCode settings.json
+# Handles JSONC format (JSON with comments) by using regex-based approach.
+# ============================================================================
+
+ampcode_exists() {
+    if [ -f "$AMPCODE_SETTINGS" ]; then
+        grep -q '"airflow-sso"' "$AMPCODE_SETTINGS" 2>/dev/null
+        return $?
+    fi
+    return 1
+}
+
+ampcode_add() {
+    if ! [ -f "$AMPCODE_SETTINGS" ]; then
+        log_error "VSCode settings not found: $AMPCODE_SETTINGS"
+        return 1
+    fi
+
+    if ampcode_exists; then
+        log_warn "AmpCode airflow-sso already exists, skipping"
+        return 0
+    fi
+
+    # Use Python to safely add the entry
+    python3 << EOF
+import re
+import json
+import sys
+
+settings_path = "$AMPCODE_SETTINGS"
+project_dir = "$SCRIPT_DIR"
+
+# The airflow-sso config to add
+airflow_config = {
+    "command": "/opt/homebrew/bin/uv",
+    "args": [
+        "run",
+        "--directory",
+        project_dir,
+        "--extra",
+        "sso",
+        "mcp-server-apache-airflow"
+    ],
+    "env": {
+        "AIRFLOW_HOST": "https://pidgey.ready-internal.net",
+        "AIRFLOW_SSO_AUTH": "true",
+        "AIRFLOW_STATE_DIR": f"{project_dir}/.airflow_state",
+        "READ_ONLY": "true"
+    }
+}
+
+try:
+    with open(settings_path, 'r') as f:
+        content = f.read()
+
+    # Find amp.mcpServers section
+    # Look for "amp.mcpServers": { ... }
+    pattern = r'("amp\.mcpServers"\s*:\s*\{)'
+    match = re.search(pattern, content)
+
+    if match:
+        # Insert after the opening brace
+        insert_pos = match.end()
+        # Format the new entry
+        entry_json = json.dumps(airflow_config, indent=4)
+        # Indent each line properly (8 spaces for nested content)
+        indented = '\n'.join('        ' + line if i > 0 else line
+                            for i, line in enumerate(entry_json.split('\n')))
+        new_entry = f'\n        "airflow-sso": {indented},'
+
+        new_content = content[:insert_pos] + new_entry + content[insert_pos:]
+
+        with open(settings_path, 'w') as f:
+            f.write(new_content)
+        print("added")
+    else:
+        # amp.mcpServers doesn't exist, need to add it
+        # Find a good place to insert (before the closing brace)
+        print("no_section")
+        sys.exit(1)
+
+except Exception as e:
+    print(f"error: {e}", file=sys.stderr)
+    sys.exit(1)
+EOF
+
+    result=$?
+    if [ $result -eq 0 ]; then
+        log_info "Added airflow-sso to AmpCode (VSCode settings)"
+        return 0
+    else
+        log_error "Failed to add airflow-sso to VSCode settings"
+        echo "  You may need to add it manually. See GETTING-STARTED.md"
+        return 1
+    fi
+}
+
+ampcode_remove() {
+    if ! [ -f "$AMPCODE_SETTINGS" ]; then
+        return 0
+    fi
+
+    if ! ampcode_exists; then
+        return 0
+    fi
+
+    # Use Python to safely remove the entry
+    python3 << EOF
+import re
+import sys
+
+settings_path = "$AMPCODE_SETTINGS"
+
+try:
+    with open(settings_path, 'r') as f:
+        content = f.read()
+
+    # Remove "airflow-sso": { ... }, pattern
+    # This regex matches the key and its nested object value
+    # It handles nested braces by counting them
+
+    # Find the start of "airflow-sso"
+    start_pattern = r',?\s*"airflow-sso"\s*:\s*\{'
+    match = re.search(start_pattern, content)
+
+    if not match:
+        # Try without leading comma
+        start_pattern = r'"airflow-sso"\s*:\s*\{'
+        match = re.search(start_pattern, content)
+
+    if match:
+        start = match.start()
+        # Find matching closing brace
+        pos = match.end()
+        depth = 1
+        while pos < len(content) and depth > 0:
+            if content[pos] == '{':
+                depth += 1
+            elif content[pos] == '}':
+                depth -= 1
+            pos += 1
+
+        # Check for trailing comma
+        end = pos
+        while end < len(content) and content[end] in ' \t\n':
+            end += 1
+        if end < len(content) and content[end] == ',':
+            end += 1
+
+        # Remove the entry
+        new_content = content[:start] + content[end:]
+
+        # Clean up any double commas or leading commas in objects
+        new_content = re.sub(r',(\s*[}\]])', r'\1', new_content)
+        new_content = re.sub(r'\{\s*,', '{', new_content)
+
+        with open(settings_path, 'w') as f:
+            f.write(new_content)
+        print("removed")
+    else:
+        print("not_found")
+
+except Exception as e:
+    print(f"error: {e}", file=sys.stderr)
+    sys.exit(1)
+EOF
+
+    result=$?
+    if [ $result -eq 0 ]; then
+        log_info "Removed airflow-sso from AmpCode"
+        return 0
+    fi
+    return 1
 }
 
 show_status() {
@@ -84,38 +273,36 @@ show_status() {
 
     # Claude Code
     if [ -f "$CLAUDE_CONFIG" ]; then
-        echo -e "  Claude Code  (.mcp.json)            ${GREEN}enabled${NC}"
+        echo -e "  Claude Code  (.mcp.json)             ${GREEN}enabled${NC}"
     elif [ -f "${CLAUDE_CONFIG}.disabled" ]; then
-        echo -e "  Claude Code  (.mcp.json)            ${RED}disabled${NC}"
+        echo -e "  Claude Code  (.mcp.json)             ${RED}disabled${NC}"
     else
-        echo -e "  Claude Code  (.mcp.json)            ${YELLOW}not setup${NC}"
+        echo -e "  Claude Code  (.mcp.json)             ${YELLOW}not setup${NC}"
+    fi
+
+    # VSCode Copilot
+    if [ -f "$VSCODE_CONFIG" ]; then
+        echo -e "  VSCode       (.vscode/mcp.json)      ${GREEN}enabled${NC}"
+    elif [ -f "${VSCODE_CONFIG}.disabled" ]; then
+        echo -e "  VSCode       (.vscode/mcp.json)      ${RED}disabled${NC}"
+    else
+        echo -e "  VSCode       (.vscode/mcp.json)      ${YELLOW}not setup${NC}"
     fi
 
     # AmpCode
-    if [ -f "$AMP_CONFIG" ]; then
-        echo -e "  AmpCode      (.amp/settings.json)   ${GREEN}enabled${NC}"
-    elif [ -f "${AMP_CONFIG}.disabled" ]; then
-        echo -e "  AmpCode      (.amp/settings.json)   ${RED}disabled${NC}"
+    if ampcode_exists; then
+        echo -e "  AmpCode      (VSCode settings.json)  ${GREEN}enabled${NC}"
     else
-        echo -e "  AmpCode      (.amp/settings.json)   ${YELLOW}not setup${NC}"
-    fi
-
-    # VSCode
-    if [ -f "$VSCODE_CONFIG" ]; then
-        echo -e "  VSCode       (.vscode/mcp.json)     ${GREEN}enabled${NC}"
-    elif [ -f "${VSCODE_CONFIG}.disabled" ]; then
-        echo -e "  VSCode       (.vscode/mcp.json)     ${RED}disabled${NC}"
-    else
-        echo -e "  VSCode       (.vscode/mcp.json)     ${YELLOW}not setup${NC}"
+        echo -e "  AmpCode      (VSCode settings.json)  ${YELLOW}not setup${NC}"
     fi
 
     # SSO cookies
     if [ -d "$SCRIPT_DIR/.airflow_state" ]; then
         echo ""
-        echo -e "  SSO cookies  (.airflow_state/)      ${GREEN}saved${NC}"
+        echo -e "  SSO cookies  (.airflow_state/)       ${GREEN}saved${NC}"
     else
         echo ""
-        echo -e "  SSO cookies  (.airflow_state/)      ${YELLOW}not yet${NC}"
+        echo -e "  SSO cookies  (.airflow_state/)       ${YELLOW}not yet${NC}"
     fi
 
     echo ""
@@ -123,9 +310,6 @@ show_status() {
 
 # ============================================================================
 # CREATE CONFIG FROM EXAMPLE TEMPLATE
-# ============================================================================
-# Copies example file to personal config, replacing $PROJECT_DIR placeholder
-# with the actual directory path. Also handles restoring disabled configs.
 # ============================================================================
 
 create_config() {
@@ -168,25 +352,32 @@ setup_claude() {
     create_config "$CLAUDE_EXAMPLE" "$CLAUDE_CONFIG" "Claude Code (.mcp.json)"
     echo ""
     echo "Next steps:"
-    echo "  1. Restart Claude Code"
+    echo "  1. Restart Claude Code in this project"
     echo "  2. SSO login will open in browser"
     echo "  3. Test: ask Claude to list Airflow DAGs"
-    echo "  4. Run: ./setup-mcp.sh rest"
+    echo "  4. Run: ./setup-mcp.sh vscode"
     echo ""
 }
 
-setup_rest() {
+setup_vscode() {
     echo ""
-    echo -e "${BLUE}Setting up AmpCode + VSCode...${NC}"
+    echo -e "${BLUE}Setting up VSCode Copilot...${NC}"
     echo ""
-    create_config "$AMP_EXAMPLE" "$AMP_CONFIG" "AmpCode (.amp/settings.json)"
     create_config "$VSCODE_EXAMPLE" "$VSCODE_CONFIG" "VSCode (.vscode/mcp.json)"
     echo ""
-    echo "Restart AmpCode and VSCode to load MCP."
+    echo "Restart VSCode to load MCP."
     echo "SSO cookies are shared - no re-login needed."
     echo ""
-    echo "Note: AmpCode may also require manual UI setup."
-    echo "See GETTING-STARTED.md for details."
+}
+
+setup_ampcode() {
+    echo ""
+    echo -e "${BLUE}Setting up AmpCode...${NC}"
+    echo ""
+    ampcode_add
+    echo ""
+    echo "Restart VSCode/AmpCode to load MCP."
+    echo "SSO cookies are shared - no re-login needed."
     echo ""
 }
 
@@ -195,8 +386,8 @@ setup_all() {
     echo -e "${BLUE}Setting up all tools...${NC}"
     echo ""
     create_config "$CLAUDE_EXAMPLE" "$CLAUDE_CONFIG" "Claude Code (.mcp.json)"
-    create_config "$AMP_EXAMPLE" "$AMP_CONFIG" "AmpCode (.amp/settings.json)"
     create_config "$VSCODE_EXAMPLE" "$VSCODE_CONFIG" "VSCode (.vscode/mcp.json)"
+    ampcode_add
     echo ""
     echo "Restart Claude Code first to trigger SSO login."
     echo "Other tools will reuse the saved cookies."
@@ -205,9 +396,6 @@ setup_all() {
 
 # ============================================================================
 # TOGGLE COMMANDS (DISABLE/ENABLE)
-# ============================================================================
-# Renames config files to .disabled suffix to prevent MCP from loading.
-# Useful when not on VPN to avoid login prompts on every tool startup.
 # ============================================================================
 
 disable_all() {
@@ -223,15 +411,14 @@ disable_all() {
         disabled=$((disabled + 1))
     fi
 
-    if [ -f "$AMP_CONFIG" ]; then
-        mv "$AMP_CONFIG" "${AMP_CONFIG}.disabled"
-        log_info "Disabled AmpCode"
+    if [ -f "$VSCODE_CONFIG" ]; then
+        mv "$VSCODE_CONFIG" "${VSCODE_CONFIG}.disabled"
+        log_info "Disabled VSCode Copilot"
         disabled=$((disabled + 1))
     fi
 
-    if [ -f "$VSCODE_CONFIG" ]; then
-        mv "$VSCODE_CONFIG" "${VSCODE_CONFIG}.disabled"
-        log_info "Disabled VSCode"
+    if ampcode_exists; then
+        ampcode_remove
         disabled=$((disabled + 1))
     fi
 
@@ -258,15 +445,15 @@ enable_all() {
         enabled=$((enabled + 1))
     fi
 
-    if [ -f "${AMP_CONFIG}.disabled" ]; then
-        mv "${AMP_CONFIG}.disabled" "$AMP_CONFIG"
-        log_info "Enabled AmpCode"
+    if [ -f "${VSCODE_CONFIG}.disabled" ]; then
+        mv "${VSCODE_CONFIG}.disabled" "$VSCODE_CONFIG"
+        log_info "Enabled VSCode Copilot"
         enabled=$((enabled + 1))
     fi
 
-    if [ -f "${VSCODE_CONFIG}.disabled" ]; then
-        mv "${VSCODE_CONFIG}.disabled" "$VSCODE_CONFIG"
-        log_info "Enabled VSCode"
+    # Re-add AmpCode if it was removed
+    if ! ampcode_exists; then
+        ampcode_add
         enabled=$((enabled + 1))
     fi
 
@@ -288,8 +475,16 @@ case "${1:-}" in
     claude)
         setup_claude
         ;;
+    vscode)
+        setup_vscode
+        ;;
+    ampcode|amp)
+        setup_ampcode
+        ;;
     rest)
-        setup_rest
+        # Legacy alias
+        setup_vscode
+        setup_ampcode
         ;;
     all)
         setup_all

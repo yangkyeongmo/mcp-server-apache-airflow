@@ -4,7 +4,7 @@ Quick setup and example prompts for using the Airflow MCP with AI coding assista
 
 ---
 
-## Setup (5 minutes)
+## Setup
 
 ### 1. Install
 
@@ -23,33 +23,32 @@ uv run playwright install chromium
 
 Restart Claude Code → SSO login opens → Test: *"List all Airflow DAGs"*
 
-### 3. Configure AmpCode
+### 3. Configure VSCode Copilot
 
 ```bash
-./setup-mcp.sh rest
+./setup-mcp.sh vscode
 ```
 
-**Important:** AmpCode MIGHT also requires manual setup in the UI:
-1. Open AmpCode → MCP Servers panel → **+ Add**
-2. Fill in:
-   - **Server Name:** `airflow-sso`
-   - **Command:** `uv`
-   - **Arguments:** `run --directory /path/to/mcp-server-apache-airflow --extra sso mcp-server-apache-airflow`
-3. Add environment variables:
-   - `AIRFLOW_HOST` = `https://pidgey.ready-internal.net`
-   - `AIRFLOW_SSO_AUTH` = `true`
-   - `AIRFLOW_STATE_DIR` = `/path/to/mcp-server-apache-airflow/.airflow_state`
-   - `READ_ONLY` = `true`
+Restart VSCode → uses saved SSO cookies.
 
-### 4. Configure VSCode Copilot
-
-The `./setup-mcp.sh rest` command creates `.vscode/mcp.json`. Just restart VSCode.
-
-### 5. Disable When Not Needed
+### 4. Configure AmpCode
 
 ```bash
-./setup-mcp.sh disable   # No login prompts when off VPN
-./setup-mcp.sh enable    # Re-enable when needed
+./setup-mcp.sh ampcode
+```
+
+Restart VSCode/AmpCode → uses saved SSO cookies.
+
+> **Note:** Amp VSCode Extension reads from global VSCode settings, not project files.
+> The script adds `airflow-sso` to `~/Library/Application Support/Code/User/settings.json`.
+> See [ampcode.com/manual](https://ampcode.com/manual#configuration) for details.
+
+### 5. Disable When Not on VPN
+
+```bash
+./setup-mcp.sh disable   # Disables all MCP configs (no login prompts)
+./setup-mcp.sh enable    # Re-enable when back on VPN
+./setup-mcp.sh status    # Check current status
 ```
 
 ---
