@@ -186,71 +186,19 @@ rm -f $AIRFLOW_STATE_DIR/key $AIRFLOW_STATE_DIR/cookies.enc
 
 ---
 
-## Local Developer Setup
-
-### 1. Clone and Install
+## Quick Start
 
 ```bash
 git clone https://github.com/zedahmed144/mcp-server-apache-airflow
 cd mcp-server-apache-airflow
-
-# Install with SSO support
 uv sync --extra sso
-
-# Install Playwright browser
 uv run playwright install chromium
+
+./setup-mcp.sh claude   # Setup Claude Code → Restart → SSO login
+./setup-mcp.sh rest     # Setup AmpCode + VSCode (reuses cookies)
 ```
 
-### 2. Setup MCP Configs
-
-The setup script creates personal configs from example templates:
-
-```bash
-# Step 1: Setup Claude Code (triggers SSO login)
-./setup-mcp.sh claude
-
-# Step 2: After SSO login works, setup other tools
-./setup-mcp.sh rest
-```
-
-Or setup all at once:
-```bash
-./setup-mcp.sh all
-```
-
-### 3. First Run (SSO Login)
-
-1. **Restart Claude Code** in this project folder
-2. A browser window opens to your Airflow instance
-3. Complete SSO authentication (Okta, Azure AD, etc.)
-4. Cookies are captured, encrypted, and saved to `.airflow_state/`
-5. **Test**: Ask Claude to "list Airflow DAGs"
-
-### 4. Setup Other Tools
-
-Once SSO login succeeds in Claude Code:
-
-```bash
-./setup-mcp.sh rest   # Creates configs for AmpCode + VSCode
-```
-
-- **AmpCode**: Restart and open this project folder
-- **VSCode**: Open this folder, use GitHub Copilot Chat
-
-All tools share the same SSO cookies — no re-login needed.
-
-### Config Files
-
-| Tool | Config File | Key Format |
-|------|-------------|------------|
-| Claude Code | `.mcp.json` | `mcpServers` |
-| AmpCode | `.amp/settings.json` | `amp.mcpServers` |
-| VSCode Copilot | `.vscode/mcp.json` | `servers` |
-
-Example templates (`.example.json`) are committed to git.
-Personal configs are gitignored — each team member runs `./setup-mcp.sh`.
-
-📖 **See [Getting Started](GETTING-STARTED.md)** for example prompts and usage patterns.
+📖 **See [Getting Started](GETTING-STARTED.md)** for detailed setup steps, AmpCode manual UI setup, and example prompts.
 
 ---
 

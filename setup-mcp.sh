@@ -1,5 +1,24 @@
 #!/bin/bash
-# Setup script to create personal MCP configs from examples
+#
+# Airflow MCP Setup Script
+# ========================
+# Creates personal MCP configs from committed example templates.
+# Each team member runs this script - personal configs are gitignored.
+#
+# HOW IT WORKS:
+#   - Example files (.example.json) are committed to git as templates
+#   - This script copies them to active configs, replacing $PROJECT_DIR with actual path
+#   - Personal configs (.mcp.json, .amp/settings.json, .vscode/mcp.json) are gitignored
+#   - All tools share the same SSO cookies in .airflow_state/
+#
+# RECOMMENDED SETUP ORDER:
+#   1. ./setup-mcp.sh claude   → Restart Claude Code → Complete SSO login
+#   2. Test in Claude Code: "List all Airflow DAGs"
+#   3. ./setup-mcp.sh rest     → Restart AmpCode + VSCode (cookies already saved)
+#
+# WHEN NOT ON VPN:
+#   ./setup-mcp.sh disable     → Avoid login prompts on tool startup
+#   ./setup-mcp.sh enable      → Re-enable when back on VPN
 #
 # Usage:
 #   ./setup-mcp.sh claude   # Step 1: Setup Claude Code, then SSO login & test
@@ -13,7 +32,13 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Config files
+# ============================================================================
+# CONFIG FILE PATHS
+# ============================================================================
+# Example files (committed to git - templates for team)
+# Personal files (gitignored - created by this script)
+# ============================================================================
+
 CLAUDE_EXAMPLE="$SCRIPT_DIR/.mcp.example.json"
 CLAUDE_CONFIG="$SCRIPT_DIR/.mcp.json"
 
@@ -23,7 +48,10 @@ AMP_CONFIG="$SCRIPT_DIR/.amp/settings.json"
 VSCODE_EXAMPLE="$SCRIPT_DIR/.vscode/mcp.example.json"
 VSCODE_CONFIG="$SCRIPT_DIR/.vscode/mcp.json"
 
-# Colors
+# ============================================================================
+# OUTPUT HELPERS
+# ============================================================================
+
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
@@ -93,6 +121,13 @@ show_status() {
     echo ""
 }
 
+# ============================================================================
+# CREATE CONFIG FROM EXAMPLE TEMPLATE
+# ============================================================================
+# Copies example file to personal config, replacing $PROJECT_DIR placeholder
+# with the actual directory path. Also handles restoring disabled configs.
+# ============================================================================
+
 create_config() {
     local example="$1"
     local config="$2"
@@ -117,9 +152,14 @@ create_config() {
         return 0
     fi
 
+    # Replace $PROJECT_DIR with actual path
     sed "s|\\\$PROJECT_DIR|$SCRIPT_DIR|g" "$example" > "$config"
     log_info "Created $name"
 }
+
+# ============================================================================
+# SETUP COMMANDS
+# ============================================================================
 
 setup_claude() {
     echo ""
@@ -145,6 +185,9 @@ setup_rest() {
     echo "Restart AmpCode and VSCode to load MCP."
     echo "SSO cookies are shared - no re-login needed."
     echo ""
+    echo "Note: AmpCode may also require manual UI setup."
+    echo "See GETTING-STARTED.md for details."
+    echo ""
 }
 
 setup_all() {
@@ -159,6 +202,13 @@ setup_all() {
     echo "Other tools will reuse the saved cookies."
     echo ""
 }
+
+# ============================================================================
+# TOGGLE COMMANDS (DISABLE/ENABLE)
+# ============================================================================
+# Renames config files to .disabled suffix to prevent MCP from loading.
+# Useful when not on VPN to avoid login prompts on every tool startup.
+# ============================================================================
 
 disable_all() {
     echo ""
@@ -229,6 +279,10 @@ enable_all() {
     fi
     echo ""
 }
+
+# ============================================================================
+# MAIN - PARSE COMMAND
+# ============================================================================
 
 case "${1:-}" in
     claude)
