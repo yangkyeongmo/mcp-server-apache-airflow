@@ -1,0 +1,34 @@
+{
+  "_readme": [
+    "AmpCode MCP config - place at project root as .amp/settings.json",
+    "Run: ./setup-mcp.sh rest (auto-replaces $PROJECT_DIR)",
+    "Or copy this file to .amp/settings.json and replace $PROJECT_DIR with actual path",
+    "Note: Uses 'amp.mcpServers' key (not 'mcpServers') for AmpCode format"
+  ],
+  "amp.mcpServers": {
+    "airflow-sso": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--directory",
+        "$PROJECT_DIR",
+        "--extra",
+        "sso",
+        "mcp-server-apache-airflow"
+      ],
+      "env": {
+        "AIRFLOW_HOST": "https://pidgey.ready-internal.net",
+        "AIRFLOW_SSO_AUTH": "true",
+        "AIRFLOW_VERIFY": "false",
+        "AIRFLOW_STATE_DIR": "$PROJECT_DIR/.airflow_state",
+        "READ_ONLY": "true"
+      }
+    }
+  },
+  "amp.mcpTrustedServers": [
+    {
+      "serverName": "airflow-sso",
+      "allow": true
+    }
+  ]
+}

@@ -1,240 +1,157 @@
 #!/bin/bash
-# Setup script to sync MCP Airflow config to Claude Code, AmpCode, and VSCode Copilot
+# Setup script to create personal MCP configs from examples
 #
 # Usage:
-#   ./setup-mcp.sh           # Show help
-#   ./setup-mcp.sh claude    # Enable for Claude Code only
-#   ./setup-mcp.sh amp       # Enable for AmpCode only
-#   ./setup-mcp.sh vscode    # Enable for VSCode Copilot only
-#   ./setup-mcp.sh all       # Enable for all tools
-#   ./setup-mcp.sh disable   # Disable for all tools
+#   ./setup-mcp.sh claude   # Step 1: Setup Claude Code, then SSO login & test
+#   ./setup-mcp.sh rest     # Step 2: Setup AmpCode + VSCode (reuses SSO cookies)
+#   ./setup-mcp.sh all      # Setup all at once
+#   ./setup-mcp.sh status   # Show current status
 
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-EXAMPLE_CONFIG="$SCRIPT_DIR/mcp-settings.example.json"
-MASTER_CONFIG="$SCRIPT_DIR/mcp-settings.json"
 
-# Config paths
-CLAUDE_CODE_CONFIG="$HOME/.claude/settings.json"
-AMPCODE_CONFIG="$HOME/.config/amp/settings.json"
-VSCODE_MCP="$SCRIPT_DIR/.vscode/mcp.json"
-PROJECT_MCP="$SCRIPT_DIR/.mcp.json"
+# Config files
+CLAUDE_EXAMPLE="$SCRIPT_DIR/.mcp.example.json"
+CLAUDE_CONFIG="$SCRIPT_DIR/.mcp.json"
 
-# Colors for output
-RED='\033[0;31m'
+AMP_EXAMPLE="$SCRIPT_DIR/.amp/settings.example.json"
+AMP_CONFIG="$SCRIPT_DIR/.amp/settings.json"
+
+VSCODE_EXAMPLE="$SCRIPT_DIR/.vscode/mcp.example.json"
+VSCODE_CONFIG="$SCRIPT_DIR/.vscode/mcp.json"
+
+# Colors
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+NC='\033[0m'
 
-log_info() { echo -e "${GREEN}[INFO]${NC} $1"; }
-log_warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
-log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
+log_info() { echo -e "${GREEN}✓${NC} $1"; }
+log_warn() { echo -e "${YELLOW}⚠${NC} $1"; }
 
 show_help() {
     echo ""
-    echo -e "${BLUE}Airflow MCP Server - Setup Script${NC}"
+    echo -e "${BLUE}Airflow MCP Setup${NC}"
     echo ""
-    echo "Usage: ./setup-mcp.sh <command>"
+    echo "Recommended order:"
+    echo "  1. ./setup-mcp.sh claude  # Setup Claude Code"
+    echo "  2. Restart Claude Code, SSO login will trigger"
+    echo "  3. Test MCP tools work in Claude Code"
+    echo "  4. ./setup-mcp.sh rest    # Setup AmpCode + VSCode"
     echo ""
     echo "Commands:"
-    echo "  claude    Enable Airflow MCP for Claude Code"
-    echo "  amp       Enable Airflow MCP for AmpCode"
-    echo "  vscode    Enable Airflow MCP for VSCode Copilot"
-    echo "  all       Enable for all tools"
-    echo "  disable   Disable for all tools"
-    echo "  status    Show current status"
-    echo ""
-    echo "After enabling, restart the tool and complete SSO login."
+    echo "  claude   Setup Claude Code only"
+    echo "  rest     Setup AmpCode + VSCode (after SSO login)"
+    echo "  all      Setup all tools at once"
+    echo "  status   Show current config status"
     echo ""
 }
 
-# Check dependencies
-check_deps() {
-    if ! command -v jq &> /dev/null; then
-        log_error "jq is required but not installed. Install with: brew install jq"
-        exit 1
-    fi
-}
-
-# Create personal config from example if needed
-ensure_master_config() {
-    if [ ! -f "$EXAMPLE_CONFIG" ]; then
-        log_error "Example config not found: $EXAMPLE_CONFIG"
-        exit 1
-    fi
-
-    if [ ! -f "$MASTER_CONFIG" ]; then
-        log_info "Creating personal config from example..."
-        sed "s|/path/to/mcp-server-apache-airflow|$SCRIPT_DIR|g" "$EXAMPLE_CONFIG" > "$MASTER_CONFIG"
-        log_info "Created: $MASTER_CONFIG"
-    fi
-}
-
-# Get MCP servers JSON
-get_mcp_servers() {
-    jq '.mcpServers' "$MASTER_CONFIG"
-}
-
-# Enable for Claude Code
-enable_claude() {
-    log_info "Enabling Airflow MCP for Claude Code..."
-
-    mkdir -p "$(dirname "$CLAUDE_CODE_CONFIG")"
-
-    if [ ! -f "$CLAUDE_CODE_CONFIG" ]; then
-        echo '{}' > "$CLAUDE_CODE_CONFIG"
-    fi
-
-    local servers
-    servers=$(get_mcp_servers)
-
-    jq --argjson srv "$servers" '.mcpServers = (.mcpServers // {}) + $srv' "$CLAUDE_CODE_CONFIG" > "${CLAUDE_CODE_CONFIG}.tmp"
-    mv "${CLAUDE_CODE_CONFIG}.tmp" "$CLAUDE_CODE_CONFIG"
-
-    # Also create project-level .mcp.json symlink
-    rm -f "$PROJECT_MCP"
-    ln -s "$(basename "$MASTER_CONFIG")" "$PROJECT_MCP"
-
-    log_info "Enabled: $CLAUDE_CODE_CONFIG"
-    log_info "Enabled: $PROJECT_MCP"
-    echo ""
-    echo -e "${YELLOW}Next: Restart Claude Code, then SSO login will trigger${NC}"
-}
-
-# Enable for AmpCode
-enable_amp() {
-    log_info "Enabling Airflow MCP for AmpCode..."
-
-    mkdir -p "$(dirname "$AMPCODE_CONFIG")"
-
-    if [ ! -f "$AMPCODE_CONFIG" ]; then
-        echo '{}' > "$AMPCODE_CONFIG"
-    fi
-
-    local servers
-    servers=$(get_mcp_servers)
-
-    jq --argjson srv "$servers" '.mcpServers = (.mcpServers // {}) + $srv' "$AMPCODE_CONFIG" > "${AMPCODE_CONFIG}.tmp"
-    mv "${AMPCODE_CONFIG}.tmp" "$AMPCODE_CONFIG"
-
-    log_info "Enabled: $AMPCODE_CONFIG"
-    echo ""
-    echo -e "${YELLOW}Next: Restart AmpCode, then SSO login will trigger${NC}"
-}
-
-# Enable for VSCode Copilot
-enable_vscode() {
-    log_info "Enabling Airflow MCP for VSCode Copilot..."
-
-    mkdir -p "$(dirname "$VSCODE_MCP")"
-
-    local servers
-    servers=$(get_mcp_servers)
-
-    jq -n --argjson srv "$servers" '{ "servers": $srv }' > "$VSCODE_MCP"
-
-    log_info "Enabled: $VSCODE_MCP"
-    echo ""
-    echo -e "${YELLOW}Next: Open this folder in VSCode, Copilot will load MCP${NC}"
-}
-
-# Disable for all tools
-disable_all() {
-    log_info "Disabling Airflow MCP for all tools..."
-
-    # Claude Code
-    if [ -f "$CLAUDE_CODE_CONFIG" ]; then
-        jq 'del(.mcpServers["airflow-sso"])' "$CLAUDE_CODE_CONFIG" > "${CLAUDE_CODE_CONFIG}.tmp"
-        mv "${CLAUDE_CODE_CONFIG}.tmp" "$CLAUDE_CODE_CONFIG"
-        log_info "Disabled in Claude Code"
-    fi
-
-    # AmpCode
-    if [ -f "$AMPCODE_CONFIG" ]; then
-        jq 'del(.mcpServers["airflow-sso"])' "$AMPCODE_CONFIG" > "${AMPCODE_CONFIG}.tmp"
-        mv "${AMPCODE_CONFIG}.tmp" "$AMPCODE_CONFIG"
-        log_info "Disabled in AmpCode"
-    fi
-
-    # VSCode
-    if [ -f "$VSCODE_MCP" ]; then
-        rm -f "$VSCODE_MCP"
-        log_info "Disabled in VSCode Copilot"
-    fi
-
-    # Project-level
-    if [ -f "$PROJECT_MCP" ]; then
-        rm -f "$PROJECT_MCP"
-        log_info "Disabled project .mcp.json"
-    fi
-
-    echo ""
-    log_info "All tools disabled. Restart each tool for changes to take effect."
-}
-
-# Show status
 show_status() {
     echo ""
-    echo -e "${BLUE}Airflow MCP Status${NC}"
+    echo -e "${BLUE}Config Status${NC}"
     echo ""
 
-    # Claude Code
-    if [ -f "$CLAUDE_CODE_CONFIG" ] && jq -e '.mcpServers["airflow-sso"]' "$CLAUDE_CODE_CONFIG" > /dev/null 2>&1; then
-        echo -e "Claude Code:    ${GREEN}ENABLED${NC}"
+    if [ -f "$CLAUDE_CONFIG" ]; then
+        echo -e "  Claude Code  (.mcp.json)            ${GREEN}✓${NC}"
     else
-        echo -e "Claude Code:    ${RED}DISABLED${NC}"
+        echo -e "  Claude Code  (.mcp.json)            ${YELLOW}missing${NC}"
     fi
 
-    # AmpCode
-    if [ -f "$AMPCODE_CONFIG" ] && jq -e '.mcpServers["airflow-sso"]' "$AMPCODE_CONFIG" > /dev/null 2>&1; then
-        echo -e "AmpCode:        ${GREEN}ENABLED${NC}"
+    if [ -f "$AMP_CONFIG" ]; then
+        echo -e "  AmpCode      (.amp/settings.json)   ${GREEN}✓${NC}"
     else
-        echo -e "AmpCode:        ${RED}DISABLED${NC}"
+        echo -e "  AmpCode      (.amp/settings.json)   ${YELLOW}missing${NC}"
     fi
 
-    # VSCode
-    if [ -f "$VSCODE_MCP" ]; then
-        echo -e "VSCode Copilot: ${GREEN}ENABLED${NC}"
+    if [ -f "$VSCODE_CONFIG" ]; then
+        echo -e "  VSCode       (.vscode/mcp.json)     ${GREEN}✓${NC}"
     else
-        echo -e "VSCode Copilot: ${RED}DISABLED${NC}"
+        echo -e "  VSCode       (.vscode/mcp.json)     ${YELLOW}missing${NC}"
     fi
 
-    # Project
-    if [ -f "$PROJECT_MCP" ]; then
-        echo -e "Project .mcp:   ${GREEN}ENABLED${NC}"
+    if [ -d "$SCRIPT_DIR/.airflow_state" ]; then
+        echo ""
+        echo -e "  SSO cookies  (.airflow_state/)      ${GREEN}✓${NC}"
     else
-        echo -e "Project .mcp:   ${RED}DISABLED${NC}"
+        echo ""
+        echo -e "  SSO cookies  (.airflow_state/)      ${YELLOW}not yet (login first)${NC}"
     fi
 
     echo ""
 }
 
-# Main
-check_deps
+create_config() {
+    local example="$1"
+    local config="$2"
+    local name="$3"
+
+    if [ ! -f "$example" ]; then
+        log_warn "Example not found: $example"
+        return 1
+    fi
+
+    mkdir -p "$(dirname "$config")"
+
+    if [ -f "$config" ]; then
+        log_warn "$name already exists, skipping"
+        return 0
+    fi
+
+    sed "s|\\\$PROJECT_DIR|$SCRIPT_DIR|g" "$example" > "$config"
+    log_info "Created $name"
+}
+
+setup_claude() {
+    echo ""
+    echo -e "${BLUE}Setting up Claude Code...${NC}"
+    echo ""
+    create_config "$CLAUDE_EXAMPLE" "$CLAUDE_CONFIG" "Claude Code (.mcp.json)"
+    echo ""
+    echo "Next steps:"
+    echo "  1. Restart Claude Code"
+    echo "  2. SSO login will open in browser"
+    echo "  3. Test: ask Claude to list Airflow DAGs"
+    echo "  4. Run: ./setup-mcp.sh rest"
+    echo ""
+}
+
+setup_rest() {
+    echo ""
+    echo -e "${BLUE}Setting up AmpCode + VSCode...${NC}"
+    echo ""
+    create_config "$AMP_EXAMPLE" "$AMP_CONFIG" "AmpCode (.amp/settings.json)"
+    create_config "$VSCODE_EXAMPLE" "$VSCODE_CONFIG" "VSCode (.vscode/mcp.json)"
+    echo ""
+    echo "Restart AmpCode and VSCode to load MCP."
+    echo "SSO cookies are shared - no re-login needed."
+    echo ""
+}
+
+setup_all() {
+    echo ""
+    echo -e "${BLUE}Setting up all tools...${NC}"
+    echo ""
+    create_config "$CLAUDE_EXAMPLE" "$CLAUDE_CONFIG" "Claude Code (.mcp.json)"
+    create_config "$AMP_EXAMPLE" "$AMP_CONFIG" "AmpCode (.amp/settings.json)"
+    create_config "$VSCODE_EXAMPLE" "$VSCODE_CONFIG" "VSCode (.vscode/mcp.json)"
+    echo ""
+    echo "Restart Claude Code first to trigger SSO login."
+    echo "Other tools will reuse the saved cookies."
+    echo ""
+}
 
 case "${1:-}" in
     claude)
-        ensure_master_config
-        enable_claude
+        setup_claude
         ;;
-    amp)
-        ensure_master_config
-        enable_amp
-        ;;
-    vscode)
-        ensure_master_config
-        enable_vscode
+    rest)
+        setup_rest
         ;;
     all)
-        ensure_master_config
-        enable_claude
-        enable_amp
-        enable_vscode
-        ;;
-    disable)
-        disable_all
+        setup_all
+        show_status
         ;;
     status)
         show_status

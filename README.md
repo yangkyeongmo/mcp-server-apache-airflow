@@ -186,16 +186,12 @@ rm -f $AIRFLOW_STATE_DIR/key $AIRFLOW_STATE_DIR/cookies.enc
 
 ## Local Developer Setup
 
-### 1. Clone the Repository
+### 1. Clone and Install
 
 ```bash
 git clone https://github.com/zedahmed144/mcp-server-apache-airflow
 cd mcp-server-apache-airflow
-```
 
-### 2. Install Dependencies
-
-```bash
 # Install with SSO support
 uv sync --extra sso
 
@@ -203,42 +199,54 @@ uv sync --extra sso
 uv run playwright install chromium
 ```
 
-### 3. Configure AMP
+### 2. Setup MCP Configs
 
-Add to `~/.config/amp/settings.json`:
+The setup script creates personal configs from example templates:
 
-```json
-{
-  "mcpServers": {
-    "airflow-sso": {
-      "command": "uv",
-      "args": [
-        "run",
-        "--directory",
-        "/path/to/mcp-server-apache-airflow",
-        "--extra",
-        "sso",
-        "mcp-server-apache-airflow"
-      ],
-      "env": {
-        "AIRFLOW_HOST": "https://your-airflow-instance.example.com",
-        "AIRFLOW_SSO_AUTH": "true",
-        "AIRFLOW_VERIFY": "true",
-        "AIRFLOW_STATE_DIR": "/path/to/mcp-server-apache-airflow/.airflow_state",
-        "READ_ONLY": "true"
-      }
-    }
-  }
-}
+```bash
+# Step 1: Setup Claude Code (triggers SSO login)
+./setup-mcp.sh claude
+
+# Step 2: After SSO login works, setup other tools
+./setup-mcp.sh rest
 ```
 
-### 4. First Run
+Or setup all at once:
+```bash
+./setup-mcp.sh all
+```
 
-1. Restart AMP and trust the new MCP server
-2. A browser window will open to your Airflow instance
+### 3. First Run (SSO Login)
+
+1. **Restart Claude Code** in this project folder
+2. A browser window opens to your Airflow instance
 3. Complete SSO authentication (Okta, Azure AD, etc.)
-4. Cookies are captured, encrypted, and saved automatically
-5. Subsequent runs use cached cookies until expiry
+4. Cookies are captured, encrypted, and saved to `.airflow_state/`
+5. **Test**: Ask Claude to "list Airflow DAGs"
+
+### 4. Setup Other Tools
+
+Once SSO login succeeds in Claude Code:
+
+```bash
+./setup-mcp.sh rest   # Creates configs for AmpCode + VSCode
+```
+
+- **AmpCode**: Restart and open this project folder
+- **VSCode**: Open this folder, use GitHub Copilot Chat
+
+All tools share the same SSO cookies — no re-login needed.
+
+### Config Files
+
+| Tool | Config File | Key Format |
+|------|-------------|------------|
+| Claude Code | `.mcp.json` | `mcpServers` |
+| AmpCode | `.amp/settings.json` | `amp.mcpServers` |
+| VSCode Copilot | `.vscode/mcp.json` | `servers` |
+
+Example templates (`.example.json`) are committed to git.
+Personal configs are gitignored — each team member runs `./setup-mcp.sh`.
 
 ---
 
