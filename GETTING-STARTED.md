@@ -29,7 +29,7 @@ Restart Claude Code → SSO login opens → Test: *"List all Airflow DAGs"*
 ./setup-mcp.sh rest
 ```
 
-**Important:** AmpCode also requires manual setup in the UI:
+**Important:** AmpCode MIGHT also requires manual setup in the UI:
 1. Open AmpCode → MCP Servers panel → **+ Add**
 2. Fill in:
    - **Server Name:** `airflow-sso`
@@ -56,10 +56,10 @@ The `./setup-mcp.sh rest` command creates `.vscode/mcp.json`. Just restart VSCod
 
 ## Example Prompts
 
-| Prompt | What it does |
-|--------|--------------|
-| *"List all Airflow DAGs"* | Shows available DAGs |
-| *"Are there any failed DAG runs today?"* | Checks for failures |
+| Prompt                                               | What it does          |
+| ---------------------------------------------------- | --------------------- |
+| *"List all Airflow DAGs"*                            | Shows available DAGs  |
+| *"Are there any failed DAG runs today?"*             | Checks for failures   |
 | *"Why did `my_dag` fail yesterday? Show error logs"* | Investigates failures |
 
 ---
@@ -68,8 +68,8 @@ The `./setup-mcp.sh rest` command creates `.vscode/mcp.json`. Just restart VSCod
 
 See [examples/](examples/) for detailed MCP interactions:
 
-| Example | Description |
-|---------|-------------|
+| Example                                                        | Description                                   |
+| -------------------------------------------------------------- | --------------------------------------------- |
 | [Analyze DAG Run Configs](examples/analyze-dag-run-configs.md) | Extract config patterns from 120+ manual runs |
 
 ---
