@@ -51,6 +51,14 @@ Restart VSCode/AmpCode → uses saved SSO cookies.
 ./setup-mcp.sh status    # Check current status
 ```
 
+**How disable/enable works:**
+
+| Tool | Disable | Enable |
+|------|---------|--------|
+| Claude Code | Renames `.mcp.json` → `.mcp.json.disabled` | Restores file |
+| VSCode Copilot | Renames `.vscode/mcp.json` → `.disabled` | Restores file |
+| AmpCode | Removes `airflow-sso` from VSCode settings.json | Re-adds entry |
+
 ---
 
 ## Example Prompts
