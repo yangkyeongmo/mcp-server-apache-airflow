@@ -123,7 +123,3 @@ The AI handled the partial DAG name gracefully, searched for matches, found the 
 
 - `fetch_dags` - Search DAGs by pattern
 - `get_dag_runs` - Retrieve run history with configs
-
-## Related Examples
-
-- [More examples...](./README.md)
