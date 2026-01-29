@@ -1,0 +1,22 @@
+{
+  "mcpServers": {
+    "airflow-sso": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--directory",
+        "/path/to/mcp-server-apache-airflow",
+        "--extra",
+        "sso",
+        "mcp-server-apache-airflow"
+      ],
+      "env": {
+        "AIRFLOW_HOST": "https://pidgey.ready-internal.net",
+        "AIRFLOW_SSO_AUTH": "true",
+        "AIRFLOW_VERIFY": "false",
+        "AIRFLOW_STATE_DIR": "/path/to/mcp-server-apache-airflow/.airflow_state",
+        "READ_ONLY": "true"
+      }
+    }
+  }
+}
