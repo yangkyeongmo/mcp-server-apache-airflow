@@ -9,6 +9,8 @@ This document describes a fork of the public Apache Airflow MCP server with an e
 | **Upstream** | https://github.com/yangkyeongmo/mcp-server-apache-airflow |
 | **Fork (Ready)** | https://github.com/zedahmed144/mcp-server-apache-airflow |
 
+> **New to this repo?** See the [Team Guide](TEAM-GUIDE.md) for quick start and example prompts.
+
 ---
 
 ## Architecture
@@ -247,6 +249,8 @@ All tools share the same SSO cookies — no re-login needed.
 
 Example templates (`.example.json`) are committed to git.
 Personal configs are gitignored — each team member runs `./setup-mcp.sh`.
+
+📖 **See [Team Guide](TEAM-GUIDE.md)** for example prompts and optimal usage patterns.
 
 ---
 
