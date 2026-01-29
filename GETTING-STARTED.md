@@ -61,6 +61,20 @@ Restart VSCode/AmpCode → uses saved SSO cookies.
 
 ---
 
+## Tips
+
+**Daily workflow:** Once initial setup is done, just use:
+```bash
+./setup-mcp.sh enable    # Reconnects all 3 agents when back on VPN
+./setup-mcp.sh disable   # Disconnects all when leaving VPN
+```
+
+**First-time setup shortcut:** After step 2 (Claude Code + SSO login), you can skip steps 3-4 and just run `./setup-mcp.sh enable` — it will configure all three tools at once.
+
+**When SSO token expires:** Don't use `enable`. Instead, run `./setup-mcp.sh claude` first to trigger fresh SSO login, then `./setup-mcp.sh enable` for the rest.
+
+---
+
 ## Example Prompts
 
 | Prompt                                               | What it does          |
