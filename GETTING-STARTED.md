@@ -9,7 +9,7 @@ Quick setup and example prompts for using the Airflow MCP with AI coding assista
 ### 1. Install
 
 ```bash
-git clone https://github.com/zedahmed144/mcp-server-apache-airflow
+git clone git@github.com:ready/mcp-server-apache-airflow.git
 cd mcp-server-apache-airflow
 uv sync --extra sso
 uv run playwright install chromium
@@ -55,11 +55,11 @@ Restart VSCode/AmpCode → uses saved SSO cookies.
 
 **How disable/enable works:**
 
-| Tool | Disable | Enable |
-|------|---------|--------|
-| Claude Code | Renames `.mcp.json` → `.mcp.json.disabled` | Restores file |
-| VSCode Copilot | Renames `.vscode/mcp.json` → `.disabled` | Restores file |
-| AmpCode | Removes `airflow-sso` from VSCode settings | Re-adds config |
+| Tool           | Disable                                    | Enable         |
+| -------------- | ------------------------------------------ | -------------- |
+| Claude Code    | Renames `.mcp.json` → `.mcp.json.disabled` | Restores file  |
+| VSCode Copilot | Renames `.vscode/mcp.json` → `.disabled`   | Restores file  |
+| AmpCode        | Removes `airflow-sso` from VSCode settings | Re-adds config |
 
 > **Why not `"disabled": true` for AmpCode?** We tried toggling a `"disabled"` property (like
 > other MCP clients support), but AmpCode ignores it and still attempts to connect — launching

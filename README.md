@@ -9,6 +9,8 @@ This document describes a fork of the public Apache Airflow MCP server with an e
 | **Upstream**     | https://github.com/yangkyeongmo/mcp-server-apache-airflow |
 | **Fork (Ready)** | https://github.com/ready/mcp-server-apache-airflow        |
 
+> **Initial Design Doc:** [AMP CLI + Airflow via MCP](https://readybossplatform.atlassian.net/wiki/spaces/II/pages/511475713/AMP+Airflow+via+MCP) (Confluence, may be outdated — this README is the source of truth)
+
 > **New to this repo?** See [Getting Started](GETTING-STARTED.md) for quick setup and example prompts.
 
 ---
@@ -199,7 +201,7 @@ rm -f $AIRFLOW_STATE_DIR/key $AIRFLOW_STATE_DIR/cookies.enc
 ## Quick Start
 
 ```bash
-git clone https://github.com/zedahmed144/mcp-server-apache-airflow
+git clone git@github.com:ready/mcp-server-apache-airflow.git
 cd mcp-server-apache-airflow
 uv sync --extra sso
 uv run playwright install chromium
