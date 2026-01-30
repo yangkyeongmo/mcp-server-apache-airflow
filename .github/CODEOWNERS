@@ -1,1 +1,4 @@
-*       @yangkyeongmo 
+# CODEOWNERS - Automatic review assignment for pull requests
+# All changes require review from @ready/data-team
+
+* @ready/data-team
