@@ -5,6 +5,9 @@ description = "Model Context Protocol (MCP) server for Apache Airflow"
 authors = [
     { name = "Gyeongmo Yang", email = "me@yanggyeongmo.com" }
 ]
+maintainers = [
+    { name = "Ready Data Team", email = "data@ready.net" }
+]
 dependencies = [
     "httpx>=0.24.1",
     "click>=8.1.7",
@@ -40,9 +43,9 @@ sso = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/zedahmed144/mcp-server-apache-airflow"
-Repository = "https://github.com/zedahmed144/mcp-server-apache-airflow.git"
-"Bug Tracker" = "https://github.com/zedahmed144/mcp-server-apache-airflow/issues"
+Homepage = "https://github.com/ready/mcp-server-apache-airflow"
+Repository = "https://github.com/ready/mcp-server-apache-airflow.git"
+"Bug Tracker" = "https://github.com/ready/mcp-server-apache-airflow/issues"
 "Upstream" = "https://github.com/yangkyeongmo/mcp-server-apache-airflow"
 
 [build-system]
