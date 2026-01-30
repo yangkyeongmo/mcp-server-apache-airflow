@@ -1,0 +1,27 @@
+{
+  "_readme": [
+    "Claude Code MCP config - place at project root as .mcp.json",
+    "Run: ./setup-mcp.sh claude (auto-replaces $PROJECT_DIR)",
+    "Or copy this file to .mcp.json and replace $PROJECT_DIR with actual path"
+  ],
+  "mcpServers": {
+    "airflow-sso": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--directory",
+        "$PROJECT_DIR",
+        "--extra",
+        "sso",
+        "mcp-server-apache-airflow"
+      ],
+      "env": {
+        "AIRFLOW_HOST": "https://pidgey.ready-internal.net",
+        "AIRFLOW_SSO_AUTH": "true",
+        "AIRFLOW_VERIFY": "false",
+        "AIRFLOW_STATE_DIR": "$PROJECT_DIR/.airflow_state",
+        "READ_ONLY": "true"
+      }
+    }
+  }
+}

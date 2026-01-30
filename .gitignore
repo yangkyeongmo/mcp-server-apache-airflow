@@ -31,10 +31,19 @@ ENV/
 
 # IDE
 .idea/
-.vscode/
+.vscode/*
+!.vscode/mcp.example.json
 *.swp
 *.swo
 
 # OS
 .DS_Store
 Thumbs.db
+
+# Airflow MCP SSO State (contains encrypted cookies and keys)
+.airflow_state/
+*.airflow_state/
+
+# Personal MCP configs (gitignored - run ./setup-mcp.sh to create from examples)
+.mcp.json
+.mcp.json.disabled
