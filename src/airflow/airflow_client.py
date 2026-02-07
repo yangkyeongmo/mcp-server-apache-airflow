@@ -71,24 +71,13 @@ def update_token(new_token: str) -> None:
     Args:
         new_token: The new JWT token to use.
     """
-    global _current_jwt_token
+    global _current_jwt_token, api_client
 
     with _token_refresh_lock:
         _current_jwt_token = new_token
         configuration.api_key = {"Authorization": f"{new_token}"}
         configuration.api_key_prefix = {"Authorization": "Bearer"}
         api_client.default_headers["Authorization"] = configuration.get_api_key_with_prefix("Authorization")
-
-
-def refresh_token() -> None:
-    """
-    Refresh the JWT token by executing the refresh command and updating the configuration.
-
-    Raises:
-        RuntimeError: If token refresh fails or no refresh command is configured.
-    """
-    new_token = execute_token_refresh_command()
-    update_token(new_token)
 
 
 class TokenRefreshApiClient(ApiClient):
@@ -115,7 +104,8 @@ class TokenRefreshApiClient(ApiClient):
             # Check if it's an authorization error and we have a refresh command
             if e.status == 401 and AIRFLOW_JWT_TOKEN_REFRESH_COMMAND:
                 try:
-                    refresh_token()
+                    new_token = execute_token_refresh_command()
+                    update_token(new_token)
                     # Retry the request with the new token
                     return super().call_api(*args, **kwargs)
                 except Exception as refresh_error:
