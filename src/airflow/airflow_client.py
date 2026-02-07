@@ -73,11 +73,33 @@ def update_token(new_token: str) -> None:
     """
     global _current_jwt_token, api_client
 
+    _current_jwt_token = new_token
+    configuration.api_key = {"Authorization": f"{new_token}"}
+    configuration.api_key_prefix = {"Authorization": "Bearer"}
+    api_client.default_headers["Authorization"] = configuration.get_api_key_with_prefix("Authorization")
+
+
+def refresh_token(old_token: str | None) -> None:
+    """
+    Refresh the JWT token by executing the refresh command and updating the configuration.
+
+    Uses a lock to prevent multiple simultaneous refresh operations when multiple threads
+    receive 401 errors at the same time. If another thread already refreshed the token,
+    this function will skip the refresh to avoid redundant command executions.
+
+    Args:
+        old_token: The token value before the 401 error, used to detect if another
+                   thread already refreshed it.
+
+    Raises:
+        RuntimeError: If token refresh fails or no refresh command is configured.
+    """
     with _token_refresh_lock:
-        _current_jwt_token = new_token
-        configuration.api_key = {"Authorization": f"{new_token}"}
-        configuration.api_key_prefix = {"Authorization": "Bearer"}
-        api_client.default_headers["Authorization"] = configuration.get_api_key_with_prefix("Authorization")
+        # If token changed (another thread already refreshed it), skip
+        if _current_jwt_token != old_token:
+            return
+        new_token = execute_token_refresh_command()
+        update_token(new_token)
 
 
 class TokenRefreshApiClient(ApiClient):
@@ -104,8 +126,7 @@ class TokenRefreshApiClient(ApiClient):
             # Check if it's an authorization error and we have a refresh command
             if e.status == 401 and AIRFLOW_JWT_TOKEN_REFRESH_COMMAND:
                 try:
-                    new_token = execute_token_refresh_command()
-                    update_token(new_token)
+                    refresh_token(_current_jwt_token)
                     # Retry the request with the new token
                     return super().call_api(*args, **kwargs)
                 except Exception as refresh_error:
