@@ -21,11 +21,26 @@ def get_all_functions() -> list[tuple[Callable, str, str, bool]]:
         (get_dag_runs, "get_dag_runs", "Get DAG runs by ID", True),
         (get_dag_runs_batch, "get_dag_runs_batch", "List DAG runs (batch)", True),
         (get_dag_run, "get_dag_run", "Get a DAG run by DAG ID and DAG run ID", True),
-        (update_dag_run_state, "update_dag_run_state", "Update a DAG run state by DAG ID and DAG run ID", False),
-        (delete_dag_run, "delete_dag_run", "Delete a DAG run by DAG ID and DAG run ID", False),
+        (
+            update_dag_run_state,
+            "update_dag_run_state",
+            "Update a DAG run state by DAG ID and DAG run ID",
+            False,
+        ),
+        (
+            delete_dag_run,
+            "delete_dag_run",
+            "Delete a DAG run by DAG ID and DAG run ID",
+            False,
+        ),
         (clear_dag_run, "clear_dag_run", "Clear a DAG run", False),
         (set_dag_run_note, "set_dag_run_note", "Update the DagRun note", False),
-        (get_upstream_dataset_events, "get_upstream_dataset_events", "Get dataset events for a DAG run", True),
+        (
+            get_upstream_dataset_events,
+            "get_upstream_dataset_events",
+            "Get dataset events for a DAG run",
+            True,
+        ),
     ]
 
 
@@ -36,6 +51,7 @@ def get_dag_run_url(dag_id: str, dag_run_id: str) -> str:
 async def post_dag_run(
     dag_id: str,
     dag_run_id: Optional[str] = None,
+    conf: Optional[Dict[str, Any]] = None,
     data_interval_end: Optional[datetime] = None,
     data_interval_start: Optional[datetime] = None,
     execution_date: Optional[datetime] = None,
@@ -49,6 +65,8 @@ async def post_dag_run(
     # Add non-read-only fields that can be set during creation
     if dag_run_id is not None:
         kwargs["dag_run_id"] = dag_run_id
+    if conf is not None:
+        kwargs["conf"] = conf
     if data_interval_end is not None:
         kwargs["data_interval_end"] = data_interval_end
     if data_interval_start is not None:
@@ -208,7 +226,9 @@ async def clear_dag_run(
     dag_id: str, dag_run_id: str, dry_run: Optional[bool] = None
 ) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
     clear_dag_run = ClearDagRun(dry_run=dry_run)
-    response = dag_run_api.clear_dag_run(dag_id=dag_id, dag_run_id=dag_run_id, clear_dag_run=clear_dag_run)
+    response = dag_run_api.clear_dag_run(
+        dag_id=dag_id, dag_run_id=dag_run_id, clear_dag_run=clear_dag_run
+    )
     return [types.TextContent(type="text", text=str(response.to_dict()))]
 
 
@@ -216,12 +236,16 @@ async def set_dag_run_note(
     dag_id: str, dag_run_id: str, note: str
 ) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
     set_dag_run_note = SetDagRunNote(note=note)
-    response = dag_run_api.set_dag_run_note(dag_id=dag_id, dag_run_id=dag_run_id, set_dag_run_note=set_dag_run_note)
+    response = dag_run_api.set_dag_run_note(
+        dag_id=dag_id, dag_run_id=dag_run_id, set_dag_run_note=set_dag_run_note
+    )
     return [types.TextContent(type="text", text=str(response.to_dict()))]
 
 
 async def get_upstream_dataset_events(
     dag_id: str, dag_run_id: str
 ) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
-    response = dag_run_api.get_upstream_dataset_events(dag_id=dag_id, dag_run_id=dag_run_id)
+    response = dag_run_api.get_upstream_dataset_events(
+        dag_id=dag_id, dag_run_id=dag_run_id
+    )
     return [types.TextContent(type="text", text=str(response.to_dict()))]
