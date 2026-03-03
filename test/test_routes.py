@@ -23,23 +23,6 @@ class TestHealthCheckRoute:
         health_route = next(r for r in app._additional_http_routes if r.path == "/health")
         assert "GET" in health_route.methods
 
-    @pytest.mark.asyncio
-    async def test_health_check_returns_ok_status(self):
-        """Test that the health_check function returns status ok."""
-        from src.server import health_check
-
-        response = await health_check(request=None)
-        assert response.status_code == 200
-
-    @pytest.mark.asyncio
-    async def test_health_check_response_body(self):
-        """Test that the health_check response body contains status ok."""
-        from src.server import health_check
-
-        response = await health_check(request=None)
-        body = json.loads(response.body)
-        assert body == {"status": "ok"}
-
     def test_health_endpoint_via_http_client(self):
         """Test the /health endpoint returns 200 via HTTP test client."""
         from src.server import app
