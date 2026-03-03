@@ -181,6 +181,17 @@ AIRFLOW_JWT_TOKEN_REFRESH_COMMAND=az account get-access-token --resource https:/
 AIRFLOW_JWT_TOKEN_REFRESH_COMMAND=/path/to/your/script.sh
 ```
 
+Internally, the server uses a small authentication layer to configure the official Apache Airflow client:
+
+- A `Configuration` object is created using `AIRFLOW_HOST` and `AIRFLOW_API_VERSION`.
+- Authentication is applied with the following precedence:
+  1. Static JWT token via `AIRFLOW_JWT_TOKEN`
+  2. JWT token obtained via `AIRFLOW_JWT_TOKEN_REFRESH_COMMAND`
+  3. Basic auth via `AIRFLOW_USERNAME` and `AIRFLOW_PASSWORD`
+- A factory function `create_airflow_api_client()` builds the `ApiClient` instance and, when configured, wraps it with automatic JWT refresh support.
+
+Most users do not need to interact with this layer directly, but it is useful context if you are extending the server or running it as a library.
+
 ### Usage with Claude Desktop
 
 Add to your `claude_desktop_config.json`:

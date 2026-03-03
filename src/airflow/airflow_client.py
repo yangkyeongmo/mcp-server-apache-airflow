@@ -18,21 +18,16 @@ from src.envs import (
 # Thread lock for token refresh to prevent concurrent refresh operations
 _token_refresh_lock = threading.Lock()
 
-# Create a configuration and API client
-configuration = Configuration(
-    host=urljoin(AIRFLOW_HOST, f"/api/{AIRFLOW_API_VERSION}"),
-)
-
 # Global variable to store current JWT token
 _current_jwt_token: str | None = AIRFLOW_JWT_TOKEN
 
 
-def execute_token_refresh_command() -> str:
+def _execute_token_refresh_command() -> str:
     """
-    Execute the token refresh command and return the new token.
+    Run the configured token refresh command and return the new token.
 
-    Returns:
-        The new JWT token as a string.
+    Used both when building initial configuration (no token provided) and when
+    TokenRefreshApiClient refreshes on 401.
 
     Raises:
         RuntimeError: If the command execution fails or returns non-zero exit code.
@@ -50,7 +45,9 @@ def execute_token_refresh_command() -> str:
         )
 
         if result.returncode != 0:
-            raise RuntimeError(f"Token refresh command failed with exit code {result.returncode}: {result.stderr}")
+            raise RuntimeError(
+                f"Token refresh command failed with exit code {result.returncode}: {result.stderr}"
+            )
 
         token = result.stdout.strip()
         if not token:
@@ -60,46 +57,8 @@ def execute_token_refresh_command() -> str:
 
     except subprocess.TimeoutExpired as e:
         raise RuntimeError("Token refresh command timed out after 30 seconds") from e
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         raise RuntimeError(f"Failed to execute token refresh command: {str(e)}") from e
-
-
-def update_token(new_token: str) -> None:
-    """
-    Update the JWT token in the configuration and API client.
-
-    Args:
-        new_token: The new JWT token to use.
-    """
-    global _current_jwt_token, api_client
-
-    _current_jwt_token = new_token
-    configuration.api_key = {"Authorization": f"{new_token}"}
-    configuration.api_key_prefix = {"Authorization": "Bearer"}
-    api_client.default_headers["Authorization"] = configuration.get_api_key_with_prefix("Authorization")
-
-
-def refresh_token(old_token: str | None) -> None:
-    """
-    Refresh the JWT token by executing the refresh command and updating the configuration.
-
-    Uses a lock to prevent multiple simultaneous refresh operations when multiple threads
-    receive 401 errors at the same time. If another thread already refreshed the token,
-    this function will skip the refresh to avoid redundant command executions.
-
-    Args:
-        old_token: The token value before the 401 error, used to detect if another
-                   thread already refreshed it.
-
-    Raises:
-        RuntimeError: If token refresh fails or no refresh command is configured.
-    """
-    with _token_refresh_lock:
-        # If token changed (another thread already refreshed it), skip
-        if _current_jwt_token != old_token:
-            return
-        new_token = execute_token_refresh_command()
-        update_token(new_token)
 
 
 class TokenRefreshApiClient(ApiClient):
@@ -126,38 +85,103 @@ class TokenRefreshApiClient(ApiClient):
             # Check if it's an authorization error and we have a refresh command
             if e.status == 401 and AIRFLOW_JWT_TOKEN_REFRESH_COMMAND:
                 try:
-                    refresh_token(_current_jwt_token)
+                    self._refresh_token(_current_jwt_token)
                     # Retry the request with the new token
                     return super().call_api(*args, **kwargs)
-                except Exception as refresh_error:
+                except Exception as refresh_error:  # noqa: BLE001
                     raise e from refresh_error
             raise
 
+    def _update_token(self, new_token: str) -> None:
+        """
+        Update the JWT token in the configuration and API client.
+        """
+        global _current_jwt_token, api_client
 
-# Initialize JWT token
-if _current_jwt_token:
-    # JWT token provided, use it
-    configuration.api_key = {"Authorization": f"{_current_jwt_token}"}
-    configuration.api_key_prefix = {"Authorization": "Bearer"}
-elif AIRFLOW_JWT_TOKEN_REFRESH_COMMAND:
-    # No token provided but refresh command available, execute it to get initial token
-    _current_jwt_token = execute_token_refresh_command()
-    configuration.api_key = {"Authorization": f"{_current_jwt_token}"}
-    configuration.api_key_prefix = {"Authorization": "Bearer"}
-elif AIRFLOW_USERNAME and AIRFLOW_PASSWORD:
-    # Fallback to basic auth
-    configuration.username = AIRFLOW_USERNAME
-    configuration.password = AIRFLOW_PASSWORD
+        _current_jwt_token = new_token
+        configuration.api_key = {"Authorization": f"{new_token}"}
+        configuration.api_key_prefix = {"Authorization": "Bearer"}
+        api_client.default_headers["Authorization"] = configuration.get_api_key_with_prefix("Authorization")
 
-# Create API client with automatic token refresh if refresh command is configured
-if AIRFLOW_JWT_TOKEN_REFRESH_COMMAND:
-    api_client = TokenRefreshApiClient(configuration)
-else:
-    api_client = ApiClient(configuration)
+    def _refresh_token(self, old_token: str | None) -> None:
+        """
+        Refresh the JWT token by executing the refresh command and updating the configuration.
 
-# JWT/Bearer auth requires manual header setup because auth_settings() in apache-airflow-client 2.x
-# only supports Basic authentication.
-# If ever updated to apache-airflow-client 3.x it's the other way around, JWT/Bearer is natively
-# supported through "access_token", and Basic auth requires manual header.
-if _current_jwt_token:
-    api_client.default_headers["Authorization"] = configuration.get_api_key_with_prefix("Authorization")
+        Uses a lock to prevent multiple simultaneous refresh operations when multiple threads
+        receive 401 errors at the same time. If another thread already refreshed the token,
+        this function will skip the refresh to avoid redundant command executions.
+        """
+        with _token_refresh_lock:
+            # If token changed (another thread already refreshed it), skip
+            if _current_jwt_token != old_token:
+                return
+            new_token = _execute_token_refresh_command()
+            self._update_token(new_token)
+
+
+def build_configuration() -> Configuration:
+    """
+    Build a configured Airflow API client Configuration.
+
+    The configuration includes:
+    - API host constructed from AIRFLOW_HOST and AIRFLOW_API_VERSION
+    - Authentication based on environment variables, with the following precedence:
+      1. Static JWT token via AIRFLOW_JWT_TOKEN
+      2. JWT token obtained via AIRFLOW_JWT_TOKEN_REFRESH_COMMAND
+      3. Basic auth via AIRFLOW_USERNAME and AIRFLOW_PASSWORD
+    """
+    global _current_jwt_token
+
+    config = Configuration(
+        host=urljoin(AIRFLOW_HOST, f"/api/{AIRFLOW_API_VERSION}"),
+    )
+
+    # Initialize authentication on the configuration
+    if _current_jwt_token:
+        # JWT token provided, use it
+        config.api_key = {"Authorization": f"{_current_jwt_token}"}
+        config.api_key_prefix = {"Authorization": "Bearer"}
+    elif AIRFLOW_JWT_TOKEN_REFRESH_COMMAND:
+        # No token provided but refresh command available, execute it to get initial token.
+        _current_jwt_token = _execute_token_refresh_command()
+        config.api_key = {"Authorization": f"{_current_jwt_token}"}
+        config.api_key_prefix = {"Authorization": "Bearer"}
+    elif AIRFLOW_USERNAME and AIRFLOW_PASSWORD:
+        # Fallback to basic auth
+        config.username = AIRFLOW_USERNAME
+        config.password = AIRFLOW_PASSWORD
+
+    return config
+
+
+def create_airflow_api_client(config: Configuration | None = None) -> ApiClient:
+    """
+    Create a configured Airflow ApiClient instance.
+
+    The client:
+    - Uses TokenRefreshApiClient when AIRFLOW_JWT_TOKEN_REFRESH_COMMAND is configured
+    - Uses ApiClient otherwise
+    - Sets the Authorization header when a JWT token is available
+    """
+    global _current_jwt_token
+
+    configuration_to_use = config or build_configuration()
+
+    if AIRFLOW_JWT_TOKEN_REFRESH_COMMAND:
+        client: ApiClient = TokenRefreshApiClient(configuration_to_use)
+    else:
+        client = ApiClient(configuration_to_use)
+
+    # JWT/Bearer auth requires manual header setup because auth_settings() in apache-airflow-client 2.x
+    # only supports Basic authentication.
+    # If ever updated to apache-airflow-client 3.x it's the other way around, JWT/Bearer is natively
+    # supported through "access_token", and Basic auth requires manual header.
+    if _current_jwt_token:
+        client.default_headers["Authorization"] = configuration_to_use.get_api_key_with_prefix("Authorization")
+
+    return client
+
+
+# Module-level configuration and API client for convenience and backwards compatibility.
+configuration = build_configuration()
+api_client = create_airflow_api_client(configuration)

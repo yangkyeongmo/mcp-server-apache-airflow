@@ -32,13 +32,16 @@ class TestAirflowClientAuthentication:
                     del sys.modules[module]
 
             # Re-import after setting environment
-            from src.airflow.airflow_client import api_client, configuration
+            from src.airflow.airflow_client import api_client, configuration, create_airflow_api_client
 
             # Verify configuration
             assert configuration.host == "http://localhost:8080/api/v1"
             assert configuration.username == "testuser"
             assert configuration.password == "testpass"
             assert isinstance(api_client, ApiClient)
+            # Factory should produce a client equivalent to the module-level one
+            factory_client = create_airflow_api_client()
+            assert isinstance(factory_client, ApiClient)
 
             # No manual header needed - auth_settings() handles Basic auth in v2.x
             assert "Authorization" not in api_client.default_headers
@@ -70,13 +73,16 @@ class TestAirflowClientAuthentication:
                     del sys.modules[module]
 
             # Re-import after setting environment
-            from src.airflow.airflow_client import api_client, configuration
+            from src.airflow.airflow_client import api_client, configuration, create_airflow_api_client
 
             # Verify configuration
             assert configuration.host == "http://localhost:8080/api/v1"
             assert configuration.api_key == {"Authorization": "test.jwt.token"}
             assert configuration.api_key_prefix == {"Authorization": "Bearer"}
             assert isinstance(api_client, ApiClient)
+            # Factory should produce a client with the same JWT configuration
+            factory_client = create_airflow_api_client()
+            assert isinstance(factory_client, ApiClient)
 
             # auth_settings() is empty for JWT in v2.x (api_key is dead code in library)
             assert configuration.auth_settings() == {}
@@ -103,7 +109,7 @@ class TestAirflowClientAuthentication:
                     del sys.modules[module]
 
             # Re-import after setting environment
-            from src.airflow.airflow_client import api_client, configuration
+            from src.airflow.airflow_client import api_client, configuration, create_airflow_api_client
 
             # Verify JWT token is used (not basic auth)
             assert configuration.host == "http://localhost:8080/api/v1"
@@ -113,6 +119,9 @@ class TestAirflowClientAuthentication:
             assert not hasattr(configuration, "username") or configuration.username is None
             assert not hasattr(configuration, "password") or configuration.password is None
             assert isinstance(api_client, ApiClient)
+            # Factory should honour the same precedence rules
+            factory_client = create_airflow_api_client()
+            assert isinstance(factory_client, ApiClient)
 
     def test_no_auth_configuration(self):
         """Test that configuration works with no authentication (for testing/development)."""
@@ -124,7 +133,7 @@ class TestAirflowClientAuthentication:
                     del sys.modules[module]
 
             # Re-import after setting environment
-            from src.airflow.airflow_client import api_client, configuration
+            from src.airflow.airflow_client import api_client, configuration, create_airflow_api_client
 
             # Verify configuration
             assert configuration.host == "http://localhost:8080/api/v1"
@@ -134,6 +143,9 @@ class TestAirflowClientAuthentication:
             # api_key might be an empty dict by default, but should not have Authorization
             assert "Authorization" not in getattr(configuration, "api_key", {})
             assert isinstance(api_client, ApiClient)
+            # Factory should also create an unauthenticated client
+            factory_client = create_airflow_api_client()
+            assert isinstance(factory_client, ApiClient)
 
     def test_environment_variable_parsing(self):
         """Test that environment variables are parsed correctly."""
@@ -254,11 +266,11 @@ class TestAirflowClientAuthentication:
                 if module in sys.modules:
                     del sys.modules[module]
 
-            from src.airflow.airflow_client import execute_token_refresh_command
+            from src.airflow.airflow_client import _execute_token_refresh_command
 
             # Execute the refresh command and expect an error
             try:
-                execute_token_refresh_command()
+                _execute_token_refresh_command()
                 raise AssertionError("Should have raised RuntimeError")
             except RuntimeError as e:
                 assert "failed with exit code 1" in str(e)
@@ -284,11 +296,11 @@ class TestAirflowClientAuthentication:
                 if module in sys.modules:
                     del sys.modules[module]
 
-            from src.airflow.airflow_client import execute_token_refresh_command
+            from src.airflow.airflow_client import _execute_token_refresh_command
 
             # Execute the refresh command and expect a timeout error
             try:
-                execute_token_refresh_command()
+                _execute_token_refresh_command()
                 raise AssertionError("Should have raised RuntimeError")
             except RuntimeError as e:
                 assert "timed out" in str(e)
