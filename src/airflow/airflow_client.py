@@ -15,9 +15,6 @@ from src.envs import (
     AIRFLOW_USERNAME,
 )
 
-# Thread lock for token refresh to prevent concurrent refresh operations
-_token_refresh_lock = threading.Lock()
-
 # Global variable to store current JWT token
 _current_jwt_token: str | None = AIRFLOW_JWT_TOKEN
 
@@ -69,6 +66,8 @@ class TokenRefreshApiClient(ApiClient):
     execute the token refresh command, and retry the request with the new token.
     """
 
+    _refresh_lock = threading.Lock()
+
     def call_api(self, *args: Any, **kwargs: Any) -> Any:
         """
         Execute API call with automatic token refresh on 401 errors.
@@ -111,7 +110,7 @@ class TokenRefreshApiClient(ApiClient):
         receive 401 errors at the same time. If another thread already refreshed the token,
         this function will skip the refresh to avoid redundant command executions.
         """
-        with _token_refresh_lock:
+        with self._refresh_lock:
             # If token changed (another thread already refreshed it), skip
             if _current_jwt_token != old_token:
                 return
