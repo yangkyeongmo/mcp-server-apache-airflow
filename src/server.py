@@ -1,10 +1,7 @@
 from fastmcp import FastMCP
-from starlette.requests import Request
-from starlette.responses import JSONResponse
+
+from src.routes import register_routes
 
 app = FastMCP("mcp-apache-airflow")
 
-
-@app.custom_route("/health", methods=["GET"])
-async def health_check(request: Request) -> JSONResponse:
-    return JSONResponse({"status": "ok"})
+register_routes(app)
