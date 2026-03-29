@@ -101,6 +101,10 @@ This project implements a [Model Context Protocol](https://modelcontextprotocol.
 | Get Health Status                | `/api/v1/health`                                                                            | ✅     |
 | Get Version                      | `/api/v1/version`                                                                           | ✅     |
 
+## Hosted deployment
+
+A hosted deployment is available on [Fronteir AI](https://fronteir.ai/mcp/yangkyeongmo-mcp-server-apache-airflow).
+
 ## Setup
 
 ### Dependencies
