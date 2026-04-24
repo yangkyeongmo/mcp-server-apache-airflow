@@ -26,6 +26,7 @@ def get_all_functions() -> list[tuple[Callable, str, str, bool]]:
         (clear_dag_run, "clear_dag_run", "Clear a DAG run", False),
         (set_dag_run_note, "set_dag_run_note", "Update the DagRun note", False),
         (get_upstream_dataset_events, "get_upstream_dataset_events", "Get dataset events for a DAG run", True),
+        (list_failed_dag_runs, "list_failed_dag_runs", "List failed DAG runs, optionally filtered by time range", True),
     ]
 
 
@@ -225,3 +226,49 @@ async def get_upstream_dataset_events(
 ) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
     response = dag_run_api.get_upstream_dataset_events(dag_id=dag_id, dag_run_id=dag_run_id)
     return [types.TextContent(type="text", text=str(response.to_dict()))]
+
+
+async def list_failed_dag_runs(
+    dag_ids: Optional[List[str]] = None,
+    execution_date_gte: Optional[str] = None,
+    execution_date_lte: Optional[str] = None,
+    start_date_gte: Optional[str] = None,
+    start_date_lte: Optional[str] = None,
+    end_date_gte: Optional[str] = None,
+    end_date_lte: Optional[str] = None,
+    order_by: Optional[str] = None,
+    page_offset: Optional[int] = None,
+    page_limit: Optional[int] = None,
+) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
+    """List DAG runs that have failed, optionally filtered by DAG IDs and time range."""
+    request: Dict[str, Any] = {"state": ["failed"]}
+    if dag_ids is not None:
+        request["dag_ids"] = dag_ids
+    if execution_date_gte is not None:
+        request["execution_date_gte"] = execution_date_gte
+    if execution_date_lte is not None:
+        request["execution_date_lte"] = execution_date_lte
+    if start_date_gte is not None:
+        request["start_date_gte"] = start_date_gte
+    if start_date_lte is not None:
+        request["start_date_lte"] = start_date_lte
+    if end_date_gte is not None:
+        request["end_date_gte"] = end_date_gte
+    if end_date_lte is not None:
+        request["end_date_lte"] = end_date_lte
+    if order_by is not None:
+        request["order_by"] = order_by
+    if page_offset is not None:
+        request["page_offset"] = page_offset
+    if page_limit is not None:
+        request["page_limit"] = page_limit
+
+    response = dag_run_api.get_dag_runs_batch(list_dag_runs_form=request)
+
+    response_dict = response.to_dict()
+
+    # Add UI links to each DAG run
+    for dag_run in response_dict.get("dag_runs", []):
+        dag_run["ui_url"] = get_dag_run_url(dag_run["dag_id"], dag_run["dag_run_id"])
+
+    return [types.TextContent(type="text", text=str(response_dict))]

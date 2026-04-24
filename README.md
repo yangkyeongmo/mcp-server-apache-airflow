@@ -39,6 +39,7 @@ This project implements a [Model Context Protocol](https://modelcontextprotocol.
 | Clear DAG Run                    | `/api/v1/dags/{dag_id}/dagRuns/{dag_run_id}/clear`                                          | ✅     |
 | Set DAG Run Note                 | `/api/v1/dags/{dag_id}/dagRuns/{dag_run_id}/setNote`                                        | ✅     |
 | Get Upstream Dataset Events      | `/api/v1/dags/{dag_id}/dagRuns/{dag_run_id}/upstreamDatasetEvents`                          | ✅     |
+| List Failed DAG Runs             | `/api/v1/dags/~/dagRuns/list` (filtered by state=failed)                                    | ✅     |
 | **Tasks**                  |                                                                                               |        |
 | List DAG Tasks                   | `/api/v1/dags/{dag_id}/tasks`                                                               | ✅     |
 | Get Task Details                 | `/api/v1/dags/{dag_id}/tasks/{task_id}`                                                     | ✅     |
