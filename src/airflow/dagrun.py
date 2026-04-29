@@ -129,7 +129,7 @@ async def get_dag_runs_batch(
     start_date_lte: Optional[str] = None,
     end_date_gte: Optional[str] = None,
     end_date_lte: Optional[str] = None,
-    state: Optional[List[str]] = None,
+    states: Optional[List[str]] = None,
     order_by: Optional[str] = None,
     page_offset: Optional[int] = None,
     page_limit: Optional[int] = None,
@@ -150,8 +150,8 @@ async def get_dag_runs_batch(
         request["end_date_gte"] = end_date_gte
     if end_date_lte is not None:
         request["end_date_lte"] = end_date_lte
-    if state is not None:
-        request["state"] = state
+    if states is not None:
+        request["state"] = states
     if order_by is not None:
         request["order_by"] = order_by
     if page_offset is not None:
