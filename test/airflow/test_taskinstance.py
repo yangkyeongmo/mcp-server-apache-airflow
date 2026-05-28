@@ -1,17 +1,18 @@
 """Unit tests for taskinstance module using pytest framework."""
 
+import json
 from unittest.mock import MagicMock, patch
 
 import mcp.types as types
 import pytest
 
 from src.airflow.taskinstance import (
+    get_log,
     get_task_instance,
     list_task_instance_tries,
     list_task_instances,
     update_task_instance,
 )
-
 
 class TestTaskInstanceModule:
     """
@@ -297,3 +298,58 @@ class TestTaskInstanceModule:
                 if v is not None
             },
         )
+
+    @pytest.mark.asyncio
+    async def test_get_log_v1_string_content(self):
+        """Airflow 2.x v1: plain string => pass through"""
+        body = json.dumps({"content": "log line 1\nlog line 2", "continuation_token": None}).encode()
+        mock_response = MagicMock()
+        mock_response.data = body
+
+        with patch(
+            "src.airflow.taskinstance.task_instance_api.get_log",
+            return_value=mock_response,
+        ) as mock_get:
+            result = await get_log(dag_id="dag_1", task_id="task_a", dag_run_id="run_001", task_try_number=1)
+
+        assert isinstance(result, list) and len(result) == 1
+        assert isinstance(result[0], types.TextContent)
+        assert result[0].text == "log line 1\nlog line 2"
+
+        mock_get.assert_called_once_with(
+            dag_id="dag_1",
+            dag_run_id="run_001",
+            task_id="task_a",
+            task_try_number=1,
+            full_content=True,
+            _preload_content=False,
+        )
+
+    @pytest.mark.asyncio
+    async def test_get_log_v2_structured_content(self):
+        """Airflow 3 v2: list of structured entries => flatten to lines"""
+        body = json.dumps(
+            {
+                "content": [
+                    {"timestamp": "2026-05-27T17:00:24Z", "level": "INFO", "event": "Task started"},
+                    {"timestamp": "2026-05-27T17:00:33Z", "level": "INFO", "event": "Task succeeded"},
+                    {"message": "no-timestamp entry"},
+                    "raw string entry",
+                ],
+                "continuation_token": None,
+            }
+        ).encode()
+        mock_response = MagicMock()
+        mock_response.data = body
+
+        with patch(
+            "src.airflow.taskinstance.task_instance_api.get_log",
+            return_value=mock_response,
+        ):
+            result = await get_log(dag_id="dag_1", task_id="task_a", dag_run_id="run_001", task_try_number=1)
+
+        text = result[0].text
+        assert "[2026-05-27T17:00:24Z INFO] Task started" in text
+        assert "[2026-05-27T17:00:33Z INFO] Task succeeded" in text
+        assert "no-timestamp entry" in text
+        assert "raw string entry" in text
