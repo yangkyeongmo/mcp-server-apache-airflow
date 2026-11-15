@@ -1,4 +1,4 @@
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Callable, List, Union
 
 import mcp.types as types
 from airflow_client.client.api.provider_api import ProviderApi
@@ -15,26 +15,14 @@ def get_all_functions() -> list[tuple[Callable, str, str, bool]]:
     ]
 
 
-async def get_providers(
-    limit: Optional[int] = None,
-    offset: Optional[int] = None,
-) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
+async def get_providers() -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
     """
     Get a list of providers.
 
-    Args:
-        limit: The numbers of items to return.
-        offset: The number of items to skip before starting to collect the result set.
+    Airflow's stable REST spec for GET /providers has no pagination parameters.
 
     Returns:
         A list of providers with their details.
     """
-    # Build parameters dictionary
-    kwargs: Dict[str, Any] = {}
-    if limit is not None:
-        kwargs["limit"] = limit
-    if offset is not None:
-        kwargs["offset"] = offset
-
-    response = provider_api.get_providers(**kwargs)
+    response = provider_api.get_providers()
     return [types.TextContent(type="text", text=str(response.to_dict()))]

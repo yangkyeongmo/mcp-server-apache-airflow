@@ -1,0 +1,75 @@
+name: Bug report
+description: Report a failure talking to Apache Airflow through this MCP server
+title: "[bug] "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. Please fill in every section so this can be triaged.
+
+        **Maintainer labels** (do not apply yourself unless you are a maintainer; they may not exist yet):
+        `needs-triage`, `factory-eligible`, `security`, `airflow-2`, `airflow-3`, `size/S`, `size/M`, `size/L`.
+        See [CONTRIBUTING.md](https://github.com/yangkyeongmo/mcp-server-apache-airflow/blob/main/CONTRIBUTING.md).
+  - type: input
+    id: airflow-version
+    attributes:
+      label: Apache Airflow version
+      description: The Airflow version of the deployment you called (for example 2.10.4 or 3.0.2).
+      placeholder: "2.10.4"
+    validations:
+      required: true
+  - type: dropdown
+    id: airflow-api-version
+    attributes:
+      label: Airflow REST API version
+      options:
+        - v1 (Airflow 2.x stable REST)
+        - v2 (Airflow 3.x)
+        - unknown
+    validations:
+      required: true
+  - type: input
+    id: mcp-version
+    attributes:
+      label: mcp-server-apache-airflow version
+      description: PyPI version, git SHA, or "main".
+      placeholder: "0.2.10"
+    validations:
+      required: true
+  - type: input
+    id: python-version
+    attributes:
+      label: Python version
+      placeholder: "3.12"
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduction
+      description: Exact steps, env vars (redact secrets), MCP client, and tool name.
+      placeholder: |
+        1. AIRFLOW_HOST=... AIRFLOW_USERNAME=... uvx mcp-server-apache-airflow --read-only
+        2. Call tool get_dag_runs_batch with ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected
+      description: What should have happened.
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual
+      description: What happened instead. Paste the error or tool output (redact secrets).
+    validations:
+      required: true
+  - type: textarea
+    id: extra
+    attributes:
+      label: Additional context
+      description: Auth method (basic vs JWT), managed Airflow (MWAA/Composer), reverse-proxy path prefix, logs.

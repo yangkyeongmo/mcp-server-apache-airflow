@@ -1,6 +1,7 @@
-.PHONY: run build publish lint format test
+.PHONY: run build publish lint lint-fix format typecheck test test-contract test-integration
 
 PYTHON=uv run --env-file .env python
+UV=uv run
 
 PARAMS=
 run:
@@ -12,8 +13,18 @@ build:
 publish:
 	uv publish
 lint:
-	$(PYTHON) -m ruff check . --fix
+	$(UV) ruff format --check .
+	$(UV) ruff check .
+lint-fix:
+	$(UV) ruff check . --fix
+	$(UV) ruff format .
 format:
-	$(PYTHON) -m ruff format .
+	$(UV) ruff format .
+typecheck:
+	$(UV) mypy src
 test:
-	$(PYTHON) -m pytest test/ -v
+	$(UV) pytest test/ -v -m "not integration"
+test-contract:
+	$(UV) pytest test/contract -v
+test-integration:
+	$(UV) pytest test/ -v -m integration

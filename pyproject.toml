@@ -62,10 +62,28 @@ line-length = 120
 [tool.ruff.lint]
 select = ["E", "W", "F", "B", "I"]
 
+[tool.ruff.lint.isort]
+known-first-party = ["src"]
+
+[tool.mypy]
+python_version = "3.10"
+files = ["src"]
+ignore_missing_imports = true
+pretty = true
+show_error_codes = true
+warn_unused_ignores = false
+# Baseline: existing wrappers build heterogeneous request dicts (str/int/bool/list)
+# without TypedDicts, and FastMCP.run() types transport as a Literal. New errors
+# outside these codes still fail CI. Tighten incrementally as wrappers are typed.
+disable_error_code = ["assignment", "arg-type"]
+
 [dependency-groups]
 dev = [
     "ruff>=0.11.0",
     "pytest>=7.0.0",
     "pytest-cov>=4.0.0",
     "pytest-asyncio>=0.21.0",
+    "mypy>=2.4.1",
+    "pyyaml>=6.0.2",
+    "types-pyyaml>=6.0.12.20261113",
 ]

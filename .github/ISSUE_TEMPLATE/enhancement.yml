@@ -1,0 +1,65 @@
+name: Enhancement
+description: Request a new tool, Airflow version, or behavior change
+title: "[enhancement] "
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Describe the change you want and why.
+
+        **Maintainer labels** (do not apply yourself unless you are a maintainer; they may not exist yet):
+        `needs-triage`, `factory-eligible`, `security`, `airflow-2`, `airflow-3`, `size/S`, `size/M`, `size/L`.
+        See [CONTRIBUTING.md](https://github.com/yangkyeongmo/mcp-server-apache-airflow/blob/main/CONTRIBUTING.md).
+  - type: input
+    id: airflow-version
+    attributes:
+      label: Target Apache Airflow version(s)
+      description: Which Airflow version this should work with (for example 2.10.x, 3.x, or both).
+      placeholder: "2.10.x"
+    validations:
+      required: true
+  - type: dropdown
+    id: airflow-api-version
+    attributes:
+      label: Airflow REST API version
+      options:
+        - v1 (Airflow 2.x stable REST)
+        - v2 (Airflow 3.x)
+        - both
+        - unknown
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What is hard or impossible today?
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected
+      description: What the server should do after this change, including tool names and REST paths if known.
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual
+      description: What happens today (error, missing tool, wrong payload, etc.).
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Current workaround or repro
+      description: How you work around this now, or steps that show the gap.
+    validations:
+      required: false
+  - type: textarea
+    id: extra
+    attributes:
+      label: Additional context
+      description: Related issues, OpenAPI operationIds, or sample payloads (redact secrets).

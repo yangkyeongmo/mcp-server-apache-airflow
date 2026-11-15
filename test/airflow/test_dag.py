@@ -475,9 +475,8 @@ class TestDagModule:
         assert isinstance(result[0], types.TextContent)
         assert str(test_case["mock_response"]) in result[0].text
 
-    @pytest.mark.integration
-    async def test_dag_functions_integration_flow(self, mock_dag_api):
-        """Integration test showing typical DAG management workflow."""
+    async def test_dag_functions_mocked_workflow(self, mock_dag_api):
+        """Mocked DAG management workflow (not a live-Airflow integration test)."""
         # Test data for a complete workflow
         dag_id = "integration_test_dag"
 

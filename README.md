@@ -379,41 +379,53 @@ touch .env
 
 ### Running Tests
 
-The project uses pytest for testing with the following commands available:
-
 ```bash
-# Run all tests
+# Unit tests and OpenAPI contract tests (no live Airflow)
 make test
+
+# OpenAPI contract tests only
+make test-contract
+
+# Live Airflow 2.x (requires Docker Compose; see CONTRIBUTING.md)
+AIRFLOW_INTEGRATION=1 make test-integration
 ```
+
+`make test` excludes the `integration` marker. CI starts Apache Airflow 2.10.4 with `docker/airflow/docker-compose.yaml` and runs those tests separately. Airflow 3.x is a skipped/allowed-failure job until `apache-airflow-client` is unpinned from `<3`.
 
 ### Code Quality
 
 ```bash
-# Run linting
+# Check formatting and lint (no --fix; this is what CI runs)
 make lint
 
-# Run code formatting
+# Apply ruff fixes locally
+make lint-fix
+
+# Format
 make format
+
+# Typecheck (mypy, baseline config in pyproject.toml)
+make typecheck
 ```
 
 ### Continuous Integration
 
-The project includes a GitHub Actions workflow (`.github/workflows/test.yml`) that automatically:
+GitHub Actions on every push and pull request to `main`:
 
-- Runs tests on Python 3.10, 3.11, and 3.12
-- Executes linting checks using ruff
-- Runs on every push and pull request to `main` branch
+- `lint` — ruff format `--check` and ruff check (never `--fix`)
+- `typecheck` — mypy on `src/`
+- `test (3.10)` / `test (3.11)` / `test (3.12)` — unit test matrix
+- `contract` — tools vs the vendored Airflow 2.10.4 stable REST OpenAPI spec
+- `integration (2.10.4)` — live tool calls against docker-compose Airflow 2.10
+- `integration (3.x)` — skipped while the client pin is `<3`
 
-The CI pipeline ensures code quality and compatibility across supported Python versions before any changes are merged.
+Required check names and the issue → draft PR → merge → tag flow are in [CONTRIBUTING.md](CONTRIBUTING.md). Releases are documented in [RELEASING.md](RELEASING.md).
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome. Use the bug/enhancement issue templates, open a draft PR, and wait for required checks plus a human merge. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
-The package is deployed automatically to PyPI when project.version is updated in `pyproject.toml`.
-Follow semver for versioning.
-
-Please include version update in the PR in order to apply the changes to core logic.
+Tagged releases (`vX.Y.Z` to PyPI, `vX.Y.ZrcN` to TestPyPI) use OIDC trusted publishing. See [RELEASING.md](RELEASING.md).
 
 ## License
 

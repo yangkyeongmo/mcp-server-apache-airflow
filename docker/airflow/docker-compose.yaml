@@ -1,0 +1,50 @@
+# Minimal Airflow 2.x stack for MCP integration tests.
+# SQLite + SequentialExecutor + webserver only. Example DAGs may be empty
+# until a scheduler parses them; read-only REST calls still work.
+#
+# Credentials (CI and local): airflow / airflow
+#
+# Airflow 3.x is not started here. apache-airflow-client is pinned to
+# >=2.7.0,<3, which talks to the v1 stable REST API. See integration.yml.
+
+services:
+  airflow:
+    image: apache/airflow:${AIRFLOW_IMAGE_TAG:-2.10.4}
+    environment:
+      AIRFLOW__CORE__EXECUTOR: SequentialExecutor
+      AIRFLOW__CORE__LOAD_EXAMPLES: "true"
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: sqlite:////opt/airflow/airflow.db
+      AIRFLOW__CORE__FERNET_KEY: "dGhpcyBpcyBhIHRlc3Qga2V5IGZvciBjaSBvbmx5"
+      AIRFLOW__WEBSERVER__SECRET_KEY: "ci-integration-secret"
+      AIRFLOW__WEBSERVER__WORKERS: "1"
+      AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "true"
+      AIRFLOW__API__AUTH_BACKENDS: >-
+        airflow.providers.fab.auth_manager.api.auth.backend.basic_auth,airflow.api.auth.backend.session
+      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "true"
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/health')",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 36
+      start_period: 40s
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        set -euo pipefail
+        airflow db migrate
+        airflow users create \
+          --username airflow \
+          --password airflow \
+          --firstname CI \
+          --lastname User \
+          --role Admin \
+          --email ci@example.com || true
+        exec airflow webserver --port 8080

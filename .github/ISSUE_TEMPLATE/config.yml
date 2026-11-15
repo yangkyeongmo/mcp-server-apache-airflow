@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Contributing and factory labels
+    url: https://github.com/yangkyeongmo/mcp-server-apache-airflow/blob/main/CONTRIBUTING.md
+    about: Label scheme (needs-triage, factory-eligible, security, airflow-2, airflow-3, size/S|M|L) and the issue to PR to release flow.

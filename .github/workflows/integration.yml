@@ -1,0 +1,77 @@
+name: Integration Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+  integration:
+    name: integration (${{ matrix.airflow-version }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    # Airflow 3.x is allowed to fail until apache-airflow-client drops the <3 pin.
+    continue-on-error: ${{ matrix.experimental }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - airflow-version: "2.10.4"
+            experimental: false
+            skip: false
+          - airflow-version: "3.x"
+            experimental: true
+            skip: true
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Skip Airflow 3.x (client pin)
+        if: matrix.skip
+        run: |
+          echo "::notice title=Airflow 3.x integration skipped::Blocked by apache-airflow-client pin (>=2.7.0,<3). Remove the upper bound and this skip to enable Airflow 3 REST coverage."
+          echo "Blocked by apache-airflow-client>=2.7.0,<3. Airflow 3 uses the v2 REST API and a 3.x client."
+
+      - name: Set up Python
+        if: ${{ !matrix.skip }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install uv
+        if: ${{ !matrix.skip }}
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "latest"
+
+      - name: Install dependencies
+        if: ${{ !matrix.skip }}
+        run: uv sync --dev --frozen
+
+      - name: Start Airflow ${{ matrix.airflow-version }}
+        if: ${{ !matrix.skip }}
+        env:
+          AIRFLOW_IMAGE_TAG: ${{ matrix.airflow-version }}
+        run: docker compose -f docker/airflow/docker-compose.yaml -p mcp-airflow-it up -d --wait
+
+      - name: Run integration tests
+        if: ${{ !matrix.skip }}
+        env:
+          AIRFLOW_INTEGRATION: "1"
+          AIRFLOW_HOST: http://127.0.0.1:8080
+          AIRFLOW_USERNAME: airflow
+          AIRFLOW_PASSWORD: airflow
+          AIRFLOW_API_VERSION: v1
+        run: uv run pytest test/ -v -m integration
+
+      - name: Airflow logs (on failure)
+        if: ${{ !matrix.skip && failure() }}
+        run: docker compose -f docker/airflow/docker-compose.yaml -p mcp-airflow-it logs --no-color | tail -n 200
+
+      - name: Stop Airflow
+        if: ${{ !matrix.skip && always() }}
+        run: docker compose -f docker/airflow/docker-compose.yaml -p mcp-airflow-it down -v
