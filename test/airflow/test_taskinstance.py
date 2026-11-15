@@ -183,7 +183,6 @@ class TestTaskInstanceModule:
     async def test_update_task_instance(self, dag_id, dag_run_id, task_id, state):
         """
         Test `update_task_instance` for updating state and validating request payload.
-        Also verifies that patch API is called with the correct update mask.
         """
         mock_response = MagicMock()
         mock_response.to_dict.return_value = {
@@ -210,14 +209,12 @@ class TestTaskInstanceModule:
         if state is not None:
             assert state in content.text
 
-        expected_mask = ["state"] if state is not None else []
-        expected_request = {"state": state} if state is not None else {}
+        expected_request = {"new_state": state} if state is not None else {}
         mock_patch.assert_called_once_with(
             dag_id=dag_id,
             dag_run_id=dag_run_id,
             task_id=task_id,
-            update_mask=expected_mask,
-            task_instance_request=expected_request,
+            update_task_instance=expected_request,
         )
 
     @pytest.mark.asyncio

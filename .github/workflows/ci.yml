@@ -1,0 +1,202 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: uv sync --dev
+
+      - name: Check formatting
+        run: uv run ruff format --check .
+
+      - name: Run linting (check-only, no --fix)
+        run: uv run ruff check .
+
+  typecheck:
+    name: typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: uv sync --dev
+
+      - name: Run mypy
+        run: uv run mypy src
+
+  test:
+    name: test (${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: uv sync --dev
+
+      - name: Run unit tests
+        run: uv run pytest test/ -m "not integration" -v --cov=src --cov-report=xml
+
+      - name: Upload coverage reports
+        if: matrix.python-version == '3.11'
+        uses: codecov/codecov-action@v4
+        with:
+          fail_ci_if_error: false
+
+  contract:
+    name: contract
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: uv sync --dev
+
+      - name: Run OpenAPI contract tests
+        run: uv run pytest test/contracts -m contract -v
+
+  integration:
+    name: integration (${{ matrix.airflow-version }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    continue-on-error: ${{ matrix.allow-failure }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - airflow-version: "2.10.5"
+            airflow-major: "2"
+            allow-failure: false
+          - airflow-version: "3.4.0"
+            airflow-major: "3"
+            allow-failure: true
+    env:
+      AIRFLOW_VERSION: ${{ matrix.airflow-version }}
+      AIRFLOW_MAJOR: ${{ matrix.airflow-major }}
+      AIRFLOW_HOST: http://127.0.0.1:8080
+      AIRFLOW_USERNAME: airflow
+      AIRFLOW_PASSWORD: airflow
+      AIRFLOW_API_VERSION: v1
+      AIRFLOW_INTEGRATION_REQUIRED: "1"
+    steps:
+      - name: Skip Airflow 3 (blocked by client pin)
+        if: matrix.airflow-major == '3'
+        run: |
+          echo "Airflow ${{ matrix.airflow-version }} integration is skipped."
+          echo "Blocked by apache-airflow-client>=2.7.0,<3, which only speaks the Airflow 2 /api/v1 client."
+          echo "Re-enable this matrix entry after the client pin is lifted."
+
+      - uses: actions/checkout@v4
+        if: matrix.airflow-major != '3'
+
+      - name: Install uv
+        if: matrix.airflow-major != '3'
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        if: matrix.airflow-major != '3'
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        if: matrix.airflow-major != '3'
+        run: uv sync --dev
+
+      - name: Start Airflow ${{ matrix.airflow-version }}
+        if: matrix.airflow-major != '3'
+        run: docker compose -f test/integration/docker-compose.yaml up -d --wait --wait-timeout 180
+
+      - name: Run integration tests
+        if: matrix.airflow-major != '3'
+        run: uv run pytest test/ -m integration -v
+
+      - name: Airflow logs on failure
+        if: failure() && matrix.airflow-major != '3'
+        run: docker compose -f test/integration/docker-compose.yaml logs --no-color | tail -n 200
+
+      - name: Stop Airflow
+        if: always() && matrix.airflow-major != '3'
+        run: docker compose -f test/integration/docker-compose.yaml down -v
+
+  factory-gate:
+    name: factory-gate
+    if: always()
+    needs: [lint, typecheck, test, contract, integration]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require successful factory checks
+        run: |
+          set -euo pipefail
+          echo "lint=${{ needs.lint.result }}"
+          echo "typecheck=${{ needs.typecheck.result }}"
+          echo "test=${{ needs.test.result }}"
+          echo "contract=${{ needs.contract.result }}"
+          echo "integration=${{ needs.integration.result }}"
+          test "${{ needs.lint.result }}" = "success"
+          test "${{ needs.typecheck.result }}" = "success"
+          test "${{ needs.test.result }}" = "success"
+          test "${{ needs.contract.result }}" = "success"
+          test "${{ needs.integration.result }}" = "success"

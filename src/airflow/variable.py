@@ -40,7 +40,7 @@ async def list_variables(
 async def create_variable(
     key: str, value: str, description: Optional[str] = None
 ) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
-    variable_request = {
+    variable_request: Dict[str, Any] = {
         "key": key,
         "value": value,
     }
@@ -59,7 +59,7 @@ async def get_variable(key: str) -> List[Union[types.TextContent, types.ImageCon
 async def update_variable(
     key: str, value: Optional[str] = None, description: Optional[str] = None
 ) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
-    update_request = {}
+    update_request: Dict[str, Any] = {}
     if value is not None:
         update_request["value"] = value
     if description is not None:

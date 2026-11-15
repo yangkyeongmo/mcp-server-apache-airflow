@@ -366,7 +366,7 @@ class TestDagModule:
                 "name": "set_task_state_minimal",
                 "input": {"dag_id": "test_dag", "state": "success"},
                 "mock_response": {"message": "Task state updated"},
-                "expected_state_request": {"state": "success"},
+                "expected_state_request": {"new_state": "success"},
             },
             {
                 "name": "set_task_state_full",
@@ -381,8 +381,8 @@ class TestDagModule:
                 },
                 "mock_response": {"message": "Dry run state update"},
                 "expected_state_request": {
-                    "state": "failed",
-                    "task_ids": ["task1"],
+                    "new_state": "failed",
+                    "task_id": "task1",
                     "execution_date": "2023-01-01T00:00:00Z",
                     "include_upstream": True,
                     "include_downstream": False,
@@ -475,9 +475,8 @@ class TestDagModule:
         assert isinstance(result[0], types.TextContent)
         assert str(test_case["mock_response"]) in result[0].text
 
-    @pytest.mark.integration
-    async def test_dag_functions_integration_flow(self, mock_dag_api):
-        """Integration test showing typical DAG management workflow."""
+    async def test_dag_functions_mocked_workflow(self, mock_dag_api):
+        """Mocked DAG management workflow (not a live Airflow integration test)."""
         # Test data for a complete workflow
         dag_id = "integration_test_dag"
 

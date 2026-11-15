@@ -48,7 +48,7 @@ async def create_connection(
     schema: Optional[str] = None,
     extra: Optional[str] = None,
 ) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
-    connection_request = {
+    connection_request: Dict[str, Any] = {
         "connection_id": conn_id,
         "conn_type": conn_type,
     }
@@ -84,7 +84,7 @@ async def update_connection(
     schema: Optional[str] = None,
     extra: Optional[str] = None,
 ) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
-    update_request = {}
+    update_request: Dict[str, Any] = {}
     if conn_type is not None:
         update_request["conn_type"] = conn_type
     if host is not None:
@@ -120,7 +120,7 @@ async def test_connection(
     schema: Optional[str] = None,
     extra: Optional[str] = None,
 ) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
-    connection_request = {
+    connection_request: Dict[str, Any] = {
         "conn_type": conn_type,
     }
     if host is not None:

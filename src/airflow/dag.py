@@ -125,7 +125,7 @@ async def get_dag_tasks(dag_id: str) -> List[Union[types.TextContent, types.Imag
 async def patch_dag(
     dag_id: str, is_paused: Optional[bool] = None, tags: Optional[List[str]] = None
 ) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
-    update_request = {}
+    update_request: Dict[str, Any] = {}
     update_mask = []
 
     if is_paused is not None:
@@ -146,7 +146,7 @@ async def patch_dags(
     is_paused: Optional[bool] = None,
     tags: Optional[List[str]] = None,
 ) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
-    update_request = {}
+    update_request: Dict[str, Any] = {}
     update_mask = []
 
     if is_paused is not None:
@@ -158,7 +158,7 @@ async def patch_dags(
 
     dag = DAG(**update_request)
 
-    kwargs = {}
+    kwargs: Dict[str, Any] = {}
     if dag_id_pattern is not None:
         kwargs["dag_id_pattern"] = dag_id_pattern
 
@@ -181,7 +181,7 @@ async def get_task(
 async def get_tasks(
     dag_id: str, order_by: Optional[str] = None
 ) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
-    kwargs = {}
+    kwargs: Dict[str, Any] = {}
     if order_by is not None:
         kwargs["order_by"] = order_by
 
@@ -203,7 +203,7 @@ async def clear_task_instances(
     dry_run: Optional[bool] = None,
     reset_dag_runs: Optional[bool] = None,
 ) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
-    clear_request = {}
+    clear_request: Dict[str, Any] = {}
     if task_ids is not None:
         clear_request["task_ids"] = task_ids
     if start_date is not None:
@@ -244,9 +244,10 @@ async def set_task_instances_state(
     include_past: Optional[bool] = None,
     dry_run: Optional[bool] = None,
 ) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
-    state_request = {"state": state}
+    # Airflow stable REST UpdateTaskInstancesState uses new_state and task_id.
+    state_request: Dict[str, Any] = {"new_state": state}
     if task_ids is not None:
-        state_request["task_ids"] = task_ids
+        state_request["task_id"] = task_ids[0] if isinstance(task_ids, list) else task_ids
     if execution_date is not None:
         state_request["execution_date"] = execution_date
     if include_upstream is not None:

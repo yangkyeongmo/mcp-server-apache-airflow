@@ -21,6 +21,11 @@ wheels/
 *.egg
 .pypirc
 .ruff_cache/
+.mypy_cache/
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
 
 # Virtual Environment
 .env
