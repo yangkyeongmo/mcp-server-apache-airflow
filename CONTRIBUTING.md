@@ -41,10 +41,13 @@ Optional: copy environment variables into `.env`. Tests do not require a live Ai
 | `make lint` | Ruff format **check** and ruff check (**no `--fix`**) |
 | `make lint-fix` | Apply ruff fixes and formatting |
 | `make typecheck` | mypy on `src/` |
-| `make test` | Unit + contract tests (`-m "not integration"`) |
+| `make test` | Unit + contract tests (`-m "not integration and not e2e_mcp"`) |
 | `make test-contract` | OpenAPI contract tests only |
 | `make airflow-up` | Start Airflow 2.10.5 via docker compose |
 | `make test-integration` | Live tool calls (`-m integration`) |
+| `make test-e2e-mcp` | MCP-protocol stdio E2E against live Airflow (`-m e2e_mcp`) |
+| `make dump-mcp-tools` | Rewrite `test/mcp/tools_snapshot.json` from a live `tools/list` |
+| `make mcp-compat` | Dump this branch and `main`, fail on breaking MCP schema changes |
 | `make airflow-down` | Stop the compose stack |
 
 CI never passes `--fix` to ruff. A lint failure means the PR must be updated, not auto-fixed in GitHub Actions.
@@ -61,6 +64,21 @@ The runtime client is `apache-airflow-client>=2.7.0,<3`, so Airflow 3 is out of 
 
 The CI matrix runs Airflow **2.10.5** (required) and **3.4.0** (skipped / allowed-failure). The 3.x job is skipped because `apache-airflow-client` is pinned to `<3`.
 
+### MCP schema compatibility
+
+`test/mcp/tools_snapshot.json` is a committed dump of `tools/list` (tool names + `inputSchema`) from a stdio server.
+
+The `mcp-compat` job:
+
+1. Starts this branch over stdio, dumps `tools/list`, and requires it to match the snapshot.
+2. Starts `origin/main` over stdio, dumps `tools/list`, and diffs against this branch.
+
+Breaking changes fail the job: removed/renamed tools, removed params, newly required params, param type changes. New tools and new optional params are allowed. If you intentionally change a schema, run `make dump-mcp-tools` and commit the snapshot.
+
+### MCP protocol E2E
+
+`e2e-mcp (2.10.5)` starts the same Airflow 2.10.5 compose stack, launches the MCP server over stdio with the official Python client, and calls key tools (`fetch_dags`, `get_dag`, `post_dag_run` + `get_dag_run`, variable CRUD, connection CRUD, `get_pools`, `get_health`, `get_version`).
+
 ## Required checks
 
 Maintainers should mark these GitHub Actions **job names** as required status checks on `main` (branch protection is configured in repo settings, not in this PR):
@@ -72,6 +90,8 @@ Maintainers should mark these GitHub Actions **job names** as required status ch
 - `test (3.12)`
 - `contract`
 - `integration (2.10.5)`
+- `mcp-compat`
+- `e2e-mcp (2.10.5)`
 - `factory-gate`
 
 Do **not** require `integration (3.4.0)`; it is an allowed-failure placeholder until the client pin is removed.
