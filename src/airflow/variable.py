@@ -47,7 +47,7 @@ async def create_variable(
     if description is not None:
         variable_request["description"] = description
 
-    response = variable_api.post_variables(variable_request=variable_request)
+    response = variable_api.post_variables(variable=variable_request)
     return [types.TextContent(type="text", text=str(response.to_dict()))]
 
 
@@ -66,7 +66,7 @@ async def update_variable(
         update_request["description"] = description
 
     response = variable_api.patch_variable(
-        variable_key=key, update_mask=list(update_request.keys()), variable_request=update_request
+        variable_key=key, update_mask=list(update_request.keys()), variable=update_request
     )
     return [types.TextContent(type="text", text=str(response.to_dict()))]
 

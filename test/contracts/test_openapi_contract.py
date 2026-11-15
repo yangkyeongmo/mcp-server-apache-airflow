@@ -113,6 +113,20 @@ def test_tool_request_fields_match_spec_schema(api_type, func, tool_name, _read_
 
 
 @pytest.mark.parametrize("api_type, func, tool_name, _read_only", TOOLS, ids=[t[2] for t in TOOLS])
+def test_tool_client_kwargs_match_endpoint(api_type, func, tool_name, _read_only):
+    for call in find_api_calls(func):
+        endpoint = client_endpoint_for_call(func, call)
+        allowed = set(endpoint.params_map["all"])
+        supplied = {keyword.arg for keyword in call.keywords if keyword.arg}
+        extra = sorted(supplied - allowed)
+        assert not extra, f"{tool_name}: client call uses unknown kwargs {extra}; expected subset of {sorted(allowed)}"
+        has_star = any(keyword.arg is None for keyword in call.keywords)
+        missing = [name for name in endpoint.params_map["required"] if name not in supplied]
+        if not has_star:
+            assert not missing, f"{tool_name}: missing required client args {missing}"
+
+
+@pytest.mark.parametrize("api_type, func, tool_name, _read_only", TOOLS, ids=[t[2] for t in TOOLS])
 def test_required_path_params_are_supplied(api_type, func, tool_name, _read_only):
     spec = load_spec()
     source = inspect.getsource(func)

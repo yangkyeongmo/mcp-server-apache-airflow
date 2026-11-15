@@ -65,4 +65,7 @@ async def test_variable_round_trip_against_live_airflow(live_airflow: str) -> No
         listed = _text(await list_variables())
         assert key in listed
     finally:
-        await delete_variable(key=key)
+        try:
+            await delete_variable(key=key)
+        except Exception:
+            pass

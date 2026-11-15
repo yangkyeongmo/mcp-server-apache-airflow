@@ -65,7 +65,7 @@ async def create_connection(
     if extra is not None:
         connection_request["extra"] = extra
 
-    response = connection_api.post_connection(connection_request=connection_request)
+    response = connection_api.post_connection(connection=connection_request)
     return [types.TextContent(type="text", text=str(response.to_dict()))]
 
 
@@ -101,7 +101,7 @@ async def update_connection(
         update_request["extra"] = extra
 
     response = connection_api.patch_connection(
-        connection_id=conn_id, update_mask=list(update_request.keys()), connection_request=update_request
+        connection_id=conn_id, update_mask=list(update_request.keys()), connection=update_request
     )
     return [types.TextContent(type="text", text=str(response.to_dict()))]
 
@@ -136,5 +136,5 @@ async def test_connection(
     if extra is not None:
         connection_request["extra"] = extra
 
-    response = connection_api.test_connection(connection_request=connection_request)
+    response = connection_api.test_connection(connection=connection_request)
     return [types.TextContent(type="text", text=str(response.to_dict()))]
