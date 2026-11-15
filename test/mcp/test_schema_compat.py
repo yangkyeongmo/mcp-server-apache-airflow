@@ -17,7 +17,7 @@ from test.mcp.compat import (
     load_snapshot,
     snapshot_matches,
 )
-from test.mcp.stdio import mcp_stdio_session
+from test.mcp.stdio import mcp_stdio_session, parse_client_text
 
 
 def _tool(name: str, properties: dict, required: list[str] | None = None) -> dict:
@@ -77,6 +77,16 @@ def test_compat_fails_on_removed_tool_param_required_and_type():
     assert (BREAKING_REMOVED_PARAM, "create_variable") in kinds
     assert (BREAKING_NEW_REQUIRED, "create_variable") in kinds
     assert (BREAKING_TYPE_CHANGE, "create_variable") in kinds
+
+
+def test_parse_client_text_handles_airflow_datetime_repr():
+    payload = parse_client_text(
+        "{'dags': [{'dag_id': 'example_bash_operator', "
+        "'last_parsed_time': datetime.datetime(2026, 11, 15, 12, 31, 33, 346287, tzinfo=tzlocal())}], "
+        "'total_entries': 74.0}"
+    )
+    assert payload["dags"][0]["dag_id"] == "example_bash_operator"
+    assert payload["total_entries"] == 74.0
 
 
 def test_snapshot_matches_identical_dumps():

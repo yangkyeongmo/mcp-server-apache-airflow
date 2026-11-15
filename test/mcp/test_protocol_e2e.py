@@ -108,10 +108,12 @@ async def test_protocol_list_and_get_dag(mcp_session: ClientSession) -> None:
 
 @pytest.mark.asyncio
 async def test_protocol_trigger_dag_run_and_read_status(mcp_session: ClientSession) -> None:
-    listed = _as_dict(await _call(mcp_session, "fetch_dags", {"limit": 20}))
+    listed = _as_dict(await _call(mcp_session, "fetch_dags", {"limit": 20, "dag_id_pattern": "example_bash_operator"}))
     dags = listed.get("dags") or []
     dag_id = next((item["dag_id"] for item in dags if item.get("dag_id") == "example_bash_operator"), None)
     if dag_id is None:
+        listed = _as_dict(await _call(mcp_session, "fetch_dags", {"limit": 5}))
+        dags = listed.get("dags") or []
         assert dags, "fetch_dags returned no dags to trigger"
         dag_id = dags[0]["dag_id"]
 
