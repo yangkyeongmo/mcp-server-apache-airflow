@@ -16,7 +16,7 @@ jobs:
       target: ${{ steps.parse.outputs.target }}
       version: ${{ steps.parse.outputs.version }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Parse tag and verify pyproject version
         id: parse
@@ -48,7 +48,7 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Set up Python
         uses: actions/setup-python@v5
