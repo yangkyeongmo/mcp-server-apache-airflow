@@ -40,14 +40,14 @@ async def list_variables(
 async def create_variable(
     key: str, value: str, description: Optional[str] = None
 ) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
-    variable_request = {
+    variable_request: Dict[str, Any] = {
         "key": key,
         "value": value,
     }
     if description is not None:
         variable_request["description"] = description
 
-    response = variable_api.post_variables(variable_request=variable_request)
+    response = variable_api.post_variables(variable=variable_request)
     return [types.TextContent(type="text", text=str(response.to_dict()))]
 
 
@@ -59,14 +59,14 @@ async def get_variable(key: str) -> List[Union[types.TextContent, types.ImageCon
 async def update_variable(
     key: str, value: Optional[str] = None, description: Optional[str] = None
 ) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
-    update_request = {}
+    update_request: Dict[str, Any] = {}
     if value is not None:
         update_request["value"] = value
     if description is not None:
         update_request["description"] = description
 
     response = variable_api.patch_variable(
-        variable_key=key, update_mask=list(update_request.keys()), variable_request=update_request
+        variable_key=key, update_mask=list(update_request.keys()), variable=update_request
     )
     return [types.TextContent(type="text", text=str(response.to_dict()))]
 

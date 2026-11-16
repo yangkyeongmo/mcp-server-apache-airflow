@@ -1,0 +1,38 @@
+# Minimal Airflow 2.x stack for MCP integration tests.
+# Uses the official image entrypoint to migrate the DB and create an admin user,
+# then serializes example DAGs so list/get tools have data without a scheduler.
+services:
+  airflow:
+    image: apache/airflow:${AIRFLOW_VERSION:-2.10.5}
+    environment:
+      AIRFLOW__CORE__EXECUTOR: SequentialExecutor
+      AIRFLOW__CORE__LOAD_EXAMPLES: "true"
+      AIRFLOW__CORE__FERNET_KEY: "PPH8kUlm7pvdkMmwvsUZxKqjp5Wd6d_k8qU3G4Yq3nE="
+      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "true"
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: sqlite:////opt/airflow/airflow.db
+      AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "true"
+      AIRFLOW__WEBSERVER__SECRET_KEY: integration-test-secret
+      AIRFLOW__API__AUTH_BACKENDS: airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session
+      _AIRFLOW_DB_MIGRATE: "true"
+      _AIRFLOW_WWW_USER_CREATE: "true"
+      _AIRFLOW_WWW_USER_USERNAME: airflow
+      _AIRFLOW_WWW_USER_PASSWORD: airflow
+      _AIRFLOW_WWW_USER_FIRSTNAME: Admin
+      _AIRFLOW_WWW_USER_LASTNAME: User
+      _AIRFLOW_WWW_USER_EMAIL: airflow@example.com
+    ports:
+      - "${AIRFLOW_PORT:-8080}:8080"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/health')\"",
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 30
+      start_period: 60s
+    command:
+      - bash
+      - -c
+      - airflow dags reserialize && exec airflow webserver --port 8080

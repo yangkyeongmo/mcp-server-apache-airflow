@@ -1,4 +1,4 @@
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Callable, List, Optional, Union
 
 import mcp.types as types
 from airflow_client.client.api.provider_api import ProviderApi
@@ -29,12 +29,8 @@ async def get_providers(
     Returns:
         A list of providers with their details.
     """
-    # Build parameters dictionary
-    kwargs: Dict[str, Any] = {}
-    if limit is not None:
-        kwargs["limit"] = limit
-    if offset is not None:
-        kwargs["offset"] = offset
-
-    response = provider_api.get_providers(**kwargs)
+    # GET /providers has no query parameters in the Airflow 2.10 stable REST spec.
+    # Keep limit/offset on the tool signature for compatibility; they are not sent.
+    _ = (limit, offset)
+    response = provider_api.get_providers()
     return [types.TextContent(type="text", text=str(response.to_dict()))]

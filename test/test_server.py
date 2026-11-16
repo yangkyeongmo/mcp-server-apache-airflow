@@ -65,7 +65,6 @@ class TestServer:
         assert app.name.startswith("mcp-")
         assert "airflow" in app.name
 
-    @pytest.mark.integration
     def test_app_tool_registration_capability(self):
         """Test that app can register tools without errors."""
         from src.server import app

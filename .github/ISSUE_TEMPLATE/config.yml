@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Contributing and factory flow
+    url: https://github.com/yangkyeongmo/mcp-server-apache-airflow/blob/main/CONTRIBUTING.md
+    about: How issues become draft PRs, required checks, and labels (create labels in the repo settings before applying them).
+  - name: Release process
+    url: https://github.com/yangkyeongmo/mcp-server-apache-airflow/blob/main/RELEASING.md
+    about: Tag-driven PyPI / TestPyPI publishing and rollback.

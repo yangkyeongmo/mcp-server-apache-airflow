@@ -107,7 +107,7 @@ async def create_dataset_event(
     dataset_uri: str,
     extra: Optional[Dict[str, Any]] = None,
 ) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
-    event_request = {
+    event_request: Dict[str, Any] = {
         "dataset_uri": dataset_uri,
     }
     if extra is not None:

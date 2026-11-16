@@ -1,0 +1,64 @@
+name: Enhancement
+description: Propose a new tool, API coverage, or behavior change
+title: "enhancement: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Describe the change you want and why.
+
+        **Label scheme** (maintainers apply these after triage; they are not auto-created):
+        `needs-triage`, `factory-eligible`, `security`, `airflow-2`, `airflow-3`, `size/S`, `size/M`, `size/L`.
+        See [CONTRIBUTING.md](https://github.com/yangkyeongmo/mcp-server-apache-airflow/blob/main/CONTRIBUTING.md).
+  - type: input
+    id: airflow-version
+    attributes:
+      label: Airflow version
+      description: Target Apache Airflow version(s), for example 2.10.5, 3.4.0, or "2.x and 3.x".
+      placeholder: "2.10.5"
+    validations:
+      required: true
+  - type: dropdown
+    id: airflow-line
+    attributes:
+      label: Airflow line
+      options:
+        - Airflow 2.x
+        - Airflow 3.x
+        - Both
+        - Unsure
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What is hard or impossible with the current tools?
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What should the server do after this change?
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: What happens today?
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduction / current workaround
+      description: How you hit the gap today, including tool names and arguments if relevant.
+    validations:
+      required: true
+  - type: textarea
+    id: api
+    attributes:
+      label: Airflow REST API
+      description: Path/method from the stable REST OpenAPI spec if you know it (for example GET /api/v1/dags).

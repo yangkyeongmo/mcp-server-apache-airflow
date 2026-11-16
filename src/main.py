@@ -96,12 +96,11 @@ def main(transport: str, mcp_host: str, mcp_port: int, apis: list[str], read_onl
             app.add_tool(Tool.from_function(func, name=name, description=description))
 
     logging.debug(f"Starting MCP server for Apache Airflow with {transport} transport")
-    params_to_run = {}
 
-    if transport in {"sse", "http"}:
-        if transport == "sse":
-            logging.warning("NOTE: the SSE transport is going to be deprecated.")
-
-        params_to_run = {"port": int(mcp_port), "host": mcp_host}
-
-    app.run(transport=transport, **params_to_run)
+    if transport == "sse":
+        logging.warning("NOTE: the SSE transport is going to be deprecated.")
+        app.run(transport="sse", port=int(mcp_port), host=mcp_host)
+    elif transport == "http":
+        app.run(transport="http", port=int(mcp_port), host=mcp_host)
+    else:
+        app.run(transport="stdio")

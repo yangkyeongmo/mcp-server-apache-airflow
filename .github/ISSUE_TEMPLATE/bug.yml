@@ -1,0 +1,71 @@
+name: Bug report
+description: Report a defect in the Airflow MCP server
+title: "bug: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug.
+
+        **Label scheme** (maintainers apply these after triage; they are not auto-created):
+        `needs-triage`, `factory-eligible`, `security`, `airflow-2`, `airflow-3`, `size/S`, `size/M`, `size/L`.
+        See [CONTRIBUTING.md](https://github.com/yangkyeongmo/mcp-server-apache-airflow/blob/main/CONTRIBUTING.md).
+  - type: input
+    id: airflow-version
+    attributes:
+      label: Airflow version
+      description: Apache Airflow version of the deployment you called (for example 2.10.5 or 3.4.0).
+      placeholder: "2.10.5"
+    validations:
+      required: true
+  - type: input
+    id: mcp-version
+    attributes:
+      label: mcp-server-apache-airflow version
+      description: Package version or git commit.
+      placeholder: "0.2.10"
+    validations:
+      required: true
+  - type: dropdown
+    id: airflow-line
+    attributes:
+      label: Airflow line
+      options:
+        - Airflow 2.x
+        - Airflow 3.x
+        - Unknown
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduction
+      description: Exact steps, MCP client, tool name, and arguments.
+      placeholder: |
+        1. Configure AIRFLOW_HOST / credentials
+        2. Call tool X with arguments Y
+        3. Observe the error
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Include the error message or unexpected payload.
+    validations:
+      required: true
+  - type: textarea
+    id: env
+    attributes:
+      label: Environment
+      description: Auth method (basic/JWT), AIRFLOW_API_VERSION, READ_ONLY, and MCP client.
+      placeholder: |
+        Auth: basic
+        AIRFLOW_API_VERSION: v1
+        Client: Claude Desktop
