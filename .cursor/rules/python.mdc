@@ -57,6 +57,9 @@ Follow these ruff settings for consistent style:
 - Use `zip()` for parallel iteration.
 - Prefer `pathlib` over `os.path` for file operations.
 - Use context managers for resource cleanup.
+- Prefer using classes instead of defining global variables.
+- Prefer wrapping logics in functions rather than spreading out in a script.
+- Prefer putting functions only exists for a class inside the class.
 
 ## Testing Guidelines
 - Create comprehensive unit tests for all modules using the `pytest` framework.

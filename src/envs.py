@@ -10,6 +10,7 @@ AIRFLOW_HOST = urlparse(_airflow_host_raw)._replace(path="").geturl().rstrip("/"
 AIRFLOW_USERNAME = os.getenv("AIRFLOW_USERNAME")
 AIRFLOW_PASSWORD = os.getenv("AIRFLOW_PASSWORD")
 AIRFLOW_JWT_TOKEN = os.getenv("AIRFLOW_JWT_TOKEN")
+AIRFLOW_JWT_TOKEN_REFRESH_COMMAND = os.getenv("AIRFLOW_JWT_TOKEN_REFRESH_COMMAND")
 AIRFLOW_API_VERSION = os.getenv("AIRFLOW_API_VERSION", "v1")
 
 # Environment variable for read-only mode
