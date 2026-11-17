@@ -137,6 +137,8 @@ async def delete_dag_dataset_queued_event(
     uri: str,
 ) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
     response = dataset_api.delete_dag_dataset_queued_event(dag_id=dag_id, uri=uri)
+    if not response:
+        return [types.TextContent(type="text", text=str({"dag_id": dag_id, "uri": uri, "deleted": True}))]
     return [types.TextContent(type="text", text=str(response.to_dict()))]
 
 
@@ -149,6 +151,8 @@ async def delete_dag_dataset_queued_events(
         kwargs["before"] = before
 
     response = dataset_api.delete_dag_dataset_queued_events(dag_id=dag_id, **kwargs)
+    if not response:
+        return [types.TextContent(type="text", text=str({"dag_id": dag_id, "deleted": True}))]
     return [types.TextContent(type="text", text=str(response.to_dict()))]
 
 
@@ -168,4 +172,6 @@ async def delete_dataset_queued_events(
         kwargs["before"] = before
 
     response = dataset_api.delete_dataset_queued_events(uri=uri, **kwargs)
+    if not response:
+        return [types.TextContent(type="text", text=str({"uri": uri, "deleted": True}))]
     return [types.TextContent(type="text", text=str(response.to_dict()))]

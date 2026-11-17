@@ -168,6 +168,8 @@ async def patch_dags(
 
 async def delete_dag(dag_id: str) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
     response = dag_api.delete_dag(dag_id=dag_id)
+    if not response:
+        return [types.TextContent(type="text", text=str({"dag_id": dag_id, "deleted": True}))]
     return [types.TextContent(type="text", text=str(response.to_dict()))]
 
 
