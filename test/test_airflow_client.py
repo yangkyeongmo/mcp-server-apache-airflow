@@ -5,6 +5,7 @@ import os
 import sys
 from unittest.mock import patch
 
+import pytest
 from airflow_client.client import ApiClient
 
 
@@ -155,12 +156,99 @@ class TestAirflowClientAuthentication:
             from src.envs import AIRFLOW_API_VERSION, AIRFLOW_HOST, AIRFLOW_JWT_TOKEN
 
             # Verify environment variables are parsed correctly
-            assert AIRFLOW_HOST == "https://airflow.example.com:8080"
+            assert AIRFLOW_HOST == "https://airflow.example.com:8080/custom"
             assert AIRFLOW_JWT_TOKEN == "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
             assert AIRFLOW_API_VERSION == "v2"
 
             # Verify configuration uses parsed values
-            assert configuration.host == "https://airflow.example.com:8080/api/v2"
+            assert configuration.host == "https://airflow.example.com:8080/custom/api/v2"
             assert configuration.api_key == {"Authorization": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."}
             assert configuration.api_key_prefix == {"Authorization": "Bearer"}
             assert api_client.default_headers["Authorization"] == "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
+
+    @pytest.mark.parametrize(
+        "airflow_host, api_version, expected_host, expected_api_url",
+        [
+            ("https://airflow.example.com", "v1", "https://airflow.example.com", "https://airflow.example.com/api/v1"),
+            (
+                "https://airflow.example.com:8080",
+                "v1",
+                "https://airflow.example.com:8080",
+                "https://airflow.example.com:8080/api/v1",
+            ),
+            (
+                "https://airflow.example.com/my-prefix",
+                "v1",
+                "https://airflow.example.com/my-prefix",
+                "https://airflow.example.com/my-prefix/api/v1",
+            ),
+            (
+                "https://airflow.example.com/my-prefix/",
+                "v1",
+                "https://airflow.example.com/my-prefix",
+                "https://airflow.example.com/my-prefix/api/v1",
+            ),
+            (
+                "https://platform.example.com/org/team/airflow",
+                "v1",
+                "https://platform.example.com/org/team/airflow",
+                "https://platform.example.com/org/team/airflow/api/v1",
+            ),
+            (
+                "https://airflow.example.com/prefix///",
+                "v1",
+                "https://airflow.example.com/prefix",
+                "https://airflow.example.com/prefix/api/v1",
+            ),
+            (
+                "https://airflow.example.com/api/v1",
+                "v1",
+                "https://airflow.example.com",
+                "https://airflow.example.com/api/v1",
+            ),
+            (
+                "https://airflow.example.com:8080/api/v2",
+                "v2",
+                "https://airflow.example.com:8080",
+                "https://airflow.example.com:8080/api/v2",
+            ),
+            (
+                "https://airflow.example.com/my-prefix/api/v1",
+                "v1",
+                "https://airflow.example.com/my-prefix",
+                "https://airflow.example.com/my-prefix/api/v1",
+            ),
+        ],
+        ids=[
+            "https-no-path",
+            "https-with-port",
+            "single-path-prefix",
+            "trailing-slash",
+            "multi-level-path",
+            "multiple-trailing-slashes",
+            "accidental-api-v1-suffix",
+            "accidental-api-v2-with-port",
+            "path-prefix-plus-accidental-api-v1",
+        ],
+    )
+    def test_airflow_host_url_handling(self, airflow_host, api_version, expected_host, expected_api_url):
+        """Test that AIRFLOW_HOST is preserved and the API URL is built correctly."""
+        with patch.dict(
+            os.environ,
+            {
+                "AIRFLOW_HOST": airflow_host,
+                "AIRFLOW_JWT_TOKEN": "tok",
+                "AIRFLOW_API_VERSION": api_version,
+            },
+            clear=True,
+        ):
+            modules_to_clear = ["src.envs", "src.airflow.airflow_client"]
+            for module in modules_to_clear:
+                if module in sys.modules:
+                    del sys.modules[module]
+
+            from src.airflow.airflow_client import configuration
+            from src.envs import AIRFLOW_HOST
+
+            assert AIRFLOW_HOST == expected_host
+            assert configuration.host == expected_api_url
