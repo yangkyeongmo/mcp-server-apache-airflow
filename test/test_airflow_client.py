@@ -5,6 +5,7 @@ import os
 import sys
 from unittest.mock import patch
 
+import pytest
 from airflow_client.client import ApiClient
 
 
@@ -155,12 +156,47 @@ class TestAirflowClientAuthentication:
             from src.envs import AIRFLOW_API_VERSION, AIRFLOW_HOST, AIRFLOW_JWT_TOKEN
 
             # Verify environment variables are parsed correctly
-            assert AIRFLOW_HOST == "https://airflow.example.com:8080"
+            assert AIRFLOW_HOST == "https://airflow.example.com:8080/custom"
             assert AIRFLOW_JWT_TOKEN == "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
             assert AIRFLOW_API_VERSION == "v2"
 
             # Verify configuration uses parsed values
-            assert configuration.host == "https://airflow.example.com:8080/api/v2"
+            assert configuration.host == "https://airflow.example.com:8080/custom/api/v2"
             assert configuration.api_key == {"Authorization": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."}
             assert configuration.api_key_prefix == {"Authorization": "Bearer"}
             assert api_client.default_headers["Authorization"] == "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
+
+
+@pytest.mark.parametrize(
+    ("host", "expected_base"),
+    [
+        (None, "http://localhost:8080"),
+        ("https://airflow.example.com", "https://airflow.example.com"),
+        ("https://airflow.example.com:9090/", "https://airflow.example.com:9090"),
+        ("https://airflow.example.com/production", "https://airflow.example.com/production"),
+        ("https://airflow.example.com/production/", "https://airflow.example.com/production"),
+        ("https://airflow.example.com/team/production/", "https://airflow.example.com/team/production"),
+        ("https://airflow.example.com/api/v1", "https://airflow.example.com"),
+        ("https://airflow.example.com/api/v2/", "https://airflow.example.com"),
+        (
+            "https://airflow.example.com:9090/team/production/api/v1/",
+            "https://airflow.example.com:9090/team/production",
+        ),
+        ("https://airflow.example.com/team/production/api/v2", "https://airflow.example.com/team/production"),
+        ("https://airflow.example.com/api/v1/production", "https://airflow.example.com/api/v1/production"),
+    ],
+)
+@pytest.mark.parametrize("api_version", ["v1", "v2"])
+def test_airflow_host_path_prefix(host, expected_base, api_version):
+    environment = {"AIRFLOW_API_VERSION": api_version}
+    if host is not None:
+        environment["AIRFLOW_HOST"] = host
+    with patch.dict(os.environ, environment, clear=True):
+        for module in ["src.envs", "src.airflow.airflow_client"]:
+            sys.modules.pop(module, None)
+
+        from src.airflow.airflow_client import configuration
+        from src.envs import AIRFLOW_HOST
+
+        assert AIRFLOW_HOST == expected_base
+        assert configuration.host == f"{expected_base}/api/{api_version}"
