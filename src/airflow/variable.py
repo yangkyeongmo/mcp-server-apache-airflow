@@ -73,4 +73,6 @@ async def update_variable(
 
 async def delete_variable(key: str) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
     response = variable_api.delete_variable(variable_key=key)
+    if not response:
+        return [types.TextContent(type="text", text=str({"key": key, "deleted": True}))]
     return [types.TextContent(type="text", text=str(response.to_dict()))]
