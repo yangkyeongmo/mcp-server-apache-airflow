@@ -1,11 +1,13 @@
 """Unit tests for taskinstance module using pytest framework."""
 
+import json
 from unittest.mock import MagicMock, patch
 
 import mcp.types as types
 import pytest
 
 from src.airflow.taskinstance import (
+    get_log,
     get_task_instance,
     list_task_instance_tries,
     list_task_instances,
@@ -294,3 +296,48 @@ class TestTaskInstanceModule:
                 if v is not None
             },
         )
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "payload, expected",
+    [
+        ({"content": "line 1\nline 2", "continuation_token": None}, "line 1\nline 2"),
+        (
+            {
+                "content": [
+                    {"timestamp": "2026-05-27T17:00:24Z", "level": "INFO", "event": "started"},
+                    {"message": "message entry"},
+                    {"text": "text entry"},
+                    {"event": "", "message": "keep empty event"},
+                    {"other": "value"},
+                    "raw entry",
+                    42,
+                    None,
+                ]
+            },
+            '[2026-05-27T17:00:24Z INFO] started\nmessage entry\ntext entry\n\n{"other": "value"}\nraw entry\n42\nNone',
+        ),
+        ({"content": "partial", "continuation_token": "next-page"}, "partial\ncontinuation_token: next-page"),
+    ],
+    ids=["v1-string", "v2-mixed-list", "pagination"],
+)
+async def test_get_log(payload, expected):
+    response = MagicMock()
+    response.data = json.dumps(payload).encode("utf-8")
+    response.to_dict.side_effect = AssertionError("Raw log responses must not use the v1 model")
+    with patch("src.airflow.taskinstance.task_instance_api.get_log", return_value=response) as mock_get:
+        result = await get_log("dag_1", "task_a", "run_001", 1)
+
+    assert len(result) == 1
+    assert isinstance(result[0], types.TextContent)
+    assert result[0].text == expected
+    response.to_dict.assert_not_called()
+    mock_get.assert_called_once_with(
+        dag_id="dag_1",
+        dag_run_id="run_001",
+        task_id="task_a",
+        task_try_number=1,
+        full_content=True,
+        _preload_content=False,
+    )

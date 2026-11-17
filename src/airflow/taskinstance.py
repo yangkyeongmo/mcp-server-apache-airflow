@@ -1,3 +1,4 @@
+import json
 from typing import Any, Callable, Dict, List, Optional, Union
 
 import mcp.types as types
@@ -113,16 +114,35 @@ async def update_task_instance(
     return [types.TextContent(type="text", text=str(response.to_dict()))]
 
 
+def _format_log_entry(entry: Any) -> str:
+    if not isinstance(entry, dict):
+        return str(entry)
+    message = next((entry[key] for key in ("event", "message", "text") if entry.get(key) is not None), None)
+    if message is None:
+        return json.dumps(entry, default=str)
+    prefix = " ".join(str(value) for value in (entry.get("timestamp"), entry.get("level")) if value)
+    return f"[{prefix}] {message}" if prefix else str(message)
+
+
 async def get_log(
     dag_id: str, task_id: str, dag_run_id: str, task_try_number: int
 ) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
+    # Skip the v1 model: Airflow 3 log content can be a list instead of a string.
     response = task_instance_api.get_log(
         dag_id=dag_id,
         dag_run_id=dag_run_id,
         task_id=task_id,
         task_try_number=task_try_number,
+        full_content=True,
+        _preload_content=False,
     )
-    return [types.TextContent(type="text", text=str(response.to_dict()))]
+    payload = json.loads(response.data)
+    content = payload.get("content", "")
+    text = "\n".join(_format_log_entry(entry) for entry in content) if isinstance(content, list) else str(content)
+    continuation_token = payload.get("continuation_token")
+    if continuation_token is not None:
+        text += f"\ncontinuation_token: {continuation_token}"
+    return [types.TextContent(type="text", text=text)]
 
 
 async def list_task_instance_tries(
