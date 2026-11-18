@@ -1,0 +1,3075 @@
+{
+  "protocol": "mcp-tools/list",
+  "tools": {
+    "clear_dag_run": {
+      "inputSchema": {
+        "properties": {
+          "dag_id": {
+            "title": "Dag Id",
+            "type": "string"
+          },
+          "dag_run_id": {
+            "title": "Dag Run Id",
+            "type": "string"
+          },
+          "dry_run": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Dry Run"
+          }
+        },
+        "required": [
+          "dag_id",
+          "dag_run_id"
+        ],
+        "type": "object"
+      },
+      "name": "clear_dag_run"
+    },
+    "clear_task_instances": {
+      "inputSchema": {
+        "properties": {
+          "dag_id": {
+            "title": "Dag Id",
+            "type": "string"
+          },
+          "dry_run": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Dry Run"
+          },
+          "end_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "End Date"
+          },
+          "include_downstream": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Include Downstream"
+          },
+          "include_future": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Include Future"
+          },
+          "include_parentdag": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Include Parentdag"
+          },
+          "include_past": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Include Past"
+          },
+          "include_subdags": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Include Subdags"
+          },
+          "include_upstream": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Include Upstream"
+          },
+          "reset_dag_runs": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Reset Dag Runs"
+          },
+          "start_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Start Date"
+          },
+          "task_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Task Ids"
+          }
+        },
+        "required": [
+          "dag_id"
+        ],
+        "type": "object"
+      },
+      "name": "clear_task_instances"
+    },
+    "create_connection": {
+      "inputSchema": {
+        "properties": {
+          "conn_id": {
+            "title": "Conn Id",
+            "type": "string"
+          },
+          "conn_type": {
+            "title": "Conn Type",
+            "type": "string"
+          },
+          "extra": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Extra"
+          },
+          "host": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Host"
+          },
+          "login": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Login"
+          },
+          "password": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Password"
+          },
+          "port": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Port"
+          },
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Schema"
+          }
+        },
+        "required": [
+          "conn_id",
+          "conn_type"
+        ],
+        "type": "object"
+      },
+      "name": "create_connection"
+    },
+    "create_dataset_event": {
+      "inputSchema": {
+        "properties": {
+          "dataset_uri": {
+            "title": "Dataset Uri",
+            "type": "string"
+          },
+          "extra": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Extra"
+          }
+        },
+        "required": [
+          "dataset_uri"
+        ],
+        "type": "object"
+      },
+      "name": "create_dataset_event"
+    },
+    "create_variable": {
+      "inputSchema": {
+        "properties": {
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Description"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "value": {
+            "title": "Value",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "value"
+        ],
+        "type": "object"
+      },
+      "name": "create_variable"
+    },
+    "delete_connection": {
+      "inputSchema": {
+        "properties": {
+          "conn_id": {
+            "title": "Conn Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "conn_id"
+        ],
+        "type": "object"
+      },
+      "name": "delete_connection"
+    },
+    "delete_dag": {
+      "inputSchema": {
+        "properties": {
+          "dag_id": {
+            "title": "Dag Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "dag_id"
+        ],
+        "type": "object"
+      },
+      "name": "delete_dag"
+    },
+    "delete_dag_dataset_queued_event": {
+      "inputSchema": {
+        "properties": {
+          "dag_id": {
+            "title": "Dag Id",
+            "type": "string"
+          },
+          "uri": {
+            "title": "Uri",
+            "type": "string"
+          }
+        },
+        "required": [
+          "dag_id",
+          "uri"
+        ],
+        "type": "object"
+      },
+      "name": "delete_dag_dataset_queued_event"
+    },
+    "delete_dag_dataset_queued_events": {
+      "inputSchema": {
+        "properties": {
+          "before": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Before"
+          },
+          "dag_id": {
+            "title": "Dag Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "dag_id"
+        ],
+        "type": "object"
+      },
+      "name": "delete_dag_dataset_queued_events"
+    },
+    "delete_dag_run": {
+      "inputSchema": {
+        "properties": {
+          "dag_id": {
+            "title": "Dag Id",
+            "type": "string"
+          },
+          "dag_run_id": {
+            "title": "Dag Run Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "dag_id",
+          "dag_run_id"
+        ],
+        "type": "object"
+      },
+      "name": "delete_dag_run"
+    },
+    "delete_dataset_queued_events": {
+      "inputSchema": {
+        "properties": {
+          "before": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Before"
+          },
+          "uri": {
+            "title": "Uri",
+            "type": "string"
+          }
+        },
+        "required": [
+          "uri"
+        ],
+        "type": "object"
+      },
+      "name": "delete_dataset_queued_events"
+    },
+    "delete_pool": {
+      "inputSchema": {
+        "properties": {
+          "pool_name": {
+            "title": "Pool Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "pool_name"
+        ],
+        "type": "object"
+      },
+      "name": "delete_pool"
+    },
+    "delete_variable": {
+      "inputSchema": {
+        "properties": {
+          "key": {
+            "title": "Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key"
+        ],
+        "type": "object"
+      },
+      "name": "delete_variable"
+    },
+    "fetch_dags": {
+      "inputSchema": {
+        "properties": {
+          "dag_id_pattern": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Dag Id Pattern"
+          },
+          "limit": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Limit"
+          },
+          "offset": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Offset"
+          },
+          "only_active": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Only Active"
+          },
+          "order_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Order By"
+          },
+          "paused": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Paused"
+          },
+          "tags": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Tags"
+          }
+        },
+        "type": "object"
+      },
+      "name": "fetch_dags"
+    },
+    "get_config": {
+      "inputSchema": {
+        "properties": {
+          "section": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Section"
+          }
+        },
+        "type": "object"
+      },
+      "name": "get_config"
+    },
+    "get_connection": {
+      "inputSchema": {
+        "properties": {
+          "conn_id": {
+            "title": "Conn Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "conn_id"
+        ],
+        "type": "object"
+      },
+      "name": "get_connection"
+    },
+    "get_dag": {
+      "inputSchema": {
+        "properties": {
+          "dag_id": {
+            "title": "Dag Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "dag_id"
+        ],
+        "type": "object"
+      },
+      "name": "get_dag"
+    },
+    "get_dag_dataset_queued_event": {
+      "inputSchema": {
+        "properties": {
+          "dag_id": {
+            "title": "Dag Id",
+            "type": "string"
+          },
+          "uri": {
+            "title": "Uri",
+            "type": "string"
+          }
+        },
+        "required": [
+          "dag_id",
+          "uri"
+        ],
+        "type": "object"
+      },
+      "name": "get_dag_dataset_queued_event"
+    },
+    "get_dag_dataset_queued_events": {
+      "inputSchema": {
+        "properties": {
+          "dag_id": {
+            "title": "Dag Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "dag_id"
+        ],
+        "type": "object"
+      },
+      "name": "get_dag_dataset_queued_events"
+    },
+    "get_dag_details": {
+      "inputSchema": {
+        "properties": {
+          "dag_id": {
+            "title": "Dag Id",
+            "type": "string"
+          },
+          "fields": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Fields"
+          }
+        },
+        "required": [
+          "dag_id"
+        ],
+        "type": "object"
+      },
+      "name": "get_dag_details"
+    },
+    "get_dag_run": {
+      "inputSchema": {
+        "properties": {
+          "dag_id": {
+            "title": "Dag Id",
+            "type": "string"
+          },
+          "dag_run_id": {
+            "title": "Dag Run Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "dag_id",
+          "dag_run_id"
+        ],
+        "type": "object"
+      },
+      "name": "get_dag_run"
+    },
+    "get_dag_runs": {
+      "inputSchema": {
+        "properties": {
+          "dag_id": {
+            "title": "Dag Id",
+            "type": "string"
+          },
+          "end_date_gte": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "End Date Gte"
+          },
+          "end_date_lte": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "End Date Lte"
+          },
+          "execution_date_gte": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Execution Date Gte"
+          },
+          "execution_date_lte": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Execution Date Lte"
+          },
+          "limit": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Limit"
+          },
+          "offset": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Offset"
+          },
+          "order_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Order By"
+          },
+          "start_date_gte": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Start Date Gte"
+          },
+          "start_date_lte": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Start Date Lte"
+          },
+          "state": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "State"
+          },
+          "updated_at_gte": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Updated At Gte"
+          },
+          "updated_at_lte": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Updated At Lte"
+          }
+        },
+        "required": [
+          "dag_id"
+        ],
+        "type": "object"
+      },
+      "name": "get_dag_runs"
+    },
+    "get_dag_runs_batch": {
+      "inputSchema": {
+        "properties": {
+          "dag_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Dag Ids"
+          },
+          "end_date_gte": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "End Date Gte"
+          },
+          "end_date_lte": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "End Date Lte"
+          },
+          "execution_date_gte": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Execution Date Gte"
+          },
+          "execution_date_lte": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Execution Date Lte"
+          },
+          "order_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Order By"
+          },
+          "page_limit": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Page Limit"
+          },
+          "page_offset": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Page Offset"
+          },
+          "start_date_gte": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Start Date Gte"
+          },
+          "start_date_lte": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Start Date Lte"
+          },
+          "state": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "State"
+          }
+        },
+        "type": "object"
+      },
+      "name": "get_dag_runs_batch"
+    },
+    "get_dag_source": {
+      "inputSchema": {
+        "properties": {
+          "file_token": {
+            "title": "File Token",
+            "type": "string"
+          }
+        },
+        "required": [
+          "file_token"
+        ],
+        "type": "object"
+      },
+      "name": "get_dag_source"
+    },
+    "get_dag_stats": {
+      "inputSchema": {
+        "properties": {
+          "dag_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Dag Ids"
+          }
+        },
+        "type": "object"
+      },
+      "name": "get_dag_stats"
+    },
+    "get_dag_tasks": {
+      "inputSchema": {
+        "properties": {
+          "dag_id": {
+            "title": "Dag Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "dag_id"
+        ],
+        "type": "object"
+      },
+      "name": "get_dag_tasks"
+    },
+    "get_dataset": {
+      "inputSchema": {
+        "properties": {
+          "uri": {
+            "title": "Uri",
+            "type": "string"
+          }
+        },
+        "required": [
+          "uri"
+        ],
+        "type": "object"
+      },
+      "name": "get_dataset"
+    },
+    "get_dataset_events": {
+      "inputSchema": {
+        "properties": {
+          "dataset_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Dataset Id"
+          },
+          "limit": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Limit"
+          },
+          "offset": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Offset"
+          },
+          "order_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Order By"
+          },
+          "source_dag_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Source Dag Id"
+          },
+          "source_map_index": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Source Map Index"
+          },
+          "source_run_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Source Run Id"
+          },
+          "source_task_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Source Task Id"
+          }
+        },
+        "type": "object"
+      },
+      "name": "get_dataset_events"
+    },
+    "get_dataset_queued_events": {
+      "inputSchema": {
+        "properties": {
+          "uri": {
+            "title": "Uri",
+            "type": "string"
+          }
+        },
+        "required": [
+          "uri"
+        ],
+        "type": "object"
+      },
+      "name": "get_dataset_queued_events"
+    },
+    "get_datasets": {
+      "inputSchema": {
+        "properties": {
+          "dag_ids": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Dag Ids"
+          },
+          "limit": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Limit"
+          },
+          "offset": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Offset"
+          },
+          "order_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Order By"
+          },
+          "uri_pattern": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Uri Pattern"
+          }
+        },
+        "type": "object"
+      },
+      "name": "get_datasets"
+    },
+    "get_event_log": {
+      "inputSchema": {
+        "properties": {
+          "event_log_id": {
+            "title": "Event Log Id",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "event_log_id"
+        ],
+        "type": "object"
+      },
+      "name": "get_event_log"
+    },
+    "get_event_logs": {
+      "inputSchema": {
+        "properties": {
+          "after": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "After"
+          },
+          "before": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Before"
+          },
+          "dag_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Dag Id"
+          },
+          "event": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Event"
+          },
+          "excluded_events": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Excluded Events"
+          },
+          "included_events": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Included Events"
+          },
+          "limit": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Limit"
+          },
+          "map_index": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Map Index"
+          },
+          "offset": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Offset"
+          },
+          "order_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Order By"
+          },
+          "owner": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Owner"
+          },
+          "run_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Run Id"
+          },
+          "task_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Task Id"
+          },
+          "try_number": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Try Number"
+          }
+        },
+        "type": "object"
+      },
+      "name": "get_event_logs"
+    },
+    "get_health": {
+      "inputSchema": {
+        "properties": {},
+        "type": "object"
+      },
+      "name": "get_health"
+    },
+    "get_import_error": {
+      "inputSchema": {
+        "properties": {
+          "import_error_id": {
+            "title": "Import Error Id",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "import_error_id"
+        ],
+        "type": "object"
+      },
+      "name": "get_import_error"
+    },
+    "get_import_errors": {
+      "inputSchema": {
+        "properties": {
+          "limit": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Limit"
+          },
+          "offset": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Offset"
+          },
+          "order_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Order By"
+          }
+        },
+        "type": "object"
+      },
+      "name": "get_import_errors"
+    },
+    "get_log": {
+      "inputSchema": {
+        "properties": {
+          "dag_id": {
+            "title": "Dag Id",
+            "type": "string"
+          },
+          "dag_run_id": {
+            "title": "Dag Run Id",
+            "type": "string"
+          },
+          "task_id": {
+            "title": "Task Id",
+            "type": "string"
+          },
+          "task_try_number": {
+            "title": "Task Try Number",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "dag_id",
+          "task_id",
+          "dag_run_id",
+          "task_try_number"
+        ],
+        "type": "object"
+      },
+      "name": "get_log"
+    },
+    "get_plugins": {
+      "inputSchema": {
+        "properties": {
+          "limit": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Limit"
+          },
+          "offset": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Offset"
+          }
+        },
+        "type": "object"
+      },
+      "name": "get_plugins"
+    },
+    "get_pool": {
+      "inputSchema": {
+        "properties": {
+          "pool_name": {
+            "title": "Pool Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "pool_name"
+        ],
+        "type": "object"
+      },
+      "name": "get_pool"
+    },
+    "get_pools": {
+      "inputSchema": {
+        "properties": {
+          "limit": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Limit"
+          },
+          "offset": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Offset"
+          },
+          "order_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Order By"
+          }
+        },
+        "type": "object"
+      },
+      "name": "get_pools"
+    },
+    "get_providers": {
+      "inputSchema": {
+        "properties": {
+          "limit": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Limit"
+          },
+          "offset": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Offset"
+          }
+        },
+        "type": "object"
+      },
+      "name": "get_providers"
+    },
+    "get_task": {
+      "inputSchema": {
+        "properties": {
+          "dag_id": {
+            "title": "Dag Id",
+            "type": "string"
+          },
+          "task_id": {
+            "title": "Task Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "dag_id",
+          "task_id"
+        ],
+        "type": "object"
+      },
+      "name": "get_task"
+    },
+    "get_task_instance": {
+      "inputSchema": {
+        "properties": {
+          "dag_id": {
+            "title": "Dag Id",
+            "type": "string"
+          },
+          "dag_run_id": {
+            "title": "Dag Run Id",
+            "type": "string"
+          },
+          "task_id": {
+            "title": "Task Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "dag_id",
+          "task_id",
+          "dag_run_id"
+        ],
+        "type": "object"
+      },
+      "name": "get_task_instance"
+    },
+    "get_tasks": {
+      "inputSchema": {
+        "properties": {
+          "dag_id": {
+            "title": "Dag Id",
+            "type": "string"
+          },
+          "order_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Order By"
+          }
+        },
+        "required": [
+          "dag_id"
+        ],
+        "type": "object"
+      },
+      "name": "get_tasks"
+    },
+    "get_upstream_dataset_events": {
+      "inputSchema": {
+        "properties": {
+          "dag_id": {
+            "title": "Dag Id",
+            "type": "string"
+          },
+          "dag_run_id": {
+            "title": "Dag Run Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "dag_id",
+          "dag_run_id"
+        ],
+        "type": "object"
+      },
+      "name": "get_upstream_dataset_events"
+    },
+    "get_value": {
+      "inputSchema": {
+        "properties": {
+          "option": {
+            "title": "Option",
+            "type": "string"
+          },
+          "section": {
+            "title": "Section",
+            "type": "string"
+          }
+        },
+        "required": [
+          "section",
+          "option"
+        ],
+        "type": "object"
+      },
+      "name": "get_value"
+    },
+    "get_variable": {
+      "inputSchema": {
+        "properties": {
+          "key": {
+            "title": "Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key"
+        ],
+        "type": "object"
+      },
+      "name": "get_variable"
+    },
+    "get_version": {
+      "inputSchema": {
+        "properties": {},
+        "type": "object"
+      },
+      "name": "get_version"
+    },
+    "get_xcom_entries": {
+      "inputSchema": {
+        "properties": {
+          "dag_id": {
+            "title": "Dag Id",
+            "type": "string"
+          },
+          "dag_run_id": {
+            "title": "Dag Run Id",
+            "type": "string"
+          },
+          "limit": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Limit"
+          },
+          "map_index": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Map Index"
+          },
+          "offset": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Offset"
+          },
+          "task_id": {
+            "title": "Task Id",
+            "type": "string"
+          },
+          "xcom_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Xcom Key"
+          }
+        },
+        "required": [
+          "dag_id",
+          "dag_run_id",
+          "task_id"
+        ],
+        "type": "object"
+      },
+      "name": "get_xcom_entries"
+    },
+    "get_xcom_entry": {
+      "inputSchema": {
+        "properties": {
+          "dag_id": {
+            "title": "Dag Id",
+            "type": "string"
+          },
+          "dag_run_id": {
+            "title": "Dag Run Id",
+            "type": "string"
+          },
+          "deserialize": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Deserialize"
+          },
+          "map_index": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Map Index"
+          },
+          "stringify": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Stringify"
+          },
+          "task_id": {
+            "title": "Task Id",
+            "type": "string"
+          },
+          "xcom_key": {
+            "title": "Xcom Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "dag_id",
+          "dag_run_id",
+          "task_id",
+          "xcom_key"
+        ],
+        "type": "object"
+      },
+      "name": "get_xcom_entry"
+    },
+    "list_connections": {
+      "inputSchema": {
+        "properties": {
+          "limit": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Limit"
+          },
+          "offset": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Offset"
+          },
+          "order_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Order By"
+          }
+        },
+        "type": "object"
+      },
+      "name": "list_connections"
+    },
+    "list_task_instance_tries": {
+      "inputSchema": {
+        "properties": {
+          "dag_id": {
+            "title": "Dag Id",
+            "type": "string"
+          },
+          "dag_run_id": {
+            "title": "Dag Run Id",
+            "type": "string"
+          },
+          "limit": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Limit"
+          },
+          "offset": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Offset"
+          },
+          "order_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Order By"
+          },
+          "task_id": {
+            "title": "Task Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "dag_id",
+          "dag_run_id",
+          "task_id"
+        ],
+        "type": "object"
+      },
+      "name": "list_task_instance_tries"
+    },
+    "list_task_instances": {
+      "inputSchema": {
+        "properties": {
+          "dag_id": {
+            "title": "Dag Id",
+            "type": "string"
+          },
+          "dag_run_id": {
+            "title": "Dag Run Id",
+            "type": "string"
+          },
+          "duration_gte": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Duration Gte"
+          },
+          "duration_lte": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Duration Lte"
+          },
+          "end_date_gte": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "End Date Gte"
+          },
+          "end_date_lte": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "End Date Lte"
+          },
+          "execution_date_gte": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Execution Date Gte"
+          },
+          "execution_date_lte": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Execution Date Lte"
+          },
+          "limit": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Limit"
+          },
+          "offset": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Offset"
+          },
+          "pool": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Pool"
+          },
+          "queue": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Queue"
+          },
+          "start_date_gte": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Start Date Gte"
+          },
+          "start_date_lte": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Start Date Lte"
+          },
+          "state": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "State"
+          },
+          "updated_at_gte": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Updated At Gte"
+          },
+          "updated_at_lte": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Updated At Lte"
+          }
+        },
+        "required": [
+          "dag_id",
+          "dag_run_id"
+        ],
+        "type": "object"
+      },
+      "name": "list_task_instances"
+    },
+    "list_variables": {
+      "inputSchema": {
+        "properties": {
+          "limit": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Limit"
+          },
+          "offset": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Offset"
+          },
+          "order_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Order By"
+          }
+        },
+        "type": "object"
+      },
+      "name": "list_variables"
+    },
+    "patch_dag": {
+      "inputSchema": {
+        "properties": {
+          "dag_id": {
+            "title": "Dag Id",
+            "type": "string"
+          },
+          "is_paused": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Is Paused"
+          },
+          "tags": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Tags"
+          }
+        },
+        "required": [
+          "dag_id"
+        ],
+        "type": "object"
+      },
+      "name": "patch_dag"
+    },
+    "patch_dags": {
+      "inputSchema": {
+        "properties": {
+          "dag_id_pattern": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Dag Id Pattern"
+          },
+          "is_paused": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Is Paused"
+          },
+          "tags": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Tags"
+          }
+        },
+        "type": "object"
+      },
+      "name": "patch_dags"
+    },
+    "patch_pool": {
+      "inputSchema": {
+        "properties": {
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Description"
+          },
+          "include_deferred": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Include Deferred"
+          },
+          "pool_name": {
+            "title": "Pool Name",
+            "type": "string"
+          },
+          "slots": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Slots"
+          }
+        },
+        "required": [
+          "pool_name"
+        ],
+        "type": "object"
+      },
+      "name": "patch_pool"
+    },
+    "pause_dag": {
+      "inputSchema": {
+        "properties": {
+          "dag_id": {
+            "title": "Dag Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "dag_id"
+        ],
+        "type": "object"
+      },
+      "name": "pause_dag"
+    },
+    "post_dag_run": {
+      "inputSchema": {
+        "properties": {
+          "dag_id": {
+            "title": "Dag Id",
+            "type": "string"
+          },
+          "dag_run_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Dag Run Id"
+          },
+          "data_interval_end": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Data Interval End"
+          },
+          "data_interval_start": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Data Interval Start"
+          },
+          "execution_date": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Execution Date"
+          },
+          "logical_date": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Logical Date"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Note"
+          }
+        },
+        "required": [
+          "dag_id"
+        ],
+        "type": "object"
+      },
+      "name": "post_dag_run"
+    },
+    "post_pool": {
+      "inputSchema": {
+        "properties": {
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Description"
+          },
+          "include_deferred": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Include Deferred"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "slots": {
+            "title": "Slots",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "name",
+          "slots"
+        ],
+        "type": "object"
+      },
+      "name": "post_pool"
+    },
+    "reparse_dag_file": {
+      "inputSchema": {
+        "properties": {
+          "file_token": {
+            "title": "File Token",
+            "type": "string"
+          }
+        },
+        "required": [
+          "file_token"
+        ],
+        "type": "object"
+      },
+      "name": "reparse_dag_file"
+    },
+    "set_dag_run_note": {
+      "inputSchema": {
+        "properties": {
+          "dag_id": {
+            "title": "Dag Id",
+            "type": "string"
+          },
+          "dag_run_id": {
+            "title": "Dag Run Id",
+            "type": "string"
+          },
+          "note": {
+            "title": "Note",
+            "type": "string"
+          }
+        },
+        "required": [
+          "dag_id",
+          "dag_run_id",
+          "note"
+        ],
+        "type": "object"
+      },
+      "name": "set_dag_run_note"
+    },
+    "set_task_instances_state": {
+      "inputSchema": {
+        "properties": {
+          "dag_id": {
+            "title": "Dag Id",
+            "type": "string"
+          },
+          "dry_run": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Dry Run"
+          },
+          "execution_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Execution Date"
+          },
+          "include_downstream": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Include Downstream"
+          },
+          "include_future": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Include Future"
+          },
+          "include_past": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Include Past"
+          },
+          "include_upstream": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Include Upstream"
+          },
+          "state": {
+            "title": "State",
+            "type": "string"
+          },
+          "task_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Task Ids"
+          }
+        },
+        "required": [
+          "dag_id",
+          "state"
+        ],
+        "type": "object"
+      },
+      "name": "set_task_instances_state"
+    },
+    "test_connection": {
+      "inputSchema": {
+        "properties": {
+          "conn_type": {
+            "title": "Conn Type",
+            "type": "string"
+          },
+          "extra": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Extra"
+          },
+          "host": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Host"
+          },
+          "login": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Login"
+          },
+          "password": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Password"
+          },
+          "port": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Port"
+          },
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Schema"
+          }
+        },
+        "required": [
+          "conn_type"
+        ],
+        "type": "object"
+      },
+      "name": "test_connection"
+    },
+    "unpause_dag": {
+      "inputSchema": {
+        "properties": {
+          "dag_id": {
+            "title": "Dag Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "dag_id"
+        ],
+        "type": "object"
+      },
+      "name": "unpause_dag"
+    },
+    "update_connection": {
+      "inputSchema": {
+        "properties": {
+          "conn_id": {
+            "title": "Conn Id",
+            "type": "string"
+          },
+          "conn_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Conn Type"
+          },
+          "extra": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Extra"
+          },
+          "host": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Host"
+          },
+          "login": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Login"
+          },
+          "password": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Password"
+          },
+          "port": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Port"
+          },
+          "schema": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Schema"
+          }
+        },
+        "required": [
+          "conn_id"
+        ],
+        "type": "object"
+      },
+      "name": "update_connection"
+    },
+    "update_dag_run_state": {
+      "inputSchema": {
+        "properties": {
+          "dag_id": {
+            "title": "Dag Id",
+            "type": "string"
+          },
+          "dag_run_id": {
+            "title": "Dag Run Id",
+            "type": "string"
+          },
+          "state": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "State"
+          }
+        },
+        "required": [
+          "dag_id",
+          "dag_run_id"
+        ],
+        "type": "object"
+      },
+      "name": "update_dag_run_state"
+    },
+    "update_task_instance": {
+      "inputSchema": {
+        "properties": {
+          "dag_id": {
+            "title": "Dag Id",
+            "type": "string"
+          },
+          "dag_run_id": {
+            "title": "Dag Run Id",
+            "type": "string"
+          },
+          "state": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "State"
+          },
+          "task_id": {
+            "title": "Task Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "dag_id",
+          "dag_run_id",
+          "task_id"
+        ],
+        "type": "object"
+      },
+      "name": "update_task_instance"
+    },
+    "update_variable": {
+      "inputSchema": {
+        "properties": {
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Description"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Value"
+          }
+        },
+        "required": [
+          "key"
+        ],
+        "type": "object"
+      },
+      "name": "update_variable"
+    }
+  }
+}

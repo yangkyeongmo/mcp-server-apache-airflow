@@ -379,41 +379,51 @@ touch .env
 
 ### Running Tests
 
-The project uses pytest for testing with the following commands available:
-
 ```bash
-# Run all tests
+# Unit tests plus OpenAPI contract tests (no live Airflow)
 make test
+
+# Contract tests only
+make test-contract
+
+# Live Airflow integration tests (needs Docker; see CONTRIBUTING.md)
+make airflow-up
+make test-integration
+make airflow-down
 ```
 
 ### Code Quality
 
 ```bash
-# Run linting
+# Check formatting and lint (CI mode: no --fix)
 make lint
 
-# Run code formatting
-make format
+# Apply ruff fixes and formatting
+make lint-fix
+
+# Typecheck
+make typecheck
 ```
 
 ### Continuous Integration
 
-The project includes a GitHub Actions workflow (`.github/workflows/test.yml`) that automatically:
+GitHub Actions (`.github/workflows/ci.yml`) runs on every push and pull request to `main`:
 
-- Runs tests on Python 3.10, 3.11, and 3.12
-- Executes linting checks using ruff
-- Runs on every push and pull request to `main` branch
+- `lint` — ruff format `--check` and ruff check (no `--fix`)
+- `typecheck` — mypy
+- `test (3.10|3.11|3.12)` — unit + contract tests
+- `contract` — Airflow 2.10.5 stable REST OpenAPI contract tests
+- `integration (2.10.5)` — live tool calls against docker-compose Airflow 2.x
+- `integration (3.4.0)` — skipped / allowed-failure until `apache-airflow-client` supports 3.x
+- `factory-gate` — aggregator for the required checks
 
-The CI pipeline ensures code quality and compatibility across supported Python versions before any changes are merged.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the issue → draft PR → required checks → human merge flow.
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) and open a draft PR.
 
-The package is deployed automatically to PyPI when project.version is updated in `pyproject.toml`.
-Follow semver for versioning.
-
-Please include version update in the PR in order to apply the changes to core logic.
+Releases are cut from `vX.Y.Z` tags using PyPI trusted publishing. See [RELEASING.md](RELEASING.md).
 
 ## License
 

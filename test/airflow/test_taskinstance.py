@@ -183,7 +183,6 @@ class TestTaskInstanceModule:
     async def test_update_task_instance(self, dag_id, dag_run_id, task_id, state):
         """
         Test `update_task_instance` for updating state and validating request payload.
-        Also verifies that patch API is called with the correct update mask.
         """
         mock_response = MagicMock()
         mock_response.to_dict.return_value = {

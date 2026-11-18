@@ -21,7 +21,8 @@ async def get_dag_stats(
     # Build parameters dictionary
     kwargs: Dict[str, Any] = {}
     if dag_ids is not None:
-        kwargs["dag_ids"] = dag_ids
+        # OpenAPI types dag_ids as a comma-separated string query param.
+        kwargs["dag_ids"] = ",".join(dag_ids) if isinstance(dag_ids, list) else dag_ids
 
     response = dag_stats_api.get_dag_stats(**kwargs)
     return [types.TextContent(type="text", text=str(response.to_dict()))]

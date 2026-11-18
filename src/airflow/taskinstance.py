@@ -100,7 +100,7 @@ async def list_task_instances(
 async def update_task_instance(
     dag_id: str, dag_run_id: str, task_id: str, state: Optional[str] = None
 ) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
-    update_request = {}
+    update_request: Dict[str, Any] = {}
     if state is not None:
         update_request["new_state"] = state
 

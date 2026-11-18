@@ -49,7 +49,7 @@ async def list_variables(
 async def create_variable(
     key: str, value: JSONValue, description: Optional[str] = None
 ) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
-    variable_request = {
+    variable_request: Dict[str, Any] = {
         "key": key,
         "value": as_string(value),
     }
@@ -74,7 +74,7 @@ async def update_variable(
         # loads value under the "val" attribute and rejects mask entries for it.
         value = variable_api.get_variable(variable_key=key).to_dict().get("value")
 
-    update_request = {"key": key, "value": as_string(value)}
+    update_request: Dict[str, Any] = {"key": key, "value": as_string(value)}
     if description is not None:
         update_request["description"] = description
 

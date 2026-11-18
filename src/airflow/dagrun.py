@@ -44,7 +44,7 @@ async def post_dag_run(
     # state: Optional[str] = None,  # TODO: add state
 ) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
     # Build kwargs dictionary with only non-None values
-    kwargs = {}
+    kwargs: Dict[str, Any] = {}
 
     # Add non-read-only fields that can be set during creation
     if dag_run_id is not None:
@@ -151,7 +151,8 @@ async def get_dag_runs_batch(
     if end_date_lte is not None:
         request["end_date_lte"] = end_date_lte
     if state is not None:
-        request["state"] = state
+        # Airflow stable REST (ListDagRunsForm) expects "states", not "state".
+        request["states"] = state
     if order_by is not None:
         request["order_by"] = order_by
     if page_offset is not None:
