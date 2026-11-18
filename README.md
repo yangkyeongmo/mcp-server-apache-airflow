@@ -144,6 +144,43 @@ curl -X 'POST' \
 
 > **Note**: If both JWT token and basic authentication credentials are provided, JWT token takes precedence.
 
+**JWT Token with Automatic Refresh:**
+
+For environments where JWT tokens expire (e.g., Cloud Composer, managed Airflow services), you can configure automatic token refresh:
+
+```
+AIRFLOW_JWT_TOKEN=<your-jwt-token>                              # Optional: initial token
+AIRFLOW_JWT_TOKEN_REFRESH_COMMAND=<command-to-refresh-token>    # Required: command to obtain new token
+```
+
+The server supports two modes:
+
+1. **With initial token**: If `AIRFLOW_JWT_TOKEN` is provided, the server uses it immediately and only executes the refresh command when a 401 Unauthorized error is detected (token expired).
+
+2. **Without initial token**: If only `AIRFLOW_JWT_TOKEN_REFRESH_COMMAND` is provided, the server executes the command on initialization to obtain the initial token.
+
+**Examples for different environments:**
+
+*Google Cloud Composer:*
+```
+AIRFLOW_JWT_TOKEN_REFRESH_COMMAND=gcloud auth print-access-token
+```
+
+*AWS MWAA (using aws-cli):*
+```
+AIRFLOW_JWT_TOKEN_REFRESH_COMMAND=aws mwaa create-web-login-token --name your-environment-name --region your-region --query WebToken --output text
+```
+
+*Azure Managed Airflow:*
+```
+AIRFLOW_JWT_TOKEN_REFRESH_COMMAND=az account get-access-token --resource https://airflow.azure.com --query accessToken --output tsv
+```
+
+*Custom command (any shell command that outputs a token):*
+```
+AIRFLOW_JWT_TOKEN_REFRESH_COMMAND=/path/to/your/script.sh
+```
+
 ### Usage with Claude Desktop
 
 Add to your `claude_desktop_config.json`:
@@ -175,6 +212,22 @@ Add to your `claude_desktop_config.json`:
       "env": {
         "AIRFLOW_HOST": "https://your-airflow-host",
         "AIRFLOW_JWT_TOKEN": "your-jwt-token"
+      }
+    }
+  }
+}
+```
+
+**JWT Token with Automatic Refresh (e.g., Google Cloud Composer):**
+```json
+{
+  "mcpServers": {
+    "mcp-server-apache-airflow": {
+      "command": "uvx",
+      "args": ["mcp-server-apache-airflow"],
+      "env": {
+        "AIRFLOW_HOST": "https://your-composer-airflow-url",
+        "AIRFLOW_JWT_TOKEN_REFRESH_COMMAND": "gcloud auth print-access-token"
       }
     }
   }
@@ -256,6 +309,27 @@ Alternative configuration using `uv`:
       "env": {
         "AIRFLOW_HOST": "https://your-airflow-host",
         "AIRFLOW_JWT_TOKEN": "your-jwt-token"
+      }
+    }
+  }
+}
+```
+
+**JWT Token with Automatic Refresh (e.g., Google Cloud Composer):**
+```json
+{
+  "mcpServers": {
+    "mcp-server-apache-airflow": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/path/to/mcp-server-apache-airflow",
+        "run",
+        "mcp-server-apache-airflow"
+      ],
+      "env": {
+        "AIRFLOW_HOST": "https://your-composer-airflow-url",
+        "AIRFLOW_JWT_TOKEN_REFRESH_COMMAND": "gcloud auth print-access-token"
       }
     }
   }
