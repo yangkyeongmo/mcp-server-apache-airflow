@@ -1,3 +1,4 @@
+import json
 from typing import Any, Callable, Dict, List, Optional, Union
 
 import mcp.types as types
@@ -7,6 +8,14 @@ from src.airflow.airflow_client import api_client
 
 task_instance_api = TaskInstanceApi(api_client)
 
+def _format_log_entry(entry: Any) -> str:
+    if not isinstance(entry, dict):
+        return str(entry)
+    message = entry.get("event") or entry.get("message") or entry.get("text")
+    if message is None:
+        return json.dumps(entry, default=str)
+    prefix = " ".join(str(p) for p in (entry.get("timestamp"), entry.get("level")) if p)
+    return f"[{prefix}] {message}" if prefix else str(message)
 
 def get_all_functions() -> list[tuple[Callable, str, str, bool]]:
     """Return list of (function, name, description, is_read_only) tuples for registration."""
@@ -33,13 +42,9 @@ def get_all_functions() -> list[tuple[Callable, str, str, bool]]:
         ),
     ]
 
-
-async def get_task_instance(
-    dag_id: str, task_id: str, dag_run_id: str
-) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
+async def get_task_instance(dag_id: str, task_id: str, dag_run_id: str) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
     response = task_instance_api.get_task_instance(dag_id=dag_id, dag_run_id=dag_run_id, task_id=task_id)
     return [types.TextContent(type="text", text=str(response.to_dict()))]
-
 
 async def list_task_instances(
     dag_id: str,
@@ -96,7 +101,6 @@ async def list_task_instances(
     response = task_instance_api.get_task_instances(dag_id=dag_id, dag_run_id=dag_run_id, **kwargs)
     return [types.TextContent(type="text", text=str(response.to_dict()))]
 
-
 async def update_task_instance(
     dag_id: str, dag_run_id: str, task_id: str, state: Optional[str] = None
 ) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
@@ -112,18 +116,27 @@ async def update_task_instance(
     )
     return [types.TextContent(type="text", text=str(response.to_dict()))]
 
-
 async def get_log(
     dag_id: str, task_id: str, dag_run_id: str, task_try_number: int
 ) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
-    response = task_instance_api.get_log(
+    # _preload_content=False returns the raw urllib3 response and skips model
+    # deserialization. We need that becauseThe v1 is str, v2 is a list of
+    # structured entries.
+    raw = task_instance_api.get_log(
         dag_id=dag_id,
         dag_run_id=dag_run_id,
         task_id=task_id,
         task_try_number=task_try_number,
+        full_content=True,
+        _preload_content=False,
     )
-    return [types.TextContent(type="text", text=str(response.to_dict()))]
-
+    payload = json.loads(raw.data.decode("utf-8"))
+    content = payload.get("content", "")
+    if isinstance(content, list):
+        text = "\n".join(_format_log_entry(e) for e in content)
+    else:
+        text = str(content)
+    return [types.TextContent(type="text", text=text)]
 
 async def list_task_instance_tries(
     dag_id: str,
@@ -142,7 +155,5 @@ async def list_task_instance_tries(
     if order_by is not None:
         kwargs["order_by"] = order_by
 
-    response = task_instance_api.get_task_instance_tries(
-        dag_id=dag_id, dag_run_id=dag_run_id, task_id=task_id, **kwargs
-    )
+    response = task_instance_api.get_task_instance_tries(dag_id=dag_id, dag_run_id=dag_run_id, task_id=task_id, **kwargs)
     return [types.TextContent(type="text", text=str(response.to_dict()))]
