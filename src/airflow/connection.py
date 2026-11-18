@@ -108,7 +108,9 @@ async def update_connection(
 
 async def delete_connection(conn_id: str) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
     response = connection_api.delete_connection(connection_id=conn_id)
-    return [types.TextContent(type="text", text=str(response.to_dict()))]
+    # a 204 response deserializes to None, so there is no body to dump
+    result = response.to_dict() if response else {"connection_id": conn_id, "deleted": True}
+    return [types.TextContent(type="text", text=str(result))]
 
 
 async def test_connection(

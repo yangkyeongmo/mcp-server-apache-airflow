@@ -202,7 +202,9 @@ async def delete_dag_run(
     dag_id: str, dag_run_id: str
 ) -> List[Union[types.TextContent, types.ImageContent, types.EmbeddedResource]]:
     response = dag_run_api.delete_dag_run(dag_id=dag_id, dag_run_id=dag_run_id)
-    return [types.TextContent(type="text", text=str(response.to_dict()))]
+    # a 204 response deserializes to None, so there is no body to dump
+    result = response.to_dict() if response else {"dag_run_id": dag_run_id, "deleted": True}
+    return [types.TextContent(type="text", text=str(result))]
 
 
 async def clear_dag_run(
