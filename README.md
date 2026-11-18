@@ -2,6 +2,7 @@
 
 # mcp-server-apache-airflow
 
+[![Trust Score](https://archestra.ai/mcp-catalog/api/badge/quality/yangkyeongmo/mcp-server-apache-airflow)](https://archestra.ai/mcp-catalog/yangkyeongmo__mcp-server-apache-airflow)
 [![smithery badge](https://smithery.ai/badge/@yangkyeongmo/mcp-server-apache-airflow)](https://smithery.ai/server/@yangkyeongmo/mcp-server-apache-airflow)
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/mcp-server-apache-airflow)
 
